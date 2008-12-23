@@ -1,0 +1,15 @@
+#labels checklist,task,calendar,contact,android
+= Introduction =
+
+What's this project for?
+
+
+= Thought =
+
+Firstly, It's a web service base on the site: http://chec.kli.st
+Secondly, It's will be hosted on Google App Engine, user need to login Google account to use the feature.
+Finally, We plan to build an Android client for accessing your checklist from your mobile.
+
+*Chec.kli.st* can help you to manager your checklist online. It's not only a task reminder like [http://www.rememberthemilk.com Remember The Milk], It's primary target is to make user can share checklist. These checklist are usually people's accumulation of experience and knowledge.
+
+
