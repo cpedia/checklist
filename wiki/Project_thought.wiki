@@ -1,7 +1,9 @@
 #labels checklist,task,calendar,contact,android
+This article is some thought about the coming project *chec.kli.st*
+
 = Introduction =
 
-What's this project for?
+What does this project do?
 
 
 = Thought =
@@ -13,3 +15,4 @@ Finally, We plan to build an Android client for accessing your checklist from yo
 *Chec.kli.st* can help you to manager your checklist online. It's not only a task reminder like [http://www.rememberthemilk.com Remember The Milk], It's primary target is to make user can share checklist. These checklist are usually people's accumulation of experience and knowledge.
 
 
+Caution: This article is not the final version! 
