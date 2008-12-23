@@ -10,7 +10,7 @@ What does this project do?
 
 Firstly, It's a web service base on the site: http://chec.kli.st.
 
-Secondly, It's will be hosted on Google App Engine, user need to login Google account to use the feature.
+Secondly, It's will be hosted on Google App Engine, user need to login Google account to use it's features.
 
 Finally, We plan to build an Android client for accessing your checklist from your mobile.
 
