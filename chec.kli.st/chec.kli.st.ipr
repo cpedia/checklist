@@ -9,6 +9,7 @@
       <maximumHeapSize value="128" />
       <maximumStackSize value="32" />
       <properties />
+      <executeOn event="beforeRun" target="compile" runConfigurationType="AndroidRunConfigurationType" runConfigurationName="Checklist" />
     </buildFile>
   </component>
   <component name="BuildJarProjectSettings">
