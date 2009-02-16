@@ -26,7 +26,6 @@ import cgi
 import datetime
 import string
 
-import util
 
 
 

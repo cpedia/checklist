@@ -28,5 +28,16 @@ import cgi
 import simplejson
 
 
+class User(db.Model):
+    user_email = db.StringProperty(required=True)
+    
 class Checklist(db.Model):
     name = db.StringProperty(multiline=False)
+
+class AuthSubStoredToken(db.Model):
+    user_email = db.StringProperty(required=True)
+    target_service = db.StringProperty(multiline=False,default='base',choices=[
+          'apps','base','blogger','calendar','codesearch','contacts','docs',
+          'albums','spreadsheet','youtube'])
+    session_token = db.StringProperty(required=True)
+

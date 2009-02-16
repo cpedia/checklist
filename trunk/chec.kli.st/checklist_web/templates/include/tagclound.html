@@ -1,0 +1,12 @@
+<div id="tagclound">
+    <h3>Tag Clound</h3>
+    <div>
+        <span class="tagheader"><b>My Tags</b></span>
+
+        <div class="cloud">
+            {%for tag in tags%}
+            <a href="/tag/{{tag.tag|unquote}}"  class="tag{{tag.entrycount}}">{{tag.tag|unquote}}</a>
+            {% endfor%}
+        </div>
+    </div>
+</div>

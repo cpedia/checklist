@@ -1,0 +1,48 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+    <meta name="verify-v1" content="XR70SJE5JNIWNugeaRSpxdbdQeJ6dUno8MHQRplhv/Y=" />
+    <meta name="msvalidate.01" content="DF4A381369FD44CDBD61C7E9566A74EC" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <!-- chec.kli.st: http://code.google.com/p/checklist created by cpedia: http://blog.cpedia.com -->
+    <meta name="keywords" content="chcklist,chec.kli.st,appengine,python,django,free,open source,cpedia" />
+    <meta name="description" content="Manage your checklist on http://check.kli.st" />
+    <meta name="author" content="cpedia, Ping Chen, http://blog.cpedia.com" />
+    <meta name="copyright" content="2008 http://cpedia.com" />
+    <title>{% block title %}{{title}}{% endblock %}</title>
+
+    {% block header %}
+    {% endblock %}
+    
+    <link rel="alternate" type="application/atom+xml" title="{{ CHECKLIST.title }}" href="{{ CHECKLIST.root_url }}/atom" />
+    {% for sheet in stylesheets %}
+        <link type="text/css" rel="stylesheet" href="{{ sheet.filename }}"/>
+    {% endfor %}
+    <!-- yui -->
+    <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.6.0/build/reset-fonts-grids/reset-fonts-grids.css" />
+</head>
+<body class="yui-skin-sam">
+<div id="doc2" class="yui-t5">
+    <div id="hd">
+        {% include "base_top.html" %}
+    </div>
+    <br>
+    <div id="bd">
+        <div id="yui-main">
+            <div class="yui-b">
+                <div class="yui-g">
+                        {% block checklist %}
+                        {% endblock %}
+                </div>
+            </div>
+        </div>
+        <div class="yui-b">
+            {% include "menu_right.html" %}
+        </div>
+    </div>
+    <div id="ft">
+        {% include "footer.html" %}
+    </div>
+</div>
+</body>
+</html>

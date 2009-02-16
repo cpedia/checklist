@@ -9,7 +9,7 @@
       <maximumHeapSize value="128" />
       <maximumStackSize value="32" />
       <properties />
-      <executeOn event="beforeRun" target="compile" runConfigurationType="AndroidRunConfigurationType" runConfigurationName="Checklist" />
+      <executeOn event="beforeRun" target="compile" />
     </buildFile>
   </component>
   <component name="BuildJarProjectSettings">
@@ -38,6 +38,9 @@
       <entry name="?*.tld" />
       <entry name="?*.ftl" />
     </wildcardResourcePatterns>
+  </component>
+  <component name="CopyrightManager" default="">
+    <module2copyright />
   </component>
   <component name="DependencyValidationManager">
     <option name="SKIP_IMPORT_STATEMENTS" value="false" />
@@ -219,10 +222,9 @@
   <component name="ProjectDetails">
     <option name="projectName" value="chec.kli.st" />
   </component>
-  <component name="ProjectFileVersion" converted="true">
-    <converter id="javaee-modules" />
-    <converter id="ror-modules" />
-    <converter id="SelenaRunConfToDiana" />
+  <component name="ProjectFileVersion" converted="true" />
+  <component name="ProjectKey">
+    <option name="state" value="https://checklist.googlecode.com/svn/trunk/chec.kli.st/chec.kli.st.ipr" />
   </component>
   <component name="ProjectModuleManager">
     <modules>
@@ -248,7 +250,8 @@
     <option name="ADDITIONAL_OPTIONS_STRING" value="" />
   </component>
   <component name="SvnBranchConfigurationManager">
-    <option name="myVersion" value="123" />
+    <option name="myVersion" value="124" />
+    <option name="mySupportsUserInfoFilter" value="true" />
   </component>
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="svn" />
