@@ -26,6 +26,8 @@ import os
 import rest
 import config
 
+from cpedia.checklist.handlers import checklist
+
 from google.appengine.ext.webapp import template
 template.register_template_library('cpedia.filter.replace')
 template.register_template_library('cpedia.filter.gravatar')
@@ -40,7 +42,10 @@ template.register_template_library('cpedia.filter.gravatar')
 def main():
     application = webapp.WSGIApplication(
                                        [
+                                        ('/403.html', checklist.UnauthorizedHandler),
+                                        ('/404.html', checklist.NotFoundHandler),
                                         ('/rest/.*', rest.Dispatcher),
+                                        ('/*$', checklist.MainPage),
                                        ],
                                        debug=config.DEBUG)
     wsgiref.handlers.CGIHandler().run(application)

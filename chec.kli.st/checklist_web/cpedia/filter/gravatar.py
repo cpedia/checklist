@@ -17,13 +17,18 @@
 __author__ = 'Ping Chen'
 
 from google.appengine.ext import webapp
-import util
 import string
 
+import config
 
 register = webapp.template.create_template_register()
 
 
 @register.filter
 def gravatar(email):
-        return util.getGravatarUrl(email)
+    default = config.CHECKLIST["root_url"]+"/static/images/anonymous.jpg"
+    size = 48
+    gravatar_url = "http://www.gravatar.com/avatar.php?"
+    gravatar_url += urllib.urlencode({'gravatar_id':hashlib.md5(str(email)).hexdigest(),
+        'default':default, 'size':str(size)})
+    return gravatar_url
