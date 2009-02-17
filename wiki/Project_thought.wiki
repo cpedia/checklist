@@ -17,9 +17,9 @@ Finally, We plan to build an Android client for accessing your checklist from yo
 *Chec.kli.st* can help you to manager your checklist online. It's not only a task reminder like [http://www.rememberthemilk.com Remember The Milk], It's primary target is to make user can share checklist. These checklist are usually people's accumulation of experience and knowledge.
 
 ===Related technologies===
-Google App Engine: python, [google app engine api http://code.google.com/appengine]
+Google App Engine: python, google app engine api http://code.google.com/appengine
 
-Google Calendar API: [Google Calendar API: Python  http://code.google.com/apis/calendar/docs/1.0/developers_guide_python.html]
+Google Calendar API: Google Calendar API: Python  http://code.google.com/apis/calendar/docs/1.0/developers_guide_python.html
 
 Android: http://code.google.com/android
 
