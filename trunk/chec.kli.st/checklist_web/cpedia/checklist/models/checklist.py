@@ -20,6 +20,7 @@ __author__ = 'Ping Chen'
 import pickle
 
 from google.appengine.ext import db
+from google.appengine.ext.db import polymodel
 from google.appengine.ext import search
 import logging
 import datetime
@@ -30,10 +31,34 @@ import simplejson
 
 class User(db.Model):
     user_email = db.StringProperty(required=True)
-    
-class Checklist(db.Model):
+
+class Tag(db.Model):
+    tag = db.StringProperty(multiline=False)
+    entrycount = db.IntegerProperty(default=0)
+    valid = db.BooleanProperty(default = True)
+
+class Tagable(polymodel.PolyModel):
+    tags = db.ListProperty(db.Category)
+
+    def get_tags(self):
+        '''comma delimted list of tags'''
+        return ','.join([urllib.unquote(tag.encode('utf8')) for tag in self.tags])
+
+    def set_tags(self, tags):
+        if tags:
+            self.tags = [db.Category(urllib.quote(tag.strip().encode('utf8'))) for tag in tags.split(',')]
+
+    tags_commas = property(get_tags,set_tags)
+
+
+class Checklist(Tagable):
     name = db.StringProperty(multiline=False)
 
+class ChecklistTemplate(Tagable):
+    name = db.StringProperty(multiline=False)
+    description = db.StringProperty()
+    owner = db.StringProperty()
+ 
 class AuthSubStoredToken(db.Model):
     user_email = db.StringProperty(required=True)
     target_service = db.StringProperty(multiline=False,default='base',choices=[
