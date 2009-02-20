@@ -11,19 +11,17 @@
 <div class="menu_top">
     <div id="userinfo">
         {% if user %}
-                {% if user.email %}
                     <b>{{ user.email }}</b> |
-                {% endif %}
-                    <a href="/user">My Account</a> |
+                    <a href="/settings">Settings</a> |
+                    <a href="/help">Help</a> |
                 {% if user_is_admin %}
                     <a href='/admin'>System Configuration</a> |
-                    <a href='http://appengine.google.com/' target="_blank">Appengine</a> |
                 {% endif %}
-            <a href="/logout">Sign out</a> |
+            <a href="{{sign_url}}">Sign out</a>
         {% else %}
-            <a href="/signup">Join now</a> |
-            Already a user <a href="/login">Sign in</a> |
+            <a href="{{sign_url}}">Sign in to Chec.kli.st with your Google Account</a>
         {% endif %}
+<!--
         <a href="javascript:toggleLanguageChooser();">
             <img src="/static/images/globe_icon.png" style="padding-right: 4px;" width="16" align="absmiddle"
                  height="16">
@@ -31,16 +29,19 @@
         </a>
         <div id="language_chooser" style="display: none;">
         </div>
+-->
     </div>
+    <div style="height:1px;background-color:#3399ff;width:100%;margin-top:5px">
+    </div>    
     <div>
         <div class="yui-gd">
         <div class="yui-u first">
             <div id="title">
-             <a href="/">{{title}}</a>
+                <a href="/"><img src="/static/images/cpedia_zone.gif" alt="CPEDIA's ZONE"></a>
             </div>
         </div>
         <div class="yui-u">
-            <div align="right" style="padding-top:10px">
+            <div align="left" style="padding-top:10px">
                 <script type="text/javascript">
                     function searchSite(){
                         var q = document.forms[0]["q"].value;
@@ -66,9 +67,5 @@
             </div>            
         </div>
         </div>
-    </div>
-    <div>
-    <ul id="navbar">
-    </ul>
     </div>
 </div>
