@@ -44,18 +44,15 @@ class ViewPage(object):
 
     def full_render(self, handler,template_file, params={}):
             #scheme, netloc, path, query, fragment = urlparse.urlsplit(handler.request.uri)
-            if not users.get_current_user():
-                url = "/login"
-                url_linktext = 'Sign in'
+            if users.get_current_user():
+                url = users.create_logout_url(handler.request.uri)
             else:
-                url = "/logout"
-                url_linktext = 'Sign out'
+                url = users.create_login_url(handler.request.uri)
 
             template_params = {
                 "CHECKLIST": config.CHECKLIST,
                 'user': users.get_current_user(),
-                'url': url,
-                'url_linktext': url_linktext,
+                'sign_url': url,
                 'request': handler.request,
                 "user_is_admin": users.is_current_user_admin(),
             }

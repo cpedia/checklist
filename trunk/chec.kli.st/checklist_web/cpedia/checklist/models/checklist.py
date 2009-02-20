@@ -1,6 +1,6 @@
 # !/usr/bin/env python
 #
-# Copyright 2008 CPedia.com.
+# Copyright 2009 CPedia.com.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -51,10 +51,8 @@ class Tagable(polymodel.PolyModel):
 
     tags_commas = property(get_tags,set_tags)
 
-
-class ChecklistTemplate(Tagable):
+class Checklist(Tagable):
     name = db.StringProperty(multiline=False)
-    user_email = db.StringProperty()
     description = db.StringProperty()
     show_item_number = db.BooleanProperty(default = True)
     strikeout_checked_item = db.BooleanProperty(default = True)
@@ -64,7 +62,11 @@ class ChecklistTemplate(Tagable):
     created_date = db.DateTimeProperty()
     last_modified_date = db.DateTimeProperty()
     last_modified_user = db.StringProperty()
+
+class ChecklistTemplate(Checklist):
+    user_email = db.StringProperty()
     system_reserved = db.BooleanProperty(default = False)
+    public = db.BooleanProperty(default = False)
 
 class ChecklistColumnTemplate(Tagable):
     name = db.StringProperty(multiline=False)
@@ -73,11 +75,9 @@ class ChecklistColumnTemplate(Tagable):
     order = db.IntegerProperty(default=0)
     checklist_template = db.ReferenceProperty(ChecklistTemplate)
 
-
-class Checklist(ChecklistTemplate):
-    name = db.StringProperty(multiline=False)
+class UserChecklist(Checklist):
     user_email = db.StringProperty(required=True)
-    starred = BooleanProperty(default = False)
+    starred = db.BooleanProperty(default = False)
 
 class ChecklistColumn(Tagable):
     name = db.StringProperty(multiline=False)
@@ -107,8 +107,8 @@ class ChecklistItem(db.Expando):
     created_date = db.DateTimeProperty()
     last_modified_date = db.DateTimeProperty()
     last_modified_user = db.StringProperty()
-    starred = BooleanProperty(default = False)
-    parent_checklist_item = db.ReferenceProperty(ChecklistItem)
+    starred = db.BooleanProperty(default = False)
+    parent_checklist_item = db.SelfReferenceProperty()
 
 class ChecklistColumnCategory(db.Model):
     name = db.StringProperty(multiline=False)
@@ -119,7 +119,7 @@ class ChecklistColumnCategory(db.Model):
 class Comment(polymodel.PolyModel):
     last_modified_date = db.DateTimeProperty()
     last_modified_user = db.StringProperty()
-    starred = BooleanProperty(default = False)
+    starred = db.BooleanProperty(default = False)
 
 
 class AuthSubStoredToken(db.Model):
