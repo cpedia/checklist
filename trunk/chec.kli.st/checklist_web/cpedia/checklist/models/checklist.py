@@ -33,6 +33,7 @@ class User(db.Model):
     user_email = db.StringProperty(required=True)
 
 class Tag(db.Model):
+    user_email = db.StringProperty()
     tag = db.StringProperty(multiline=False)
     entrycount = db.IntegerProperty(default=0)
     valid = db.BooleanProperty(default = True)
@@ -51,14 +52,68 @@ class Tagable(polymodel.PolyModel):
     tags_commas = property(get_tags,set_tags)
 
 
-class Checklist(Tagable):
-    name = db.StringProperty(multiline=False)
-
 class ChecklistTemplate(Tagable):
     name = db.StringProperty(multiline=False)
+    user_email = db.StringProperty()
     description = db.StringProperty()
-    owner = db.StringProperty()
- 
+    show_item_number = db.BooleanProperty(default = True)
+    strikeout_checked_item = db.BooleanProperty(default = True)
+    auto_check_parent_item = db.BooleanProperty(default = True)
+    color_for_checked_item = db.StringProperty()
+    color_for_starred_item = db.StringProperty()
+    created_date = db.DateTimeProperty()
+    last_modified_date = db.DateTimeProperty()
+    last_modified_ = db.UserProperty()
+    system_reserved = db.BooleanProperty(default = False)
+
+class ChecklistColumnTemplate(Tagable):
+    name = db.StringProperty(multiline=False)
+    type = db.StringProperty(multiline=False,default='String',choices=[
+          'String','Category','Number','Yes/No','Date'])
+    order = db.IntegerProperty(default=0)
+    checklist_template = db.ReferenceProperty(ChecklistTemplate)
+
+
+class Checklist(ChecklistTemplate):
+    name = db.StringProperty(multiline=False)
+    user_email = db.StringProperty(required=True)
+    starred = BooleanProperty(default = False)
+
+class ChecklistColumn(Tagable):
+    name = db.StringProperty(multiline=False)
+    type = db.StringProperty(multiline=False,default='String',choices=[
+          'String','Category','Number','Yes/No','Date'])
+    order = db.IntegerProperty(default=0)
+    checklist = db.ReferenceProperty(Checklist)
+
+    def delete(self):
+        self.update_checklist_items()
+        super(ChecklistColumn, self).delete()
+
+    def update_checklist_items(self):
+        def delete_column_for_items():
+            for item in self.checklist.checklistitem_set:
+                if self.name in item.dynamic_properties:
+                    del item.name
+        try:
+            db.run_in_transaction(delete_column_for_items)
+        except db.TransactionFailedError():
+            logging.error("Delete column  (%s) for checklist (%s) error.",
+                          self.name, self.checklist.name)
+
+class ChecklistItem(db.Expando):
+    checklist = db.ReferenceProperty(Checklist)
+    order = db.IntegerProperty(default=0)
+    created_date = db.DateTimeProperty()
+    last_modified_date = db.DateTimeProperty()
+    last_modified_ = db.UserProperty()
+    starred = BooleanProperty(default = False)
+
+class ChecklistColumnCategory(db.Model):
+    name = db.StringProperty(multiline=False)
+    user_email = db.StringProperty(required=True)
+    categorys = db.ListProperty(db.Category)
+
 class AuthSubStoredToken(db.Model):
     user_email = db.StringProperty(required=True)
     target_service = db.StringProperty(multiline=False,default='base',choices=[
