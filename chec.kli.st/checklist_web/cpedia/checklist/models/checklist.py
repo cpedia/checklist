@@ -63,7 +63,7 @@ class ChecklistTemplate(Tagable):
     color_for_starred_item = db.StringProperty()
     created_date = db.DateTimeProperty()
     last_modified_date = db.DateTimeProperty()
-    last_modified_ = db.UserProperty()
+    last_modified_user = db.StringProperty()
     system_reserved = db.BooleanProperty(default = False)
 
 class ChecklistColumnTemplate(Tagable):
@@ -106,13 +106,21 @@ class ChecklistItem(db.Expando):
     order = db.IntegerProperty(default=0)
     created_date = db.DateTimeProperty()
     last_modified_date = db.DateTimeProperty()
-    last_modified_ = db.UserProperty()
+    last_modified_user = db.StringProperty()
     starred = BooleanProperty(default = False)
+    parent_checklist_item = db.ReferenceProperty(ChecklistItem)
 
 class ChecklistColumnCategory(db.Model):
     name = db.StringProperty(multiline=False)
     user_email = db.StringProperty(required=True)
     categorys = db.ListProperty(db.Category)
+
+
+class Comment(polymodel.PolyModel):
+    last_modified_date = db.DateTimeProperty()
+    last_modified_user = db.StringProperty()
+    starred = BooleanProperty(default = False)
+
 
 class AuthSubStoredToken(db.Model):
     user_email = db.StringProperty(required=True)
