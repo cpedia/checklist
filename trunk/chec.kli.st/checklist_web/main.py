@@ -45,6 +45,8 @@ def main():
                                         ('/403.html', checklist.UnauthorizedHandler),
                                         ('/404.html', checklist.NotFoundHandler),
                                         ('/rest/.*', rest.Dispatcher),
+                                        ('/create/list/*$', checklist.CreateList),
+                                        ('/create/quicklist/*$', checklist.CreateQucikList),
                                         ('/*$', checklist.MainPage),
                                        ],
                                        debug=config.DEBUG)

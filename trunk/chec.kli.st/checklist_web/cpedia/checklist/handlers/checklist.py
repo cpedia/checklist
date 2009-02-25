@@ -67,13 +67,27 @@ class UnauthorizedHandler(webapp.RequestHandler):
         view.ViewPage(cache_time=36000).render(self)
 
 class MainPage(BaseRequestHandler):
+    @authorized.role("user")
     def get(self):
-        pageStr = self.request.get('page')
-        if pageStr:
-            page = int(pageStr)
-        else:
-            page = 1;
+        
+        template_values = {
+        }
+        self.generate('checklist_main.html',template_values)
+
+class CreateList(BaseRequestHandler):
+    @authorized.role("user")
+    def get(self):
+        
+        template_values = {
+        }
+        self.generate('checklist_main.html',template_values)
+
+
+class CreateQucikList(BaseRequestHandler):
+    @authorized.role("user")
+    def get(self):
 
         template_values = {
         }
         self.generate('checklist_main.html',template_values)
+
