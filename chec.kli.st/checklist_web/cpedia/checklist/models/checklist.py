@@ -59,14 +59,20 @@ class Checklist(Tagable):
     auto_check_parent_item = db.BooleanProperty(default = True)
     color_for_checked_item = db.StringProperty()
     color_for_starred_item = db.StringProperty()
-    created_date = db.DateTimeProperty()
-    last_modified_date = db.DateTimeProperty()
-    last_modified_user = db.StringProperty()
 
+class ChecklistTemplateGroup(db.Model):
+    name = db.StringProperty(multiline=False)
+    order = db.IntegerProperty(default=0)
+    parent_checklist_template_group = db.SelfReferenceProperty()
+    active = db.BooleanProperty(default = True)
+
+#system reserved checklist templates. Administrator can maintain these templates,
+#user can create a checklist from the template.
 class ChecklistTemplate(Checklist):
     user_email = db.StringProperty()
-    system_reserved = db.BooleanProperty(default = False)
-    public = db.BooleanProperty(default = False)
+    order = db.IntegerProperty(default=0)
+    active = db.BooleanProperty(default = True)
+    group = db.ReferenceProperty(ChecklistTemplateGroup)
 
 class ChecklistColumnTemplate(Tagable):
     name = db.StringProperty(multiline=False)
@@ -78,6 +84,11 @@ class ChecklistColumnTemplate(Tagable):
 class UserChecklist(Checklist):
     user_email = db.StringProperty(required=True)
     starred = db.BooleanProperty(default = False)
+    public = db.BooleanProperty(default = False)
+    created_date = db.DateTimeProperty()
+    last_modified_date = db.DateTimeProperty()
+    last_modified_user = db.StringProperty()
+    
 
 class ChecklistColumn(Tagable):
     name = db.StringProperty(multiline=False)
@@ -102,7 +113,7 @@ class ChecklistColumn(Tagable):
                           self.name, self.checklist.name)
 
 class ChecklistItem(db.Expando):
-    checklist = db.ReferenceProperty(Checklist)
+    checklist = db.ReferenceProperty(UserChecklist)
     order = db.IntegerProperty(default=0)
     created_date = db.DateTimeProperty()
     last_modified_date = db.DateTimeProperty()

@@ -52,8 +52,8 @@ def role(role):
                 if self.request.method != 'GET':
                     self.error(403)
                 else:
-                    #self.redirect(users.create_login_url(self.request.uri))
-                    self.redirect("/login")
+                    self.redirect(users.create_login_url(self.request.uri))
+                    #self.redirect("/login")
             elif role == "user" or (role == "admin" and users.is_current_user_admin()):
                 return handler_method(self, *args, **kwargs)
             else:
