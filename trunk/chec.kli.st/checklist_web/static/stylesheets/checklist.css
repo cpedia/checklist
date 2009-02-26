@@ -1,0 +1,88 @@
+body {
+    background: #fff;
+    color: #333;
+}
+
+a, a:link, a:visited, a:link {
+    color: #555;
+    text-decoration: underline;
+    border-bottom-color: #555;
+}
+
+a:hover {
+    background-color: #F4F2E4;
+}
+
+.gbh {
+    border-top: 1px solid #C9D7F1;
+    height: 4px;
+    margin-top: 4px;
+    position: absolute;
+    width: 100%;
+}
+
+#gaia {
+    text-align: right;
+}
+
+#logodiv {
+    margin: 6px;  
+}
+
+.noborder_table {
+    border: none;
+}
+
+.noborder_table th {
+    border: none;
+    padding: .4em;
+    font-weight: bold;
+    text-align: right;
+}
+
+.noborder_table td {
+    border: none;
+    padding: .4em;
+    text-align: left;
+}
+
+.error {
+    background: #f8f7ef none repeat scroll 0 0;
+    border: medium none red;
+    border-left: 4px solid;
+    font-weight: bold;
+    margin: 10px 0;
+    padding-bottom: 10px;
+    padding-left: 10px;
+}
+
+#title a, #title a:hover, #title a:link, #title a:visited {
+    background-color: inherit !important;
+    border-style: none;
+    font-size: 2.4em !important;
+    text-decoration: none;
+}
+
+#footer {
+    background: #fbfaf4;
+    height: 2.5em;
+    margin-bottom: 20px;
+    margin-top: 20px;
+    min-width: 750px;
+    overflow: hidden;
+    text-align: center;
+}
+
+#google_ad {
+    padding-left: 5px;
+    padding-top: 10px;
+}
+
+#logo {
+    background: #efefef;
+    border: 1px #cccccc solid;
+    height: 148px;
+    padding-right: 5px;
+    padding-top: 2px;
+    text-align: right;
+}
