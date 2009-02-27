@@ -37,7 +37,7 @@ a:hover {
     border: none;
     padding: .4em;
     font-weight: bold;
-    text-align: right;
+    text-align: center;
 }
 
 .noborder_table td {
@@ -85,4 +85,9 @@ a:hover {
     padding-right: 5px;
     padding-top: 2px;
     text-align: right;
+}
+
+.movebutton{
+    width:40px;
+    text-align:center;
 }

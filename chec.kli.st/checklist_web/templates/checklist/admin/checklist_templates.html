@@ -1,7 +1,99 @@
+<!--CSS file (default YUI Sam Skin) -->
+<link type="text/css" rel="stylesheet" href="http://yui.yahooapis.com/2.7.0/build/datatable/assets/skins/sam/datatable.css">
+<!-- Dependencies -->
+<script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/yahoo-dom-event/yahoo-dom-event.js"></script>
+<script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/element/element-min.js"></script>
+<script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/datasource/datasource-min.js"></script>
+<!-- OPTIONAL: JSON Utility (for DataSource) -->
+<script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/json/json-min.js"></script>
+<!-- OPTIONAL: Connection Manager (enables XHR for DataSource) -->
+<script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/connection/connection-min.js"></script>
+<!-- OPTIONAL: Drag Drop (enables resizeable or reorderable columns) -->
+<script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/dragdrop/dragdrop-min.js"></script>
+<!-- Source files -->
+<script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/datatable/datatable-min.js"></script>
+<script type="text/javascript">
+    YAHOO.util.Event.addListener(window, "load", function() {
+        YAHOO.checklist.templates.RowDataMod = function() {
+            var myColumnDefs = [
+                {key:"name",resizeable:true,editor:"textbox"},
+                {key:"type",resizeable:true,editor:"textbox",editorOptions:{}}
+            ];
+
+            var myDataSource = new YAHOO.util.DataSource([]);
+            myDataSource.responseType = YAHOO.util.DataSource.TYPE_JSARRAY;
+            myDataSource.responseSchema = {
+                fields: ["name","type"]
+            };
+
+            var myDataTable = new YAHOO.widget.DataTable("columns_container",
+                    myColumnDefs, myDataSource, {});
+
+            // Add/update/delete rows as indicated
+            var handleClick = function() {
+                // Reset sort
+                myDataTable.set("sortedBy", null);
+
+                var mode = YAHOO.util.Dom.get("mode").value,
+                        count = parseInt(YAHOO.util.Dom.get("count").value),
+                        index = parseInt(YAHOO.util.Dom.get("index").value);
+
+                if (YAHOO.lang.isNumber(index)) {
+                    switch (mode) {
+                        case "add":
+                            if (count === 1) {
+                                myDataTable.addRow(getData(), index);
+                            }
+                            else {
+                                myDataTable.addRows(getData(count), index);
+                            }
+                            return;
+                        case "update":
+                            if (count === 1) {
+                                myDataTable.updateRow(index, getData());
+                            }
+                            else {
+                                myDataTable.updateRows(index, getData(count));
+                            }
+                            return;
+                        case "deletestandard":
+                            if (count === 1) {
+                                myDataTable.deleteRow(index);
+                            }
+                            else {
+                                myDataTable.deleteRows(index, count);
+                            }
+                            return;
+                        case "deletereverse":
+                            if (count === 1) {
+                                myDataTable.deleteRow(index, -1);
+                            }
+                            else {
+                                myDataTable.deleteRows(index, count * -1);
+                            }
+                            return;
+                        default:
+                            break;
+                    }
+
+                }
+                YAHOO.log("Could not continue due to invalid index.");
+            }
+
+            var btn = new YAHOO.widget.Button("go");
+            btn.on("click", handleClick);
+
+            return {
+                ds: myDataSource,
+                dt: myDataTable
+            };
+        }();
+    });
+</script>
 <div>
     Choose the columns you would like to have in your list.
     The columns on the right were automatically added based on the template you chose.
-    <table>
+    <table class="noborder_table">
         <tr>
             <th>Additional Columns</th>
             <th>&nbsp;</th>
@@ -9,31 +101,35 @@
         </tr>
         <tr>
             <td>
-            <select multiple id="columns_choices">
-               <option value="Flag_Yes/No">        <pre>Flag        Yes/No </pre></option>
-               <option value="Priority_Yes/No">    <pre>Priority    Yes/No </pre></option>
-               <option value="Amount_Number">      <pre>Amount      Number</pre></option>
-               <option value="Units_Category">     <pre>Units       Category</pre></option>
-               <option value="Category_Category">  <pre>Category    Category</pre></option>
-               <option value="Date_Date">          <pre>Date        Date</pre></option>
-               <option value="Notes_String">       <pre>Notes       String</pre></option>
-               <option value="String">             <pre>--New--     String</pre></option>
-               <option value="Category">           <pre>--New--     Category</pre></option>
-               <option value="Number">             <pre>--New--     Number</pre></option>
-               <option value="Yes/No">             <pre>--New--     Yes/No</pre></option>
-               <option value="Date">               <pre>--New--     Date</pre></option>
+            <select multiple id="columns_choices" style="width:180px;height:200px;font-family:Courier New">
+               <option value="Flag_Yes/No">        <pre>Flag--------Yes/No </pre></option>
+               <option value="Priority_Yes/No">    <pre>Priority----Yes/No </pre></option>
+               <option value="Amount_Number">      <pre>Amount------Number</pre></option>
+               <option value="Units_Category">     <pre>Units-------Category</pre></option>
+               <option value="Category_Category">  <pre>Category----Category</pre></option>
+               <option value="Date_Date">          <pre>Date--------Date</pre></option>
+               <option value="Notes_String">       <pre>Notes-------String</pre></option>
+               <option value="String" class="new_column">             <pre>--New-------String</pre></option>
+               <option value="Category" class="new_column">           <pre>--New-------Category</pre></option>
+               <option value="Number" class="new_column">             <pre>--New-------Number</pre></option>
+               <option value="Yes/No" class="new_column">             <pre>--New-------Yes/No</pre></option>
+               <option value="Date" class="new_column">               <pre>--New-------Date</pre></option>
             </select>
             </td>
-            <td></td>
+            <td style="text-align:center;line-height:10px">
+                <input type="button" value=">" class="movebutton"><br>
+                <input type="button" value=">>" class="movebutton"><br>
+                <input type="button" value="<" class="movebutton"><br>
+                <input type="button" value="<<" class="movebutton">
+            </td>
             <td>
-            <div>
-                <table></table>
+            <div id="columns_container">
             </div>
             </td>
         </tr>
     </table>
 </div>
-
+<br>
 <fieldset id="admin_templates">
     <legend>Checklist templates admin</legend>
     <div class="fieldsetdiv">
