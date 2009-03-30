@@ -93,7 +93,7 @@ class UserChecklist(Checklist):
 class ChecklistColumn(Tagable):
     name = db.StringProperty(multiline=False)
     type = db.StringProperty(multiline=False,default='String',choices=[
-          'String','Category','Number','Yes/No','Date'])
+          'Checkbox','String','Category','Number','Yes/No','Date'])
     order = db.IntegerProperty(default=0)
     checklist = db.ReferenceProperty(Checklist)
 
