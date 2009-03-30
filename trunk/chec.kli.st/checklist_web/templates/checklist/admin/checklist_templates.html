@@ -18,6 +18,7 @@
     YAHOO.util.Event.addListener(window, "load", function() {
         YAHOO.checklist.templates.RowDataMod = function() {
             var myColumnDefs = [
+                {key:"check",resizeable:true,label:"Select Row",formatter:YAHOO.widget.DataTable.formatCheckbox,className:"align_center"},
                 {key:"name",resizeable:true,label:"Column Name",editor: new YAHOO.widget.TextboxCellEditor({disableBtns:true})},
                 {key:"type",resizeable:true,label:"Column Type",editor:new YAHOO.widget.DropdownCellEditor({dropdownOptions:["Checkbox","String","Category","Number","Yes/No","Date"],disableBtns:true})}
             ];
@@ -34,8 +35,20 @@
             // Subscribe to events for row selection
             //myDataTable.subscribe("rowMouseoverEvent", myDataTable.onEventHighlightRow);
             //myDataTable.subscribe("rowMouseoutEvent", myDataTable.onEventUnhighlightRow);
-            myDataTable.subscribe("rowClickEvent", myDataTable.onEventSelectRow);
-            myDataTable.subscribe("cellDbClickEvent", myDataTable.onEventShowCellEditor);
+            //myDataTable.subscribe("rowClickEvent", myDataTable.onEventSelectRow);
+
+            // Selects any cell that receives a checkbox click
+            myDataTable.subscribe("checkboxClickEvent", function(oArgs) {
+                var elCheckbox = oArgs.target;
+                var elRow = this.getTrEl(elCheckbox);
+                if (elCheckbox.checked) {
+                    this.selectRow(elRow);
+                }else{
+                    this.unselectRow(elRow);
+                }
+            });
+
+            myDataTable.subscribe("cellClickEvent", myDataTable.onEventShowCellEditor);
 
             var getSelectedColumns = function(columns_choices) {
                 if (columns_choices && columns_choices.selectedIndex != -1) {
