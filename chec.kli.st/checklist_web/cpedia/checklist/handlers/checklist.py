@@ -38,6 +38,8 @@ from google.appengine.ext import search
 from cpedia.pagination.GqlQueryPaginator import GqlQueryPaginator,GqlPage
 from cpedia.pagination.paginator import InvalidPage,Paginator
 
+from cpedia.checklist.handlers import restful
+
 import authorized
 import view
 
