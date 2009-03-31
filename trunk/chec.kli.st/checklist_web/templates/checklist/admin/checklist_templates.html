@@ -126,7 +126,35 @@
                 YAHOO.log("Could not continue due to invalid index.");
             };
 
+            //save template.
+            var saveTemplate = function() {
+                if (YAHOO.util.Dom.get("templateName").value.trim()=="") {
+                    alert("Please specify checklist template name.");
+                    YAHOO.util.Dom.get("templateName").focus();
+                    return;
+                }
+                var index = myDataTable.getRecordSet().getLength();
+                if (YAHOO.lang.isNumber(index) && index > 0) {
+                    YAHOO.util.Connect.asyncRequest('POST', '/rpc/saveTemplate',
+                    {
+                        success: function (o) {
+                            var record = YAHOO.lang.JSON.parse(o.responseText);
+                            alert("Save checklist template successfully.");
+                        },
+                        failure: function (o) {
+                            alert(o.statusText);
+                        },
+                        scope:this
+                    },myDataTable.getRecordSet()
+                            );
+                }else{
+                    alert("Please specify checklist template column(s).");
+                    YAHOO.util.Dom.get("columns_choices").focus();
+                }
+            };
+
             YAHOO.util.Event.addListener(["addColumn","deleteColumn"], "click", handleClick);
+            YAHOO.util.Event.addListener("updateBtn", "click", saveTemplate);
             return {
                 ds: myDataSource,
                 dt: myDataTable
@@ -172,5 +200,11 @@
                 </div>
             </td>
         </tr>
+        <tr>
+            <td colspan="3">Checklist template name: <input type="text" size="40" id="templateName"></td>
+        </tr>
+        <tr>
+            <td colspan="3" style="text-align:center;"><button id="updateBtn">Save</button></td></tr>
     </table>
 </div>
+<br>

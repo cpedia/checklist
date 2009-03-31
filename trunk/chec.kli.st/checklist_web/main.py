@@ -23,10 +23,10 @@ from google.appengine.ext import webapp
 import logging
 import os
 
-import rest
 import config
 
 from cpedia.checklist.handlers import checklist
+from cpedia.checklist.handlers import rpc
 
 from google.appengine.ext.webapp import template
 template.register_template_library('cpedia.filter.replace')
@@ -45,9 +45,9 @@ def main():
                                         ('/403.html', checklist.UnauthorizedHandler),
                                         ('/404.html', checklist.NotFoundHandler),
                                         ('/admin/templates/*$', checklist.TemplatesAdmin),
-                                        ('/rest/.*', rest.Dispatcher),
                                         ('/create/list/*$', checklist.CreateList),
                                         ('/create/quicklist/*$', checklist.CreateQucikList),
+                                        ('/rpc/([-\w\.]+)/*$', rpc.RPCHandler),
                                         ('/*$', checklist.MainPage),
                                        ],
                                        debug=config.DEBUG)
