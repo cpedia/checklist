@@ -14,16 +14,28 @@
 <!-- Source files -->
 <script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/datatable/datatable-min.js"></script>
 <script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/button/button-min.js"></script>
+<style type="text/css">
+    .align_center {
+        text-align: center !important;
+    }
+</style>
 <script type="text/javascript">
     YAHOO.util.Event.addListener(window, "load", function() {
         YAHOO.checklist.templates.RowDataMod = function() {
+            var imageFormatter = function(elCell, oRecord, oColumn) {
+                elCell.innerHTML = '<input type="image" src="/static/images/' + oColumn.key + '.png" name="' + oColumn.key + '" title="' + oColumn.label + ' row" />';
+                elCell.style.cursor = 'pointer';
+            };
+
             var myColumnDefs = [
                 {key:"check",resizeable:true,label:"Select Row",formatter:YAHOO.widget.DataTable.formatCheckbox,className:"align_center"},
                 {key:"name",resizeable:true,label:"Column Name",editor: new YAHOO.widget.TextboxCellEditor({disableBtns:true})},
-                {key:"type",resizeable:true,label:"Column Type",editor:new YAHOO.widget.DropdownCellEditor({dropdownOptions:["Checkbox","String","Category","Number","Yes/No","Date"],disableBtns:true})}
+                {key:"type",resizeable:true,label:"Column Type",editor:new YAHOO.widget.DropdownCellEditor({dropdownOptions:["Checkbox","String","Category","Number","Yes/No","Date"],disableBtns:true})},
+                {key:"up",resizeable:true,label:"Up",formatter:imageFormatter},
+                {key:"down",resizeable:true,label:"Down",formatter:imageFormatter}
             ];
 
-            var myDataSource = new YAHOO.util.DataSource([{name:"CheckBox",type:"CheckBox"},{name:"Item",type:"String"}]);
+            var myDataSource = new YAHOO.util.DataSource([{name:"Checkbox",type:"Checkbox"},{name:"Item",type:"String"}]);
             myDataSource.responseType = YAHOO.util.DataSource.TYPE_JSARRAY;
             myDataSource.responseSchema = {
                 fields: ["name","type"]
@@ -43,8 +55,28 @@
                 var elRow = this.getTrEl(elCheckbox);
                 if (elCheckbox.checked) {
                     this.selectRow(elRow);
-                }else{
+                } else {
                     this.unselectRow(elRow);
+                }
+            });
+
+            // Move up/down the row that receives a up/down img click
+            myDataTable.subscribe("buttonClickEvent", function(oArgs) {
+                var elImage = oArgs.target;
+                var elRow = this.getTrEl(elImage),
+                        index = this.getTrIndex(elImage),
+                        recordData = this.getRecord(elRow).getData();
+                var mode = elImage.name;
+                if (mode == "up") {
+                    if (!YAHOO.lang.isNull(this.getPreviousTrEl(elImage))) {
+                        this.deleteRow(index);
+                        this.addRows([{name:recordData.name, type:recordData.type}], index - 1);
+                    }
+                } else if (mode == "down") {
+                    if (!YAHOO.lang.isNull(this.getNextTrEl(elImage))) {
+                        this.deleteRow(index);
+                        this.addRows([{name:recordData.name, type:recordData.type}], index + 1);
+                    }
                 }
             });
 
@@ -114,7 +146,7 @@
         <tr>
             <td>
                 <select multiple id="columns_choices" style="width:185px;height:230px;font-family:Courier New">
-                    <option value="CheckBox" class="Checkbox"> CheckBox----Checkbox</option>
+                    <option value="Checkbox" class="Checkbox"> Checkbox----Checkbox</option>
                     <option value="Item" class="String"> Item--------String</option>
                     <option value="Flag" class="Yes/No"> Flag--------Yes/No</option>
                     <option value="Priority" class="Number"> Priority----Number</option>
