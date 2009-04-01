@@ -26,71 +26,84 @@
     }
 </style>
 <script type="text/javascript">
-    YAHOO.checklist.templates.DynamicData = function() {
-        // Column definitions
-        var myColumnDefs = [ // sortable:true enables sorting
-            {key:"check",resizeable:true,label:"Select Row",formatter:YAHOO.widget.DataTable.formatCheckbox,className:"align_center"},
-            {key:"name", label:"Name", sortable:true},
-            {key:"description", label:"Description", sortable:false},
-            {key:"create_date", label:"Create Date", sortable:true,formatter:"date"},
-            {key:"last_update_date", label:"Update Date", sortable:true,formatter:"date"},
-            {key:"active", label:"Active", sortable:true}
-        ];
+    YAHOO.util.Event.addListener(window, "load", function() {
+        YAHOO.checklist.templates.DynamicData = function() {
+            // Column definitions
+            var myColumnDefs = [ // sortable:true enables sorting
+                {key:"check",resizeable:true,label:"Select Row",formatter:YAHOO.widget.DataTable.formatCheckbox,className:"align_center"},
+                {key:"name", label:"Name", sortable:true},
+                {key:"description", label:"Description", sortable:false},
+                {key:"create_date", label:"Create Date", sortable:true,formatter:"date"},
+                {key:"last_update_date", label:"Update Date", sortable:true,formatter:"date"},
+                {key:"active", label:"Active", sortable:true}
+            ];
 
-        // Custom parser
-        var stringToDate = function(sData) {
-            var array = sData.split("-");
-            return new Date(array[1] + " " + array[0] + ", " + array[2]);
-        };
+            // Custom parser
+            var stringToDate = function(sData) {
+                var array = sData.split("-");
+                return new Date(array[1] + " " + array[0] + ", " + array[2]);
+            };
 
-        var buildQueryString = function (state, dt) {
-            return "?arg0=" + state.pagination.recordOffset +
-                   "&arg1=" + state.pagination.rowsPerPage + '&time=' + new Date().getTime();
-        };
+            var buildQueryString = function (state, dt) {
+                return "?arg0=" + state.pagination.recordOffset +
+                       "&arg1=" + state.pagination.rowsPerPage + '&time=' + new Date().getTime();
+            };
 
-        // DataSource instance
-        var myDataSource = new YAHOO.util.DataSource("/json/getTemplates");
-        myDataSource.responseType = YAHOO.util.DataSource.TYPE_JSON;
-        myDataSource.responseSchema = {
-            resultsList: "records",
-            fields: [
-                {key:"name"},
-                {key:"description"},
-                {key:"create_date", parser:stringToDate},
-                {key:"last_update_date", parser:stringToDate},
-                {key:"active"}
-            ],
-            metaFields: {
-                totalRecords: "totalRecords" // Access to value in the server response
-            }
-        };
+            // DataSource instance
+            var myDataSource = new YAHOO.util.DataSource("/json/getTemplates");
+            myDataSource.responseType = YAHOO.util.DataSource.TYPE_JSON;
+            myDataSource.responseSchema = {
+                resultsList: "records",
+                fields: [
+                    {key:"name"},
+                    {key:"description"},
+                    {key:"create_date", parser:stringToDate},
+                    {key:"last_update_date", parser:stringToDate},
+                    {key:"active"}
+                ],
+                metaFields: {
+                    totalRecords: "totalRecords" // Access to value in the server response
+                }
+            };
 
-        // DataTable configuration
-        var myConfigs = {
-            initialRequest: "?arg0=0&arg1=10&time=" + new Date().getTime(),  //'startIndex=0&results=25'
-            generateRequest: buildQueryString,
-            dynamicData: true, // Enables dynamic server-driven data
-            sortedBy : {key:"last_update_date", dir:YAHOO.widget.DataTable.CLASS_ASC}, // Sets UI initial sort arrow
-            paginator: new YAHOO.widget.Paginator({ rowsPerPage:10 }) // Enables pagination
-        };
+            var myPaginator = new YAHOO.widget.Paginator({
+                rowsPerPage : 10,
+                template : "{PreviousPageLink} <strong>{CurrentPageReport}</strong> {NextPageLink} {LastPageLink}"
+            });
 
-        // DataTable instance
-        var myDataTable = new YAHOO.widget.DataTable("templates_container", myColumnDefs, myDataSource, myConfigs);
-        // Update totalRecords on the fly with value from server
-        myDataTable.handleDataReturnPayload = function(oRequest, oResponse, oPayload) {
-            oPayload.totalRecords = oResponse.meta.totalRecords;
-            return oPayload;
-        }
+            // DataTable configuration
+            var myConfigs = {
+                initialRequest: "?arg0=0&arg1=10&time=" + new Date().getTime(),  //'startIndex=0&results=25'
+                generateRequest: buildQueryString,
+                dynamicData: true, // Enables dynamic server-driven data
+                sortedBy : {key:"last_update_date", dir:YAHOO.widget.DataTable.CLASS_ASC}, // Sets UI initial sort arrow
+                paginator: myPaginator // Enables pagination
+            };
 
-        return {
-            ds: myDataSource,
-            dt: myDataTable
-        };
+            // DataTable instance
+            var myDataTable = new YAHOO.widget.DataTable("templates_container", myColumnDefs, myDataSource, myConfigs);
+            // Update totalRecords on the fly with value from server
+            myDataTable.handleDataReturnPayload = function(oRequest, oResponse, oPayload) {
+                oPayload.totalRecords = oResponse.meta.totalRecords;
+                return oPayload;
+            };
 
-    }();
+            var newTemplate = function() {
+            };
+
+            YAHOO.util.Event.addListener("addTemplate", "click", newTemplate);
+
+            return {
+                ds: myDataSource,
+                dt: myDataTable
+            };
+
+        }();
+    });
 </script>
 <div>
-    Templates list
+    Templates list <br>
+    <button id="addTemplate">Create new Template</button>
     <div id="templates_container" style="overflow:auto;height:230px;font-family:Courier New">
     </div>
 
