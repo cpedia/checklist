@@ -11,7 +11,7 @@ CHECKLIST = {
     "checklist_version": "0.1",
     "html_type": "text/html",
     "charset": "utf-8",
-    "title": "chec.kli.st",
+    "title": "Chec.kli.st",
     "author": "Ping Chen",
     # This must be the email address of a registered administrator for the
     # application due to mail api restrictions.
