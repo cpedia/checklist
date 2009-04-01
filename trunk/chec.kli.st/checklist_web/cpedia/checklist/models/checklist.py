@@ -16,7 +16,6 @@
 
 __author__ = 'Ping Chen'
 
-
 import pickle
 
 from google.appengine.ext import db
@@ -28,17 +27,15 @@ import urllib
 import cgi
 import simplejson
 
+from cpedia.checklist import models
 
-class User(db.Model):
-    user_email = db.StringProperty(required=True)
-
-class Tag(db.Model):
-    user_email = db.StringProperty()
+class Tag(models.SerializableModel):
+    user = db.UserProperty()
     tag = db.StringProperty(multiline=False)
     entrycount = db.IntegerProperty(default=0)
     valid = db.BooleanProperty(default = True)
 
-class Tagable(polymodel.PolyModel):
+class Tagable(models.SerializableModel):
     tags = db.ListProperty(db.Category)
 
     def get_tags(self):
@@ -60,40 +57,36 @@ class Checklist(Tagable):
     color_for_checked_item = db.StringProperty()
     color_for_starred_item = db.StringProperty()
 
-class ChecklistTemplateGroup(db.Model):
-    name = db.StringProperty(multiline=False)
-    order = db.IntegerProperty(default=0)
-    parent_checklist_template_group = db.SelfReferenceProperty()
-    active = db.BooleanProperty(default = True)
 
 #system reserved checklist templates. Administrator can maintain these templates,
 #user can create a checklist from the template.
 class ChecklistTemplate(Checklist):
-    user_email = db.StringProperty()
+    user = db.UserProperty()
     order = db.IntegerProperty(default=0)
     active = db.BooleanProperty(default = True)
-    group = db.ReferenceProperty(ChecklistTemplateGroup)
+    created_date = db.DateTimeProperty()
+    last_updated_date = db.DateTimeProperty()
+    last_updated_user = db.UserProperty()
 
 class ChecklistColumnTemplate(Tagable):
     name = db.StringProperty(multiline=False)
     type = db.StringProperty(multiline=False,default='String',choices=[
-          'String','Category','Number','Yes/No','Date'])
+            'String','Category','Number','Yes/No','Date'])
     order = db.IntegerProperty(default=0)
     checklist_template = db.ReferenceProperty(ChecklistTemplate)
 
 class UserChecklist(Checklist):
-    user_email = db.StringProperty(required=True)
+    user = db.UserProperty(required=True)
     starred = db.BooleanProperty(default = False)
     public = db.BooleanProperty(default = False)
     created_date = db.DateTimeProperty()
-    last_modified_date = db.DateTimeProperty()
-    last_modified_user = db.StringProperty()
-    
+    last_updated_date = db.DateTimeProperty()
+    last_updated_user = db.UserProperty()
 
 class ChecklistColumn(Tagable):
     name = db.StringProperty(multiline=False)
     type = db.StringProperty(multiline=False,default='String',choices=[
-          'Checkbox','String','Category','Number','Yes/No','Date'])
+            'Checkbox','String','Category','Number','Yes/No','Date'])
     order = db.IntegerProperty(default=0)
     checklist = db.ReferenceProperty(Checklist)
 
@@ -116,27 +109,25 @@ class ChecklistItem(db.Expando):
     checklist = db.ReferenceProperty(UserChecklist)
     order = db.IntegerProperty(default=0)
     created_date = db.DateTimeProperty()
-    last_modified_date = db.DateTimeProperty()
-    last_modified_user = db.StringProperty()
+    last_updated_date = db.DateTimeProperty()
+    last_updated_user = db.UserProperty()
     starred = db.BooleanProperty(default = False)
     parent_checklist_item = db.SelfReferenceProperty()
 
 class ChecklistColumnCategory(db.Model):
     name = db.StringProperty(multiline=False)
-    user_email = db.StringProperty(required=True)
+    user = db.UserProperty(required=True)
     categorys = db.ListProperty(db.Category)
 
-
 class Comment(polymodel.PolyModel):
-    last_modified_date = db.DateTimeProperty()
-    last_modified_user = db.StringProperty()
+    last_updated_date = db.DateTimeProperty()
+    last_updated_user = db.UserProperty()
     starred = db.BooleanProperty(default = False)
-
 
 class AuthSubStoredToken(db.Model):
     user_email = db.StringProperty(required=True)
     target_service = db.StringProperty(multiline=False,default='base',choices=[
-          'apps','base','blogger','calendar','codesearch','contacts','docs',
-          'albums','spreadsheet','youtube'])
+            'apps','base','blogger','calendar','codesearch','contacts','docs',
+            'albums','spreadsheet','youtube'])
     session_token = db.StringProperty(required=True)
 
