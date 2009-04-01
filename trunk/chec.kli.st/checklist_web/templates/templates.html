@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}{{title}} -- checklist templates{% endblock %}
+{% block title %}{{title}} - checklist templates{% endblock %}
 {% block checklist %}
 <!--CSS file (default YUI Sam Skin) -->
 <link type="text/css" rel="stylesheet"
@@ -67,6 +67,7 @@
             };
 
             var myPaginator = new YAHOO.widget.Paginator({
+                containers : ['paging_nav'],
                 rowsPerPage : 10,
                 template : "{PreviousPageLink} <strong>{CurrentPageReport}</strong> {NextPageLink} {LastPageLink}"
             });
@@ -104,9 +105,9 @@
 <div>
     Templates list <br>
     <button id="addTemplate">Create new Template</button>
-    <div id="templates_container" style="overflow:auto;height:230px;font-family:Courier New">
+    <div id="templates_container">
     </div>
-
+    <div id="paging_nav"></div>
 </div>
 <br>
 {% endblock %}
