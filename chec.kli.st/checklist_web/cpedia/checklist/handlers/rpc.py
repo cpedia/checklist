@@ -16,7 +16,6 @@
 
 __author__ = 'Ping Chen'
 
-
 import os
 import logging
 import datetime
@@ -37,39 +36,52 @@ import authorized
 # This handler allows the functions defined in the RPCHandler class to
 # be called automatically by remote code.
 class RPCHandler(webapp.RequestHandler):
-  def get(self,action):
-    arg_counter = 0;
-    args = []
-    while True:
-      arg = self.request.get('arg' + str(arg_counter))
-      arg_counter += 1
-      if arg:
-        args += (simplejson.loads(arg),);
-      else:
-        break;
-    result = getattr(self, action)(*args)
-    self.response.out.write(simplejson.dumps((result)))
+    def get(self,action):
+        arg_counter = 0;
+        args = []
+        while True:
+            arg = self.request.get('arg' + str(arg_counter))
+            arg_counter += 1
+            if arg:
+                args += (simplejson.loads(arg),);
+            else:
+                break;
+        result = getattr(self, action)(*args)
+        self.response.headers['Content-Type'] = 'application/json'
+        self.response.out.write(simplejson.dumps((result)))
 
-  def post(self,action):
-    request_ = self.request
-    result = getattr(self, action)(request_)
-    util.getLogger(__name__).debug('ajax action "%s"return value is %s', action,simplejson.dumps(result))
-    self.response.out.write(simplejson.dumps(result))
+    def post(self,action):
+        request_ = self.request
+        result = getattr(self, action)(request_)
+        logging.debug('ajax action "%s" return value is %s', action,simplejson.dumps(result))
+        self.response.headers['Content-Type'] = 'application/json'
+        self.response.out.write(simplejson.dumps(result))
 
-# The RPCs exported to JavaScript follow here:
-  
+    # The RPCs exported to JavaScript follow here:
 
-  @authorized.role('admin')
-  def saveTemplate(self,request):
-      checklistTemplate = datastore.Entity("ChecklistTemplate")
-      checklistTemplate["user_email"] = users.get_current_user().email()
-      checklistTemplate["name"] = "New permalink"
-      checklistTemplate["description"] = "_self"
-      datastore.Put(checklistTemplate)
-      util.flushMenuList()
-      checklistTemplate['key'] = str(checklistTemplate.key())
-      checklistTemplate['id'] = str(checklistTemplate.key().id())
-      return checklistTemplate
+    #get checklist template list.
+    @authorized.role('admin')
+    def getTemplates(self,startIndex,results):
+        query = datastore.Query('ChecklistTemplate')
+        query.Order(('last_updated_date', datastore.Query.DESCENDING))
+        templates = []
+        for template in query.Get(results,startIndex):
+            templates+=[template.to_json()]
+        totalRecords = query.Count()
+        returnValue = {"records":templates,"totalRecords":totalRecords,"startIndex":startIndex}
+        return returnValue
+
+    @authorized.role('admin')
+    def saveTemplate(self,request):
+        checklistTemplate = datastore.Entity("ChecklistTemplate")
+        checklistTemplate["user_email"] = users.get_current_user().email()
+        checklistTemplate["name"] = "New permalink"
+        checklistTemplate["description"] = "_self"
+        datastore.Put(checklistTemplate)
+        util.flushMenuList()
+        checklistTemplate['key'] = str(checklistTemplate.key())
+        checklistTemplate['id'] = str(checklistTemplate.key().id())
+        return checklistTemplate
 
 
       

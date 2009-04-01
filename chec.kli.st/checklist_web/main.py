@@ -44,10 +44,11 @@ def main():
                                        [
                                         ('/403.html', checklist.UnauthorizedHandler),
                                         ('/404.html', checklist.NotFoundHandler),
-                                        ('/admin/templates/*$', checklist.TemplatesAdmin),
+                                        ('/admin/template/*$', checklist.TemplateListAdmin),
+                                        ('/admin/template/(.*)/*$', checklist.TemplateAdmin),
                                         ('/create/list/*$', checklist.CreateList),
                                         ('/create/quicklist/*$', checklist.CreateQucikList),
-                                        ('/rpc/([-\w\.]+)/*$', rpc.RPCHandler),
+                                        ('/json/([-\w\.]+)/*$', rpc.RPCHandler),
                                         ('/*$', checklist.MainPage),
                                        ],
                                        debug=config.DEBUG)

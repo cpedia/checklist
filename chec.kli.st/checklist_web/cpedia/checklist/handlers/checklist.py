@@ -93,11 +93,19 @@ class CreateQucikList(BaseRequestHandler):
         }
         self.generate('checklist_main.html',template_values)
 
-class TemplatesAdmin(BaseRequestHandler):
+class TemplateListAdmin(BaseRequestHandler):
     @authorized.role("admin")
     def get(self):
 
         template_values = {
         }
-        self.generate('checklist_admin.html',template_values)
+        self.generate('templates.html',template_values)
+
+class TemplateAdmin(BaseRequestHandler):
+    @authorized.role("admin")
+    def get(self):
+
+        template_values = {
+        }
+        self.generate('template_columns.html',template_values)
 

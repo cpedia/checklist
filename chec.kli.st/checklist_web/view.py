@@ -51,6 +51,7 @@ class ViewPage(object):
 
             template_params = {
                 "CHECKLIST": config.CHECKLIST,
+                "title": config.CHECKLIST['title'],
                 'user': users.get_current_user(),
                 'sign_url': url,
                 'request': handler.request,

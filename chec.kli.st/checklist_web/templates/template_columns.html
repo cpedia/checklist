@@ -1,4 +1,7 @@
-<!--CSS file (default YUI Sam Skin) -->
+{% extends "base.html" %}
+{% block title %}{{title}} -- checklist template columns{% endblock %}
+{% block checklist %}
+    <!--CSS file (default YUI Sam Skin) -->
 <link type="text/css" rel="stylesheet"
       href="http://yui.yahooapis.com/2.7.0/build/datatable/assets/skins/sam/datatable.css">
 <!-- Dependencies -->
@@ -21,7 +24,7 @@
 </style>
 <script type="text/javascript">
     YAHOO.util.Event.addListener(window, "load", function() {
-        YAHOO.checklist.templates.RowDataMod = function() {
+        YAHOO.checklist.templates.columns.RowDataMod = function() {
             var imageFormatter = function(elCell, oRecord, oColumn) {
                 elCell.innerHTML = '<input type="image" src="/static/images/' + oColumn.key + '.png" name="' + oColumn.key + '" title="' + oColumn.label + ' row" />';
                 elCell.style.cursor = 'pointer';
@@ -128,7 +131,7 @@
 
             //save template.
             var saveTemplate = function() {
-                if (YAHOO.util.Dom.get("templateName").value.trim()=="") {
+                if (YAHOO.util.Dom.get("templateName").value.trim() == "") {
                     alert("Please specify checklist template name.");
                     YAHOO.util.Dom.get("templateName").focus();
                     return;
@@ -145,9 +148,9 @@
                             alert(o.statusText);
                         },
                         scope:this
-                    },myDataTable.getRecordSet()
+                    }, myDataTable.getRecordSet()
                             );
-                }else{
+                } else {
                     alert("Please specify checklist template column(s).");
                     YAHOO.util.Dom.get("columns_choices").focus();
                 }
@@ -204,7 +207,12 @@
             <td colspan="3">Checklist template name: <input type="text" size="40" id="templateName"></td>
         </tr>
         <tr>
-            <td colspan="3" style="text-align:center;"><button id="updateBtn">Save</button></td></tr>
+            <td colspan="3" style="text-align:center;">
+                <button id="updateBtn">Save</button>
+            </td>
+        </tr>
     </table>
 </div>
 <br>
+{% endblock %}
+
