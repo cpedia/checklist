@@ -44,8 +44,9 @@ def main():
                                        [
                                         ('/403.html', checklist.UnauthorizedHandler),
                                         ('/404.html', checklist.NotFoundHandler),
-                                        ('/admin/template/*$', checklist.TemplateListAdmin),
-                                        ('/admin/template/([-\w\.]+)/*$', checklist.TemplateAdmin),
+                                        ('/admin/templates/*$', checklist.TemplateListAdmin),
+                                        ('/admin/create/template/*$', checklist.TemplateCreateAdmin),
+                                        ('/admin/edit/template/(.*)/*$', checklist.TemplateEditAdmin),
                                         ('/create/list/*$', checklist.CreateList),
                                         ('/create/quicklist/*$', checklist.CreateQucikList),
                                         ('/json/([-\w\.]+)/*$', rpc.RPCHandler),

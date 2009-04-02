@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}{{title}} - checklist template columns{% endblock %}
 {% block checklist %}
-    <!--CSS file (default YUI Sam Skin) -->
+<!--CSS file (default YUI Sam Skin) -->
 <link type="text/css" rel="stylesheet"
       href="http://yui.yahooapis.com/2.7.0/build/datatable/assets/skins/sam/datatable.css">
 <!-- Dependencies -->
@@ -131,14 +131,19 @@
 
             //save template.
             var saveTemplate = function() {
-                if (YAHOO.util.Dom.get("templateName").value.trim() == "") {
-                    alert("Please specify checklist template name.");
+                var templateName = YAHOO.util.Dom.get("templateName").value;
+                var description = YAHOO.util.Dom.get("description").value;
+                if (templateName.trim() == "") {
+                    alert("Please input checklist template name.");
                     YAHOO.util.Dom.get("templateName").focus();
                     return;
                 }
                 var index = myDataTable.getRecordSet().getLength();
                 if (YAHOO.lang.isNumber(index) && index > 0) {
-                    YAHOO.util.Connect.asyncRequest('POST', '/rpc/saveTemplate',
+                    var formObject = YAHOO.util.Dom.get('submitForm');
+                    formObject["template_columns"].value = myDataTable.getRecordSet();
+                    YAHOO.util.Connect.setForm(formObject, true);
+                    YAHOO.util.Connect.asyncRequest('POST', '/admin/create/template',
                     {
                         success: function (o) {
                             var record = YAHOO.lang.JSON.parse(o.responseText);
@@ -148,10 +153,10 @@
                             alert(o.statusText);
                         },
                         scope:this
-                    }, myDataTable.getRecordSet()
+                    }
                             );
                 } else {
-                    alert("Please specify checklist template column(s).");
+                    alert("Please choose at least one column to your template.");
                     YAHOO.util.Dom.get("columns_choices").focus();
                 }
             };
@@ -166,52 +171,71 @@
     });
 </script>
 <div>
-    Choose the columns you would like to have in your list.
-    The columns on the right were automatically added based on the template you chose.
-    <table class="noborder_table">
-        <tr>
-            <th>Additional Columns</th>
-            <th>&nbsp;</th>
-            <th>Columns to use in my list</th>
-        </tr>
-        <tr>
-            <td>
-                <select multiple id="columns_choices" style="width:185px;height:230px;font-family:Courier New">
-                    <option value="Checkbox" class="Checkbox"> Checkbox----Checkbox</option>
-                    <option value="Item" class="String"> Item--------String</option>
-                    <option value="Flag" class="Yes/No"> Flag--------Yes/No</option>
-                    <option value="Priority" class="Number"> Priority----Number</option>
-                    <option value="Amount" class="Number"> Amount------Number</option>
-                    <option value="Units" class="Category"> Units-------Category</option>
-                    <option value="Category" class="Category"> Category----Category</option>
-                    <option value="Date" class="Date"> Date--------Date</option>
-                    <option value="Notes" class="String"> Notes-------String</option>
-                    <option value="New" class="String"> --New-------String</option>
-                    <option value="New" class="Category"> --New-------Category</option>
-                    <option value="New" class="Number"> --New-------Number</option>
-                    <option value="New" class="Yes/No"> --New-------Yes/No</option>
-                    <option value="New" class="Date"> --New-------Date</option>
-                </select>
-            </td>
-            <td style="text-align:center;line-height:10px">
-                <input type="button" value=">" class="movebutton" id="addColumn">
-                <br><br>
-                <input type="button" value="<" class="movebutton" id="deleteColumn">
-            </td>
-            <td>
-                <div id="columns_container" style="overflow:auto;height:230px;font-family:Courier New">
-                </div>
-            </td>
-        </tr>
-        <tr>
-            <td colspan="3">Checklist template name: <input type="text" size="40" id="templateName"></td>
-        </tr>
-        <tr>
-            <td colspan="3" style="text-align:center;">
-                <button id="updateBtn">Save</button>
-            </td>
-        </tr>
-    </table>
+    <form method=post id="submitForm">
+        <input name=template_columns type="hidden"/>
+        <table class="noborder_table">
+            <tr>
+                <td>
+                    Checklist template name:
+                </td>
+                <td><input type="text" size="40" id="templateName" name="templateName"></td>
+            </tr>
+            <tr>
+                <td>Checklist template description:</td>
+                <td><input type="text" size="40" id="description" name="description"></td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <fieldset>
+                        <legend>Choose the columns you would like to have in your template:</legend>
+                        <table>
+                            <tr>
+                                <th>Columns</th>
+                                <th>&nbsp;</th>
+                                <th>Columns to use in my template</th>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <select multiple id="columns_choices"
+                                            style="width:185px;height:230px;font-family:Courier New,monospace">
+                                        <option value="Checkbox" class="Checkbox"> Checkbox----Checkbox</option>
+                                        <option value="Item" class="String"> Item--------String</option>
+                                        <option value="Flag" class="Yes/No"> Flag--------Yes/No</option>
+                                        <option value="Priority" class="Number"> Priority----Number</option>
+                                        <option value="Amount" class="Number"> Amount------Number</option>
+                                        <option value="Units" class="Category"> Units-------Category</option>
+                                        <option value="Category" class="Category"> Category----Category</option>
+                                        <option value="Date" class="Date"> Date--------Date</option>
+                                        <option value="Notes" class="String"> Notes-------String</option>
+                                        <option value="New" class="String"> --New-------String</option>
+                                        <option value="New" class="Category"> --New-------Category</option>
+                                        <option value="New" class="Number"> --New-------Number</option>
+                                        <option value="New" class="Yes/No"> --New-------Yes/No</option>
+                                        <option value="New" class="Date"> --New-------Date</option>
+                                    </select>
+                                </td>
+                                <td style="text-align:center;line-height:10px">
+                                    <input type="button" value=">" class="movebutton" id="addColumn">
+                                    <br><br>
+                                    <input type="button" value="<" class="movebutton" id="deleteColumn">
+                                </td>
+                                <td>
+                                    <div id="columns_container"
+                                         style="overflow:auto;height:230px;font-family:Courier New,monospace">
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </fieldset>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <button id="updateBtn">Save</button>
+                </td>
+            </tr>
+        </table>
+    </form>
 </div>
 <br>
 {% endblock %}

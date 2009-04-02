@@ -90,6 +90,7 @@
             };
 
             var newTemplate = function() {
+                window.location.href = "/admin/create/template/";
             };
 
             YAHOO.util.Event.addListener("addTemplate", "click", newTemplate);
@@ -103,7 +104,7 @@
     });
 </script>
 <div>
-    Templates list <br>
+    Templates list <br><br>
     <button id="addTemplate">Create new Template</button>
     <div id="templates_container">
     </div>
