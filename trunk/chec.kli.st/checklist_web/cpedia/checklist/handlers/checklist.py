@@ -40,9 +40,9 @@ from cpedia.pagination.paginator import InvalidPage,Paginator
 
 from cpedia.checklist.handlers import restful
 
+import simplejson
 import authorized
 import view
-
 
 class BaseRequestHandler(webapp.RequestHandler):
     """Supplies a common template generation function.
@@ -71,7 +71,7 @@ class UnauthorizedHandler(webapp.RequestHandler):
 class MainPage(BaseRequestHandler):
     @authorized.role("user")
     def get(self):
-        
+
         template_values = {
         }
         self.generate('checklist_main.html',template_values)
@@ -79,11 +79,10 @@ class MainPage(BaseRequestHandler):
 class CreateList(BaseRequestHandler):
     @authorized.role("user")
     def get(self):
-        
+
         template_values = {
         }
         self.generate('checklist_main.html',template_values)
-
 
 class CreateQucikList(BaseRequestHandler):
     @authorized.role("user")
@@ -101,11 +100,25 @@ class TemplateListAdmin(BaseRequestHandler):
         }
         self.generate('templates.html',template_values)
 
-class TemplateAdmin(BaseRequestHandler):
+class TemplateCreateAdmin(BaseRequestHandler):
+    @authorized.role("admin")
+    def get(self):
+        template_values = {
+        }
+        self.generate('template_info.html',template_values)
+
+    @authorized.role("admin")
+    def post(self):
+        name = self.request.get('templateName')
+        description = self.request.get('description')
+        columns = self.request.get('template_columns')
+        self.response.out.write(simplejson.dumps(True))
+
+class TemplateEditAdmin(BaseRequestHandler):
     @authorized.role("admin")
     def get(self):
 
         template_values = {
         }
-        self.generate('template_columns.html',template_values)
+        self.generate('template_info.html',template_values)
 
