@@ -42,8 +42,8 @@
                 {key:"active", label:"Active", sortable:true},
                 {key:"up",resizeable:true,label:"Up",formatter:imageFormatter},
                 {key:"down",resizeable:true,label:"Down",formatter:imageFormatter},
-                {key:"key",resizeable:true,label:"Edit",formatter:function(elCell, oRecord){
-                    elCell.innerHTML = "<a href='/admin/edit/template/"+oRecord.data+"'>Edit</a>";
+                {key:"key",resizeable:true,label:"Edit",formatter:function(elCell, oRecord, oColumn, oData){
+                    elCell.innerHTML = "<a href='/admin/edit/template/"+oData+"'>Edit</a>";
                 }}
             ];
 
@@ -135,12 +135,103 @@
 
             myDataTable.subscribe("cellClickEvent", myDataTable.onEventShowCellEditor);
 
-
             var newTemplate = function() {
                 window.location.href = "/admin/create/template/";
             };
+            var selectedTemplateIds = function(recordSet,selectedRows) {
+                var template_keys  = "template_keys=";
+                for (var x = 0, length=selectedRows.length; x < length; x++) {
+                    var record =  recordSet.getRecord(selectedRows[x]);
+                    template_keys += record.getData().key;
+                    if(x < length-1){
+                        template_keys+=",";
+                    }
+                }
+                return template_keys;
+            };
+            var deleteTemplates = function() {
+                var selected = myDataTable.getSelectedRows();
+                var rset = myDataTable.getRecordSet();
+                if (selected.length > 0) {
+                    YAHOO.util.Connect.asyncRequest('POST', '/json/deleteTemplates',
+                    {
+                        success: function (o) {
+                            if (o.responseText == 'true') {
+                                for (var x = 0; x < selected.length; x++) {
+                                    myDataTable.deleteRow(rset.getRecordIndex(rset.getRecord(selected[x])));
+                                }
+                            } else {
+                                alert(o.responseText);
+                            }
+                        },
+                        failure: function (o) {
+                            alert(o.statusText);
+                        },
+                        scope:this
+                    }, selectedTemplateIds(rset, selected)
+                            );
+                } else {
+                    alert("Please select at least one template to delete.");
+                }
+            };
 
+            var publishTemplates = function() {
+                var selected = myDataTable.getSelectedRows();
+                var rset = myDataTable.getRecordSet();
+                if (selected.length > 0) {
+                    YAHOO.util.Connect.asyncRequest('POST', '/json/publishTemplates',
+                    {
+                        success: function (o) {
+                            if (o.responseText == 'true') {
+                                for (var x = 0; x < selected.length; x++) {
+                                    rset.getRecord(selected[x]).getData().active = true;
+                                }
+                                myDataTable.render();
+                            } else {
+                                alert(o.responseText);
+                            }
+                        },
+                        failure: function (o) {
+                            alert(o.statusText);
+                        },
+                        scope:this
+                    }, selectedTemplateIds(rset, selected)
+                            );
+                } else {
+                    alert("Please select at least one template to publish.");
+                }
+            };
+
+            var holdTemplates = function() {
+                var selected = myDataTable.getSelectedRows();
+                var rset = myDataTable.getRecordSet();
+                if (selected.length > 0) {
+                    YAHOO.util.Connect.asyncRequest('POST', '/json/holdTemplates',
+                    {
+                        success: function (o) {
+                            if (o.responseText == 'true') {
+                                for (var x = 0; x < selected.length; x++) {
+                                    rset.getRecord(selected[x]).getData().active = false;
+                                }
+                                myDataTable.render();
+                            } else {
+                                alert(o.responseText);
+                            }
+                        },
+                        failure: function (o) {
+                            alert(o.statusText);
+                        },
+                        scope:this
+                    }, selectedTemplateIds(rset, selected)
+                            );
+                } else {
+                    alert("Please select at least one template to hold.");
+                }
+            };
             YAHOO.util.Event.addListener("addTemplate", "click", newTemplate);
+            YAHOO.util.Event.addListener("deleteTemplate", "click", deleteTemplates);
+            YAHOO.util.Event.addListener("publishTemplate", "click", publishTemplates);
+            YAHOO.util.Event.addListener("holdTemplate", "click", holdTemplates);
 
             return {
                 ds: myDataSource,
@@ -157,6 +248,7 @@
         <button id="addTemplate">Create New Template</button>
         <button id="deleteTemplate">Delete</button>
         <button id="publishTemplate">Publish</button>
+        <button id="holdTemplate">Hold</button>
     </div>
     <div id="templates_container">
     </div>

@@ -72,16 +72,37 @@ class RPCHandler(webapp.RequestHandler):
         return returnValue
 
     @authorized.role('admin')
-    def saveTemplate(self,request):
-        checklistTemplate = datastore.Entity("ChecklistTemplate")
-        checklistTemplate["user_email"] = users.get_current_user().email()
-        checklistTemplate["name"] = ""
-        checklistTemplate["description"] = ""
-        datastore.Put(checklistTemplate)
-        util.flushMenuList()
-        checklistTemplate['key'] = str(models.checklistTemplate.key())
-        checklistTemplate['id'] = str(models.checklistTemplate.key().id())
-        return checklistTemplate
+    def deleteTemplates(self,request):
+        template_keys = request.get("template_keys")
+        templates =  models.ChecklistTemplate.get(template_keys.split(","))
+        for template in templates:
+            template_columns = template.checklistcolumntemplate_set
+            for column in template_columns:
+                column.delete()
+            template.delete()   
+        return True
+
+    @authorized.role('admin')
+    def publishTemplates(self,request):
+        template_keys = request.get("template_keys")
+        templates =  models.ChecklistTemplate.get(template_keys.split(","))
+        for template in templates:
+            template.active = True
+            template.last_updated_date = datetime.datetime.now()
+            template.last_updated_user = users.get_current_user()
+            template.put()   
+        return True
+
+    @authorized.role('admin')
+    def holdTemplates(self,request):
+        template_keys = request.get("template_keys")
+        templates =  models.ChecklistTemplate.get(template_keys.split(","))
+        for template in templates:
+            template.active = False
+            template.last_updated_date = datetime.datetime.now()
+            template.last_updated_user = users.get_current_user()
+            template.put()
+        return True
 
 
       
