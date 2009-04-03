@@ -37,8 +37,11 @@
                 {key:"up",resizeable:true,label:"Up",formatter:imageFormatter},
                 {key:"down",resizeable:true,label:"Down",formatter:imageFormatter}
             ];
-
-            var myDataSource = new YAHOO.util.DataSource([{name:"Checkbox",type:"Checkbox"},{name:"Item",type:"String"}]);
+            {% if template %}
+                var myDataSource = new YAHOO.util.DataSource({{template_columns}});                
+            {% else %}
+                var myDataSource = new YAHOO.util.DataSource([{name:"Checkbox",type:"Checkbox"},{name:"Item",type:"String"}]);
+            {% endif %}
             myDataSource.responseType = YAHOO.util.DataSource.TYPE_JSARRAY;
             myDataSource.responseSchema = {
                 fields: ["name","type"]
@@ -151,25 +154,13 @@
                 if (YAHOO.lang.isNumber(index) && index > 0) {
                     var formObject = YAHOO.util.Dom.get('submitForm');
                     formObject["template_columns"].value = YAHOO.lang.JSON.stringify(getDataSet(myDataTable));
-                    YAHOO.util.Connect.setForm(formObject, true);
-                    YAHOO.util.Connect.asyncRequest('POST', '/admin/create/template',
-                    {
-                        success: function (o) {
-                            var result = YAHOO.lang.JSON.parse(o.responseText);
-                            if (result) {
-                                if(window.confirm("Save checklist template successfully.")){
-                                    window.location.href = "/admin/templates";
-                                }
-                            }else{
-                                alert("Save checklist template unsuccessfully.");
-                            }
-                        },
-                        failure: function (o) {
-                            alert(o.statusText);
-                        },
-                        scope:this
-                    }
-                            );
+                    //YAHOO.util.Connect.setForm(formObject, true);
+                    {% if template %}
+                    formObject.action = "/admin/edit/template/{{template.key}}";
+                    {% else %}
+                    formObject.action = "/admin/create/template";                        
+                    {% endif %}
+                    formObject.submit();
                 } else {
                     alert("Please choose at least one column to your template.");
                     YAHOO.util.Dom.get("columns_choices").focus();
@@ -193,11 +184,11 @@
                 <td>
                     Checklist template name:
                 </td>
-                <td><input type="text" size="40" id="templateName" name="templateName"></td>
+                <td><input type="text" size="40" id="templateName" name="templateName" value="{% if template %}{{template.name}}{% endif %}"></td>
             </tr>
             <tr>
                 <td>Checklist template description:</td>
-                <td><textarea rows="2" cols="37" id="description" name="description"> </textarea></td>
+                <td><textarea rows="2" cols="37" id="description" name="description">{% if template %}{{template.description}}{% endif %}</textarea></td>
             </tr>
             <tr>
                 <td colspan="2">

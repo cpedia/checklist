@@ -32,6 +32,8 @@ def to_dict(model_obj, attr_list, init_dict_func=None):
         for elem in elems[1:]:
             value = getattr(value, elem)
         values[elems[-1]] = value
+    if model_obj.is_saved():
+        values['key'] =  str(model_obj.key())  
     return values
 
 # Format for conversion of datetime to JSON
