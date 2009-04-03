@@ -39,6 +39,7 @@ from cpedia.pagination.GqlQueryPaginator import GqlQueryPaginator,GqlPage
 from cpedia.pagination.paginator import InvalidPage,Paginator
 
 from cpedia.checklist.handlers import restful
+import cpedia.checklist.models.checklist as models
 
 import simplejson
 import authorized
@@ -109,10 +110,26 @@ class TemplateCreateAdmin(BaseRequestHandler):
 
     @authorized.role("admin")
     def post(self):
-        name = self.request.get('templateName')
-        description = self.request.get('description')
-        columns = self.request.get('template_columns')
-        self.response.out.write(simplejson.dumps(True))
+        try:
+            checklist_template = models.ChecklistTemplate()
+            checklist_template.name = self.request.get('templateName')
+            checklist_template.description = self.request.get('description')
+            checklist_template.user = users.get_current_user()
+            checklist_template.last_updated_user = users.get_current_user()
+            checklist_template.put()
+            columns = self.request.get('template_columns')
+            template_columns = simplejson.loads(columns)
+            for column in template_columns:
+                template_column = models.ChecklistColumnTemplate()
+                template_column.name = column['name']
+                template_column.type = column['type']
+                template_column.order = column['order']
+                template_column.checklist_template = checklist_template
+                template_column.put()
+            #self.response.out.write(simplejson.dumps(True))
+            return True
+        except Exception:
+            return False
 
 class TemplateEditAdmin(BaseRequestHandler):
     @authorized.role("admin")

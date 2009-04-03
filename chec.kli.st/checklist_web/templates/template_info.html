@@ -31,7 +31,7 @@
             };
 
             var myColumnDefs = [
-                {key:"check",resizeable:true,label:"Select Row",formatter:YAHOO.widget.DataTable.formatCheckbox,className:"align_center"},
+                {key:"check",resizeable:true,label:"Select",formatter:YAHOO.widget.DataTable.formatCheckbox,className:"align_center"},
                 {key:"name",resizeable:true,label:"Column Name",editor: new YAHOO.widget.TextboxCellEditor({disableBtns:true})},
                 {key:"type",resizeable:true,label:"Column Type",editor:new YAHOO.widget.DropdownCellEditor({dropdownOptions:["Checkbox","String","Category","Number","Yes/No","Date"],disableBtns:true})},
                 {key:"up",resizeable:true,label:"Up",formatter:imageFormatter},
@@ -129,10 +129,19 @@
                 YAHOO.log("Could not continue due to invalid index.");
             };
 
+            var getDataSet = function(myDataTable) {
+                var allData = [];
+                for (var i = 0,recordSet = myDataTable.getRecordSet(); i < recordSet.getLength(); i++) {
+                    var data = recordSet.getRecord(i).getData();
+                    data['order'] = i;
+                    allData.push(data);
+                }
+                return allData;
+            };
+
             //save template.
             var saveTemplate = function() {
                 var templateName = YAHOO.util.Dom.get("templateName").value;
-                var description = YAHOO.util.Dom.get("description").value;
                 if (templateName.trim() == "") {
                     alert("Please input checklist template name.");
                     YAHOO.util.Dom.get("templateName").focus();
@@ -141,13 +150,19 @@
                 var index = myDataTable.getRecordSet().getLength();
                 if (YAHOO.lang.isNumber(index) && index > 0) {
                     var formObject = YAHOO.util.Dom.get('submitForm');
-                    formObject["template_columns"].value = myDataTable.getRecordSet();
+                    formObject["template_columns"].value = YAHOO.lang.JSON.stringify(getDataSet(myDataTable));
                     YAHOO.util.Connect.setForm(formObject, true);
                     YAHOO.util.Connect.asyncRequest('POST', '/admin/create/template',
                     {
                         success: function (o) {
-                            var record = YAHOO.lang.JSON.parse(o.responseText);
-                            alert("Save checklist template successfully.");
+                            var result = YAHOO.lang.JSON.parse(o.responseText);
+                            if (result) {
+                                if(window.confirm("Save checklist template successfully.")){
+                                    window.location.href = "/admin/templates";
+                                }
+                            }else{
+                                alert("Save checklist template unsuccessfully.");
+                            }
                         },
                         failure: function (o) {
                             alert(o.statusText);
@@ -182,7 +197,7 @@
             </tr>
             <tr>
                 <td>Checklist template description:</td>
-                <td><input type="text" size="40" id="description" name="description"></td>
+                <td><textarea rows="2" cols="37" id="description" name="description"> </textarea></td>
             </tr>
             <tr>
                 <td colspan="2">
@@ -231,7 +246,7 @@
             </tr>
             <tr>
                 <td colspan="2">
-                    <button id="updateBtn">Save</button>
+                    <input type="button" id="updateBtn" value="Save">
                 </td>
             </tr>
         </table>
