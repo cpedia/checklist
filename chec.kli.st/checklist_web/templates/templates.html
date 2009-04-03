@@ -28,21 +28,30 @@
 <script type="text/javascript">
     YAHOO.util.Event.addListener(window, "load", function() {
         YAHOO.checklist.templates.DynamicData = function() {
+            var imageFormatter = function(elCell, oRecord, oColumn) {
+                elCell.innerHTML = '<input type="image" src="/static/images/' + oColumn.key + '.png" name="' + oColumn.key + '" title="' + oColumn.label + ' row" />';
+                elCell.style.cursor = 'pointer';
+            };
             // Column definitions
             var myColumnDefs = [ // sortable:true enables sorting
                 {key:"check",resizeable:true,label:"Select Row",formatter:YAHOO.widget.DataTable.formatCheckbox,className:"align_center"},
                 {key:"name", label:"Name", sortable:true},
                 {key:"description", label:"Description", sortable:false},
-                {key:"create_date", label:"Create Date", sortable:true,formatter:"date"},
-                {key:"last_update_date", label:"Update Date", sortable:true,formatter:"date"},
-                {key:"active", label:"Active", sortable:true}
+                {key:"created_date", label:"Create Date", sortable:true,formatter:"date"},
+                {key:"last_updated_date", label:"Update Date", sortable:true,formatter:"date"},
+                {key:"active", label:"Active", sortable:true},
+                {key:"up",resizeable:true,label:"Up",formatter:imageFormatter},
+                {key:"down",resizeable:true,label:"Down",formatter:imageFormatter},
+                {key:"key",resizeable:true,label:"Edit",formatter:function(elCell, oRecord){
+                    elCell.innerHTML = "<a href='/admin/edit/template/"+oRecord.data+"'>Edit</a>";
+                }}
             ];
 
             // Custom parser
             var stringToDate = function(sData) {
-                if(sData!=null){
-                var array = sData.split("-");
-                return new Date(array[1] + " " + array[0] + ", " + array[2].slice(0,2));
+                if (sData != null) {
+                    var array = sData.split("-");
+                    return new Date(array[1] + " " + array[2].slice(0, 2) + ", " + array[0]);
                 }
             };
 
@@ -59,9 +68,10 @@
                 fields: [
                     {key:"name"},
                     {key:"description"},
-                    {key:"create_date",parser:stringToDate},
-                    {key:"last_update_date",parser:stringToDate},
-                    {key:"active"}
+                    {key:"created_date",parser:stringToDate},
+                    {key:"last_updated_date",parser:stringToDate},
+                    {key:"active"},
+                    {key:"key"}
                 ],
                 metaFields: {
                     totalRecords: "totalRecords" // Access to value in the server response
@@ -71,7 +81,8 @@
             var myPaginator = new YAHOO.widget.Paginator({
                 containers : ['paging_nav'],
                 rowsPerPage : 10,
-                template : "{PreviousPageLink} <strong>{CurrentPageReport}</strong> {NextPageLink} {LastPageLink}"
+                rowsPerPageOptions : [10,20,30],
+                template : "{PreviousPageLink} <strong>{CurrentPageReport}</strong> {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
             });
 
             // DataTable configuration
@@ -79,7 +90,7 @@
                 initialRequest: "?arg0=0&arg1=10&time=" + new Date().getTime(),  //'startIndex=0&results=25'
                 generateRequest: buildQueryString,
                 dynamicData: true, // Enables dynamic server-driven data
-                sortedBy : {key:"last_update_date", dir:YAHOO.widget.DataTable.CLASS_ASC}, // Sets UI initial sort arrow
+                sortedBy : {key:"last_updated_date", dir:YAHOO.widget.DataTable.CLASS_ASC}, // Sets UI initial sort arrow
                 paginator: myPaginator // Enables pagination
             };
 
@@ -90,6 +101,40 @@
                 oPayload.totalRecords = oResponse.meta.totalRecords;
                 return oPayload;
             };
+
+            // Selects any cell that receives a checkbox click
+            myDataTable.subscribe("checkboxClickEvent", function(oArgs) {
+                var elCheckbox = oArgs.target;
+                var elRow = this.getTrEl(elCheckbox);
+                if (elCheckbox.checked) {
+                    this.selectRow(elRow);
+                } else {
+                    this.unselectRow(elRow);
+                }
+            });
+
+            // Move up/down the row that receives a up/down img click
+            myDataTable.subscribe("buttonClickEvent", function(oArgs) {
+                var elImage = oArgs.target;
+                var elRow = this.getTrEl(elImage),
+                        index = this.getTrIndex(elImage),
+                        recordData = this.getRecord(elRow).getData();
+                var mode = elImage.name;
+                if (mode == "up") {
+                    if (!YAHOO.lang.isNull(this.getPreviousTrEl(elImage))) {
+                        this.deleteRow(index);
+                        this.addRows([{name:recordData.name, type:recordData.type}], index - 1);
+                    }
+                } else if (mode == "down") {
+                    if (!YAHOO.lang.isNull(this.getNextTrEl(elImage))) {
+                        this.deleteRow(index);
+                        this.addRows([{name:recordData.name, type:recordData.type}], index + 1);
+                    }
+                }
+            });
+
+            myDataTable.subscribe("cellClickEvent", myDataTable.onEventShowCellEditor);
+
 
             var newTemplate = function() {
                 window.location.href = "/admin/create/template/";
@@ -107,7 +152,12 @@
 </script>
 <div>
     Templates list <br><br>
-    <button id="addTemplate">Create new Template</button>
+
+    <div style="padding-bottom:3px">
+        <button id="addTemplate">Create New Template</button>
+        <button id="deleteTemplate">Delete</button>
+        <button id="publishTemplate">Publish</button>
+    </div>
     <div id="templates_container">
     </div>
     <div id="paging_nav"></div>
