@@ -63,15 +63,15 @@ class Checklist(Tagable):
 class ChecklistTemplate(Checklist):
     user = db.UserProperty()
     order = db.IntegerProperty(default=0)
-    active = db.BooleanProperty(default = True)
-    created_date = db.DateTimeProperty()
-    last_updated_date = db.DateTimeProperty()
+    active = db.BooleanProperty(default = False)
+    created_date = db.DateTimeProperty(auto_now_add=True)
+    last_updated_date = db.DateTimeProperty(auto_now_add=True)
     last_updated_user = db.UserProperty()
 
 class ChecklistColumnTemplate(Tagable):
     name = db.StringProperty(multiline=False)
     type = db.StringProperty(multiline=False,default='String',choices=[
-            'String','Category','Number','Yes/No','Date'])
+            'Checkbox','String','Category','Number','Yes/No','Date'])
     order = db.IntegerProperty(default=0)
     checklist_template = db.ReferenceProperty(ChecklistTemplate)
 
@@ -79,8 +79,8 @@ class UserChecklist(Checklist):
     user = db.UserProperty(required=True)
     starred = db.BooleanProperty(default = False)
     public = db.BooleanProperty(default = False)
-    created_date = db.DateTimeProperty()
-    last_updated_date = db.DateTimeProperty()
+    created_date = db.DateTimeProperty(auto_now_add=True)
+    last_updated_date = db.DateTimeProperty(auto_now_add=True)
     last_updated_user = db.UserProperty()
 
 class ChecklistColumn(Tagable):
@@ -108,8 +108,8 @@ class ChecklistColumn(Tagable):
 class ChecklistItem(db.Expando):
     checklist = db.ReferenceProperty(UserChecklist)
     order = db.IntegerProperty(default=0)
-    created_date = db.DateTimeProperty()
-    last_updated_date = db.DateTimeProperty()
+    created_date = db.DateTimeProperty(auto_now_add=True)
+    last_updated_date = db.DateTimeProperty(auto_now_add=True)
     last_updated_user = db.UserProperty()
     starred = db.BooleanProperty(default = False)
     parent_checklist_item = db.SelfReferenceProperty()
@@ -120,7 +120,7 @@ class ChecklistColumnCategory(db.Model):
     categorys = db.ListProperty(db.Category)
 
 class Comment(polymodel.PolyModel):
-    last_updated_date = db.DateTimeProperty()
+    last_updated_date = db.DateTimeProperty(auto_now_add=True)
     last_updated_user = db.UserProperty()
     starred = db.BooleanProperty(default = False)
 

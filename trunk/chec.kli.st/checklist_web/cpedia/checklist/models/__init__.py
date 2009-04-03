@@ -93,7 +93,8 @@ class SerializableModel(db.Model):
                 del entity[skipped_property]
             replace_datastore_types(entity)
         values = to_dict(self, attr_list, to_entity)
-        return simplejson.dumps(values)
+        #return simplejson.dumps(values)   #simplejson.dumps will be applied when do the rpc call.
+        return values
 
 
 class Counter(object):

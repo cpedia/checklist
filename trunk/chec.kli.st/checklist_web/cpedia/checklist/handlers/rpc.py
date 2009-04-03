@@ -29,7 +29,7 @@ from google.appengine.api import memcache
 from google.appengine.api import images
 from google.appengine.ext import db
 
-from cpedia.checklist.models.checklist import ChecklistTemplate,ChecklistColumnTemplate
+import cpedia.checklist.models.checklist as models
 import authorized
 
 
@@ -55,19 +55,19 @@ class RPCHandler(webapp.RequestHandler):
         result = getattr(self, action)(request_)
         logging.debug('ajax action "%s" return value is %s', action,simplejson.dumps(result))
         self.response.headers['Content-Type'] = 'application/json'
-        self.response.out.write(simplejson.dumps(result))
+        self.response.out.write(simplejson.dumps((result)))
 
     # The RPCs exported to JavaScript follow here:
 
     #get checklist template list.
     @authorized.role('admin')
     def getTemplates(self,startIndex,results):
-        query = datastore.Query('ChecklistTemplate')
-        query.Order(('last_updated_date', datastore.Query.DESCENDING))
+        query = db.Query(models.ChecklistTemplate)
+        query.order('-last_updated_date')
         templates = []
-        for template in query.Get(results,startIndex):
+        for template in query.fetch(results,startIndex):
             templates+=[template.to_json()]
-        totalRecords = query.Count()
+        totalRecords = query.count()
         returnValue = {"records":templates,"totalRecords":totalRecords,"startIndex":startIndex}
         return returnValue
 
@@ -75,12 +75,12 @@ class RPCHandler(webapp.RequestHandler):
     def saveTemplate(self,request):
         checklistTemplate = datastore.Entity("ChecklistTemplate")
         checklistTemplate["user_email"] = users.get_current_user().email()
-        checklistTemplate["name"] = "New permalink"
-        checklistTemplate["description"] = "_self"
+        checklistTemplate["name"] = ""
+        checklistTemplate["description"] = ""
         datastore.Put(checklistTemplate)
         util.flushMenuList()
-        checklistTemplate['key'] = str(checklistTemplate.key())
-        checklistTemplate['id'] = str(checklistTemplate.key().id())
+        checklistTemplate['key'] = str(models.checklistTemplate.key())
+        checklistTemplate['id'] = str(models.checklistTemplate.key().id())
         return checklistTemplate
 
 
