@@ -1,17 +1,19 @@
-r"""Using simplejson from the shell to validate and
-pretty-print::
+r"""Command-line tool to validate and pretty-print JSON
 
-    $ echo '{"json":"obj"}' | python -msimplejson.tool
+Usage::
+
+    $ echo '{"json":"obj"}' | python -m simplejson.tool
     {
         "json": "obj"
     }
-    $ echo '{ 1.2:3.4}' | python -msimplejson.tool
+    $ echo '{ 1.2:3.4}' | python -m simplejson.tool
     Expecting property name: line 1 column 2 (char 2)
+
 """
+import sys
 import simplejson
 
 def main():
-    import sys
     if len(sys.argv) == 1:
         infile = sys.stdin
         outfile = sys.stdout
@@ -22,7 +24,7 @@ def main():
         infile = open(sys.argv[1], 'rb')
         outfile = open(sys.argv[2], 'wb')
     else:
-        raise SystemExit("%s [infile [outfile]]" % (sys.argv[0],))
+        raise SystemExit(sys.argv[0] + " [infile [outfile]]")
     try:
         obj = simplejson.load(infile)
     except ValueError, e:

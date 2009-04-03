@@ -24,6 +24,7 @@ ESCAPE_DCT = {
     '\t': '\\t',
 }
 for i in range(0x20):
+    #ESCAPE_DCT.setdefault(chr(i), '\\u{0:04x}'.format(i))
     ESCAPE_DCT.setdefault(chr(i), '\\u%04x' % (i,))
 
 # Assume this produces an infinity on all machines (probably not guaranteed)
@@ -52,12 +53,14 @@ def py_encode_basestring_ascii(s):
         except KeyError:
             n = ord(s)
             if n < 0x10000:
+                #return '\\u{0:04x}'.format(n)
                 return '\\u%04x' % (n,)
             else:
                 # surrogate pair
                 n -= 0x10000
                 s1 = 0xd800 | ((n >> 10) & 0x3ff)
                 s2 = 0xdc00 | (n & 0x3ff)
+                #return '\\u{0:04x}\\u{1:04x}'.format(s1, s2)
                 return '\\u%04x\\u%04x' % (s1, s2)
     return '"' + str(ESCAPE_ASCII.sub(replace, s)) + '"'
 
@@ -100,25 +103,25 @@ class JSONEncoder(object):
             indent=None, separators=None, encoding='utf-8', default=None):
         """Constructor for JSONEncoder, with sensible defaults.
 
-        If skipkeys is False, then it is a TypeError to attempt
+        If skipkeys is false, then it is a TypeError to attempt
         encoding of keys that are not str, int, long, float or None.  If
         skipkeys is True, such items are simply skipped.
 
-        If ensure_ascii is True, the output is guaranteed to be str
+        If ensure_ascii is true, the output is guaranteed to be str
         objects with all incoming unicode characters escaped.  If
         ensure_ascii is false, the output will be unicode object.
 
-        If check_circular is True, then lists, dicts, and custom encoded
+        If check_circular is true, then lists, dicts, and custom encoded
         objects will be checked for circular references during encoding to
         prevent an infinite recursion (which would cause an OverflowError).
         Otherwise, no such check takes place.
 
-        If allow_nan is True, then NaN, Infinity, and -Infinity will be
+        If allow_nan is true, then NaN, Infinity, and -Infinity will be
         encoded as such.  This behavior is not JSON specification compliant,
         but is consistent with most JavaScript based encoders and decoders.
         Otherwise, it will be a ValueError to encode such floats.
 
-        If sort_keys is True, then the output of dictionaries will be
+        If sort_keys is true, then the output of dictionaries will be
         sorted by key; this is useful for regression tests to ensure
         that JSON serializations can be compared on a day-to-day basis.
 
@@ -171,7 +174,7 @@ class JSONEncoder(object):
                 return JSONEncoder.default(self, o)
 
         """
-        raise TypeError("%r is not JSON serializable" % (o,))
+        raise TypeError(repr(o) + " is not JSON serializable")
 
     def encode(self, o):
         """Return a JSON string representation of a Python data structure.
@@ -237,8 +240,9 @@ class JSONEncoder(object):
                 return _repr(o)
 
             if not allow_nan:
-                raise ValueError("Out of range float values are not JSON compliant: %r"
-                    % (o,))
+                raise ValueError(
+                    "Out of range float values are not JSON compliant: " +
+                    repr(o))
 
             return text
 
@@ -356,18 +360,18 @@ def _make_iterencode(markers, _default, _encoder, _indent, _floatstr, _key_separ
             # also allow them.  Many encoders seem to do something like this.
             elif isinstance(key, float):
                 key = _floatstr(key)
-            elif isinstance(key, (int, long)):
-                key = str(key)
             elif key is True:
                 key = 'true'
             elif key is False:
                 key = 'false'
             elif key is None:
                 key = 'null'
+            elif isinstance(key, (int, long)):
+                key = str(key)
             elif _skipkeys:
                 continue
             else:
-                raise TypeError("key %r is not a string" % (key,))
+                raise TypeError("key " + repr(key) + " is not a string")
             if first:
                 first = False
             else:
