@@ -13,6 +13,8 @@ CHECKLIST = {
     "charset": "utf-8",
     "title": "Chec.kli.st",
     "author": "Ping Chen",
+    #user can override this value.
+    "checklist_num_per_page":10,
     # This must be the email address of a registered administrator for the
     # application due to mail api restrictions.
     "email": "cpedia@gmail.com",
