@@ -72,7 +72,16 @@ class UnauthorizedHandler(webapp.RequestHandler):
 class MainPage(BaseRequestHandler):
     @authorized.role("user")
     def get(self):
+        user = users.get_current_user()
+        checklists = db.Query("select * from UserChecklist where user = :1",user)
+        pageStr = self.request.get('page')
+        if pageStr:
+            page = int(pageStr)
+        else:
+            page = 1;
 
+        #get blog pagination from cache.
+        obj_page = util.getBlogPagination(page)
         template_values = {
         }
         self.generate('checklist_main.html',template_values)

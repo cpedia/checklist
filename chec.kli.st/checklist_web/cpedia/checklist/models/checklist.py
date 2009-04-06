@@ -27,7 +27,15 @@ import urllib
 import cgi
 import simplejson
 
+import config
+
 from cpedia.checklist import models
+
+class User(models.SerializableModel):
+    user = db.UserProperty()
+    date_joined = db.DateTimeProperty(auto_now_add=True)
+    checklists_count = db.IntegerProperty(default=0)
+    checklist_num_per_page = db.IntegerProperty(default=config.CHECKLIST["checklist_num_per_page"])
 
 class Tag(models.SerializableModel):
     user = db.UserProperty()
@@ -82,6 +90,26 @@ class UserChecklist(Checklist):
     created_date = db.DateTimeProperty(auto_now_add=True)
     last_updated_date = db.DateTimeProperty(auto_now_add=True)
     last_updated_user = db.UserProperty()
+
+    def update_user(self,update):
+        """Update User info"""
+        users = User.all().filter('user',self.user).fetch(10)
+        if users == []:
+            usernew = User(user=self.user,checklists_count=1)
+            usernew.put()
+        else:
+            if not update:
+                users[0].checklists_count+=1
+                users[0].put()
+    
+    def save(self):
+        self.update_user(False)
+        self.last_updated_user = self.user
+        self.put()
+
+    def update(self):
+        self.update_user(True)
+        self.put()
 
 class ChecklistColumn(Tagable):
     name = db.StringProperty(multiline=False)
