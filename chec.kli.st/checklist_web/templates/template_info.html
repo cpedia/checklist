@@ -167,8 +167,13 @@
                 }
             };
 
+            var cancelClick = function(){
+                 window.location.href = "/admin/templates";
+            }
+
             YAHOO.util.Event.addListener(["addColumn","deleteColumn"], "click", handleClick);
             YAHOO.util.Event.addListener("updateBtn", "click", saveTemplate);
+            YAHOO.util.Event.addListener("cancelBtn", "click", cancelClick);
             return {
                 ds: myDataSource,
                 dt: myDataTable
@@ -237,7 +242,8 @@
             </tr>
             <tr>
                 <td colspan="2">
-                    <input type="button" id="updateBtn" value="Save">
+                    <input type="button" id="updateBtn" value="Submit">
+                    <input type="button" id="cancelBtn" value="Cancel">
                 </td>
             </tr>
         </table>

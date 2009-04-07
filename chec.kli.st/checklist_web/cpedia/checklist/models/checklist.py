@@ -35,7 +35,8 @@ class User(models.SerializableModel):
     user = db.UserProperty()
     date_joined = db.DateTimeProperty(auto_now_add=True)
     checklists_count = db.IntegerProperty(default=0)
-    checklist_num_per_page = db.IntegerProperty(default=config.CHECKLIST["checklist_num_per_page"])
+    starred_checklists_count = db.IntegerProperty(default=0)
+    public_checklists_count = db.IntegerProperty(default=0)
 
 class Tag(models.SerializableModel):
     user = db.UserProperty()
@@ -96,12 +97,20 @@ class UserChecklist(Checklist):
         users = User.all().filter('user',self.user).fetch(10)
         if users == []:
             usernew = User(user=self.user,checklists_count=1)
+            if self.public is True:
+                usernew.public_checklists_count=1
+            if self.starred is True:
+                usernew.starred_checklists_count=1
             usernew.put()
         else:
             if not update:
                 users[0].checklists_count+=1
+                if self.public is True:
+                    users[0].public_checklists_count+=1
+                if self.starred is True:
+                    users[0].starred_checklists_count+=1
                 users[0].put()
-    
+
     def save(self):
         self.update_user(False)
         self.last_updated_user = self.user
@@ -110,6 +119,50 @@ class UserChecklist(Checklist):
     def update(self):
         self.update_user(True)
         self.put()
+
+    #if a checklist is already starred, then the starred method should not be called.
+    def starred(self):
+        self.starred = True
+        users = User.all().filter('user',self.user).fetch(10)
+        if users != []:
+            users[0].starred_checklists_count+=1
+            users[0].put()
+        self.put()
+
+    def unstarred(self):
+        self.starred = False
+        users = User.all().filter('user',self.user).fetch(10)
+        if users != []:
+            users[0].starred_checklists_count-=1
+            users[0].put()
+        self.put()
+
+    #if a checklist is already public, then the starred method should not be called.
+    def public(self):
+        self.public = True
+        users = User.all().filter('user',self.user).fetch(10)
+        if users != []:
+            users[0].public_checklists_count+=1
+            users[0].put()
+        self.put()
+
+    def unpublic(self):
+        self.public = False
+        users = User.all().filter('user',self.user).fetch(10)
+        if users != []:
+            users[0].public_checklists_count-=1
+            users[0].put()
+        self.put()
+
+
+    def delete(self):
+        users = User.all().filter('user',self.user).fetch(10)
+        if users == []:
+            self.delete()
+        else:
+            users[0].checklists_count-=1
+            users[0].put()
+
 
 class ChecklistColumn(Tagable):
     name = db.StringProperty(multiline=False)
