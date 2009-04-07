@@ -52,7 +52,8 @@ def main():
                                         ('/json/([-\w\.]+)/*$', rpc.RPCHandler),
                                         ('/list/*$', checklist.UserChecklistPage),
                                         ('/list/starred/(.*)/*$', checklist.UserStarredChecklistPage),
-                                        ('/list/(.*)/*$', checklist.UserPublicChecklistPage),
+                                        ('/list/user/(.*)/*$', checklist.UserPublicChecklistPage),
+                                        ('/list/(.*)/*$', checklist.UserChecklist),
                                         ('/*$', checklist.MainPage),
                                        ],
                                        debug=config.DEBUG)

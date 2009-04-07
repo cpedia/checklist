@@ -104,6 +104,17 @@ class RPCHandler(webapp.RequestHandler):
             template.put()
         return True
 
+    #get checklist template list.
+    @authorized.role('admin')
+    def getChecklists(self,startIndex,results):
+        query = db.Query(models.ChecklistTemplate)
+        query.order('-last_updated_date')
+        templates = []
+        for template in query.fetch(results,startIndex):
+            templates+=[template.to_json()]
+        totalRecords = query.count()
+        returnValue = {"records":templates,"totalRecords":totalRecords,"startIndex":startIndex}
+        return returnValue
 
       
 

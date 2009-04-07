@@ -163,6 +163,14 @@ class UserStarredChecklistPage(BaseRequestHandler):
         }
         self.generate('checklist_main.html',template_values)
 
+class UserChecklist(BaseRequestHandler):
+    @authorized.role("user")
+    def get(self,checklist_key):
+
+        template_values = {
+        }
+        self.generate('checklist_main.html',template_values)
+
 class CreateList(BaseRequestHandler):
     @authorized.role("user")
     def get(self):
