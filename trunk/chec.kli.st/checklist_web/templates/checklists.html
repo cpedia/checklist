@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}{{title}} - checklists{% endblock %}
+{% block checklist %}
+<!-- Core + Skin CSS -->
+<link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.7.0/build/paginator/assets/skins/sam/paginator.css">
+<!-- Dependencies -->
+<script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/yahoo-dom-event/yahoo-dom-event.js"></script>
+<script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/element/element-min.js"></script>
+
+<!-- Source File -->
+<script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/paginator/paginator-min.js"></script>
+<script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/button/button-min.js"></script>
+<style type="text/css">
+    .align_center {
+        text-align: center !important;
+    }
+</style>
+<script type="text/javascript">
+    YAHOO.util.Event.addListener(window, "load", function() {
+        YAHOO.checklist.templates.DynamicData = function() {
+
+            var myPaginator = new YAHOO.widget.Paginator({
+                containers : ['paging_nav'],
+                rowsPerPage : 10,
+                rowsPerPageOptions : [10,20,30],
+                template : "{PreviousPageLink} <strong>{CurrentPageReport}</strong> {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+            });
+
+            myPaginator.render();
+
+            var newTemplate = function() {
+                window.location.href = "/admin/create/template/";
+            };
+            var selectedTemplateIds = function(recordSet,selectedRows) {
+                var template_keys  = "template_keys=";
+                for (var x = 0, length=selectedRows.length; x < length; x++) {
+                    var record =  recordSet.getRecord(selectedRows[x]);
+                    template_keys += record.getData().key;
+                    if(x < length-1){
+                        template_keys+=",";
+                    }
+                }
+                return template_keys;
+            };
+
+
+            YAHOO.util.Event.addListener("addTemplate", "click", newTemplate);
+
+        }();
+    });
+</script>
+<div>
+    Templates list <br><br>
+
+    <div style="padding-bottom:3px">
+        <button id="addTemplate">Create Checklist</button>
+        <button id="deleteTemplate">Delete</button>
+    </div>
+    <div id="templates_container">
+    </div>
+    <div id="paging_nav"></div>
+</div>
+<br>
+{% endblock %}
+

@@ -28,8 +28,13 @@ class GqlQueryPaginator(Paginator):
     Like Paginator, but works on google GqlQuery.
     Query the data for each page to resolve the performance issue of mass records.
     """
-    def __init__(self, gqlQuery,page_number,per_page, orphans=0, allow_empty_first_page=True):
-        self.count_ = int(gqlQuery.count()) ##todo:google GqlQuery has 1000 records limit.
+    def __init__(self, gqlQuery,page_number,per_page, count=None,orphans=0, allow_empty_first_page=True):
+        if count is not None:
+            #for the list large than 1000, we should pass the count value from the counter outside.
+            #as google appengine has the limitation of 1000 records from the GqlQuery.
+            self.count_ = count
+        else:
+            self.count_ = int(gqlQuery.count())
         self.number = page_number
         bottom = (self.number - 1) * per_page
         self.object_list = gqlQuery.fetch(per_page,bottom)

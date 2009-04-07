@@ -50,6 +50,9 @@ def main():
                                         ('/create/list/*$', checklist.CreateList),
                                         ('/create/quicklist/*$', checklist.CreateQucikList),
                                         ('/json/([-\w\.]+)/*$', rpc.RPCHandler),
+                                        ('/list/*$', checklist.UserChecklistPage),
+                                        ('/list/starred/(.*)/*$', checklist.UserStarredChecklistPage),
+                                        ('/list/(.*)/*$', checklist.UserPublicChecklistPage),
                                         ('/*$', checklist.MainPage),
                                        ],
                                        debug=config.DEBUG)

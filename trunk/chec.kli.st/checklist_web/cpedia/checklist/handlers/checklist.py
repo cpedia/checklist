@@ -44,6 +44,9 @@ import cpedia.checklist.models.checklist as models
 import simplejson
 import authorized
 import view
+import config
+
+from cpedia.checklist import cache_manager
 
 class BaseRequestHandler(webapp.RequestHandler):
     """Supplies a common template generation function.
@@ -73,16 +76,90 @@ class MainPage(BaseRequestHandler):
     @authorized.role("user")
     def get(self):
         user = users.get_current_user()
-        checklists = db.Query("select * from UserChecklist where user = :1",user)
         pageStr = self.request.get('page')
         if pageStr:
             page = int(pageStr)
         else:
             page = 1;
+        checklist_num_per_page_ = self.request.get('checklist_num_per_page')
+        if checklist_num_per_page_:
+            checklist_num_per_page = int(checklist_num_per_page_)
+        else:
+            checklist_num_per_page = config.CHECKLIST["checklist_num_per_page"];
 
         #get blog pagination from cache.
-        obj_page = util.getBlogPagination(page)
+        checklist_page = cache_manager.getUserChecklistPagination(user,page,checklist_num_per_page)
         template_values = {
+        "checklist_page":checklist_page,
+        }
+        self.generate('checklist_main.html',template_values)
+
+class UserChecklistPage(BaseRequestHandler):
+    @authorized.role("user")
+    def get(self):
+        user = users.get_current_user()
+        pageStr = self.request.get('page')
+        if pageStr:
+            page = int(pageStr)
+        else:
+            page = 1;
+        checklist_num_per_page_ = self.request.get('checklist_num_per_page')
+        if checklist_num_per_page_:
+            checklist_num_per_page = int(checklist_num_per_page_)
+        else:
+            checklist_num_per_page = config.CHECKLIST["checklist_num_per_page"];
+
+        #get blog pagination from cache.
+        checklist_page = cache_manager.getUserChecklistPagination(user,page,checklist_num_per_page)
+        template_values = {
+        "checklist_page":checklist_page,
+        }
+        self.generate('checklists.html',template_values)
+
+class UserPublicChecklistPage(BaseRequestHandler):
+    @authorized.role("user")
+    def get(self,user_key):
+        if user_key is None:
+            user = users.get_current_user()
+        else:
+            user = models.User.get(user_key).user
+        pageStr = self.request.get('page')
+        if pageStr:
+            page = int(pageStr)
+        else:
+            page = 1;
+        checklist_num_per_page_ = self.request.get('checklist_num_per_page')
+        if checklist_num_per_page_:
+            checklist_num_per_page = int(checklist_num_per_page_)
+        else:
+            checklist_num_per_page = config.CHECKLIST["checklist_num_per_page"];
+
+        #get blog pagination from cache.
+        checklist_page = cache_manager.getUserPublicChecklistPagination(user,page,checklist_num_per_page)
+        template_values = {
+        "checklist_page":checklist_page,
+        }
+        self.generate('checklist_main.html',template_values)
+
+class UserStarredChecklistPage(BaseRequestHandler):
+    @authorized.role("user")
+    def get(self):
+        user = users.get_current_user()
+        pageStr = self.request.get('page')
+        if pageStr:
+            page = int(pageStr)
+        else:
+            page = 1;
+        checklist_num_per_page_ = self.request.get('checklist_num_per_page')
+        if checklist_num_per_page_:
+            checklist_num_per_page = int(checklist_num_per_page_)
+        else:
+            checklist_num_per_page = config.CHECKLIST["checklist_num_per_page"];
+
+        #get blog pagination from cache.
+        checklist_page = cache_manager.getUserStarredChecklistPagination(user,page,checklist_num_per_page)
+        template_values = {
+        "checklist_page":checklist_page,
         }
         self.generate('checklist_main.html',template_values)
 
@@ -145,8 +222,8 @@ class TemplateEditAdmin(BaseRequestHandler):
         for column in template_columns:
             columns +=[column.to_json()]
         template_values = {
-            "template":template,
-            "template_columns":simplejson.dumps(columns),
+        "template":template,
+        "template_columns":simplejson.dumps(columns),
         }
         self.generate('template_info.html',template_values)
 
@@ -174,8 +251,8 @@ class TemplateEditAdmin(BaseRequestHandler):
             template_column.put()
 
         template_values = {
-            "template":template,
-            "template_columns":simplejson.dumps(columns),
+        "template":template,
+        "template_columns":simplejson.dumps(columns),
         }
         self.redirect('/admin/templates')
 
