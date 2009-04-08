@@ -35,15 +35,13 @@
             // Column definitions
             var myColumnDefs = [ // sortable:true enables sorting
                 {key:"check",resizeable:true,label:"Select Row",formatter:YAHOO.widget.DataTable.formatCheckbox,className:"align_center"},
+                {key:"starred",resizeable:true,label:"Starred",formatter:imageFormatter,className:"align_center"},
                 {key:"name", label:"Name", sortable:true},
                 {key:"description", label:"Description", sortable:false},
                 {key:"created_date", label:"Create Date", sortable:true,formatter:"date"},
                 {key:"last_updated_date", label:"Update Date", sortable:true,formatter:"date"},
-                {key:"active", label:"Active", sortable:true},
-                {key:"up",resizeable:true,label:"Up",formatter:imageFormatter},
-                {key:"down",resizeable:true,label:"Down",formatter:imageFormatter},
                 {key:"key",resizeable:true,label:"Edit",formatter:function(elCell, oRecord, oColumn, oData){
-                    elCell.innerHTML = "<a href='/admin/edit/checklist/"+oData+"'>Edit</a>";
+                    elCell.innerHTML = "<a href='/list/"+oData+"'>Edit</a>";
                 }}
             ];
 
@@ -61,7 +59,7 @@
             };
 
             // DataSource instance
-            var myDataSource = new YAHOO.util.DataSource("/json/getChecklists");
+            var myDataSource = new YAHOO.util.DataSource("/json/getUserChecklists");
             myDataSource.responseType = YAHOO.util.DataSource.TYPE_JSON;
             myDataSource.responseSchema = {
                 resultsList: "records",
@@ -70,7 +68,6 @@
                     {key:"description"},
                     {key:"created_date",parser:stringToDate},
                     {key:"last_updated_date",parser:stringToDate},
-                    {key:"active"},
                     {key:"key"}
                 ],
                 metaFields: {
@@ -136,7 +133,7 @@
             myDataTable.subscribe("cellClickEvent", myDataTable.onEventShowCellEditor);
 
             var newChecklist = function() {
-                window.location.href = "/admin/create/checklist/";
+                window.location.href = "/create/list";
             };
             var selectedChecklistIds = function(recordSet,selectedRows) {
                 var checklist_keys  = "checklist_keys=";
@@ -193,9 +190,9 @@
         <button id="addChecklist">Create New Checklist</button>
         <button id="deleteChecklist">Delete</button>
     </div>
-    <div id="Checklists_container">
+    <div id="checklists_container">
     </div>
-    <div id="paging_nav"></div>
+    <div id="paging_nav"> </div>
 </div>
 <br>
 {% endblock %}

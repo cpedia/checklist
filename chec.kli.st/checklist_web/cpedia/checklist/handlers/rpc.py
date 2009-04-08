@@ -31,6 +31,8 @@ from google.appengine.ext import db
 
 import cpedia.checklist.models.checklist as models
 import authorized
+import config
+from cpedia.checklist import cache_manager
 
 
 # This handler allows the functions defined in the RPCHandler class to
@@ -71,6 +73,15 @@ class RPCHandler(webapp.RequestHandler):
         returnValue = {"records":templates,"totalRecords":totalRecords,"startIndex":startIndex}
         return returnValue
 
+    #get template.
+    def getTemplate(self,template_key):
+        template = models.ChecklistTemplate.get(template_key)
+        columns = []
+        for column in template.checklistcolumntemplate_set:
+            columns+=[column.to_json()]
+        returnValue = {"columns":columns,"template":template.to_json()}
+        return returnValue
+
     @authorized.role('admin')
     def deleteTemplates(self,request):
         template_keys = request.get("template_keys")
@@ -106,14 +117,16 @@ class RPCHandler(webapp.RequestHandler):
 
     #get checklist template list.
     @authorized.role('admin')
-    def getChecklists(self,startIndex,results):
-        query = db.Query(models.ChecklistTemplate)
-        query.order('-last_updated_date')
-        templates = []
-        for template in query.fetch(results,startIndex):
-            templates+=[template.to_json()]
-        totalRecords = query.count()
-        returnValue = {"records":templates,"totalRecords":totalRecords,"startIndex":startIndex}
+    def getUserChecklists(self,startIndex,checklist_num_per_page):
+        user = users.get_current_user()
+        page = startIndex +1
+        #get checklist pagination from cache.
+        checklist_page = cache_manager.getUserChecklistPagination(user,page,checklist_num_per_page)
+        checklists = []
+        for checklist in checklist_page.object_list:
+            checklists+=[checklist.to_json()]
+        totalRecords = checklist_page.paginator.count
+        returnValue = {"records":checklists,"totalRecords":totalRecords,"startIndex":startIndex}
         return returnValue
 
       

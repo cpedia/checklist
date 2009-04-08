@@ -38,6 +38,41 @@ import urllib, hashlib
 
 CACHE_TIME = 3600
 
+#common method for get cached object list.
+#In most case, you can always pass in a class name as the key 
+def getCachedObjectList(key_,query):
+    try:
+        result = memcache.get(key_+"_list") #for avoid key name confuse when using the class name as key.
+    except Exception:
+        result = None
+    if result is None:
+        result = query.fetch(1000)
+        memcache.add(key=key_, value=result, time=CACHE_TIME)
+    else:
+        logging.debug("cache_manager.getCachedObjectList(). key:%s, query:%s",key_,query)
+    return result
+
+#common method for get cached object.
+#In most case, you can always pass in a class name as the key
+def getCachedObject(key_,query):
+    try:
+        result = memcache.get(key_+"_object")
+    except Exception:
+        result = None
+    if result is None:
+        result = query.get()
+        memcache.add(key=key_, value=result, time=CACHE_TIME)
+    else:
+        logging.debug("cache_manager.getCachedObject(). key:%s, query:%s",key_,query)
+    return result
+
+def delteCachedObjectList(key):
+    memcache.delete(key+"_list")
+
+def delteCachedObject(key):
+    memcache.delete(key+"_object")
+
+
 CACHE_KEY_PREFIX = {
 "user_checklist_page":"user_checklist_page_",
 "user_starred_checklist_page":"user_starred_checklist_page_",

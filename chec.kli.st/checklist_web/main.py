@@ -47,6 +47,7 @@ def main():
                                         ('/admin/templates/*$', checklist.TemplateListAdmin),
                                         ('/admin/create/template/*$', checklist.TemplateCreateAdmin),
                                         ('/admin/edit/template/(.*)/*$', checklist.TemplateEditAdmin),
+                                        ('/edit/list/(.*)/*$', checklist.ChecklistEditAdmin),
                                         ('/create/list/*$', checklist.CreateList),
                                         ('/create/quicklist/*$', checklist.CreateQucikList),
                                         ('/json/([-\w\.]+)/*$', rpc.RPCHandler),
