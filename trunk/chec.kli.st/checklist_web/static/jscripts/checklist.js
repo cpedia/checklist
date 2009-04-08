@@ -1,4 +1,5 @@
 YAHOO.namespace("checklist");
+YAHOO.namespace("checklist.columns");
 YAHOO.namespace("checklist.templates");
 YAHOO.namespace("checklist.templates.columns");
 
