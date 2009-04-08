@@ -91,6 +91,7 @@ class RPCHandler(webapp.RequestHandler):
             for column in template_columns:
                 column.delete()
             template.delete()   
+        cache_manager.delteCachedObjectList(models.ChecklistTemplate.__name__)
         return True
 
     @authorized.role('admin')
@@ -101,7 +102,8 @@ class RPCHandler(webapp.RequestHandler):
             template.active = True
             template.last_updated_date = datetime.datetime.now()
             template.last_updated_user = users.get_current_user()
-            template.put()   
+            template.put()
+        cache_manager.delteCachedObjectList(models.ChecklistTemplate.__name__)
         return True
 
     @authorized.role('admin')
@@ -113,6 +115,7 @@ class RPCHandler(webapp.RequestHandler):
             template.last_updated_date = datetime.datetime.now()
             template.last_updated_user = users.get_current_user()
             template.put()
+        cache_manager.delteCachedObjectList(models.ChecklistTemplate.__name__)
         return True
 
     #get checklist template list.
