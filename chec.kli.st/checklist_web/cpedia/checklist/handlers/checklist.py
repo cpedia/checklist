@@ -156,7 +156,8 @@ class UserChecklist(BaseRequestHandler):
 class CreateList(BaseRequestHandler):
     @authorized.role("user")
     def get(self):
-        query = models.ChecklistTemplate.gql("WHERE active = TRUE ORDER BY ORDER ASC")
+        query = models.ChecklistTemplate.gql('WHERE active =:1 ORDER BY ORDER ASC',True)
+        templates_=query.fetch(1000)
         templates = cache_manager.getCachedObjectList(models.ChecklistTemplate.__name__,query)
         template_values = {
         "checklist_templates":templates,
