@@ -52,25 +52,27 @@ def getCachedObjectList(key_,query):
         logging.debug("cache_manager.getCachedObjectList(). key:%s, query:%s",key_,query)
     return result
 
-#common method for get cached object.
-#In most case, you can always pass in a class name as the key
-def getCachedObject(key_,query):
+
+#common method for get cached object by object primary key.
+def getCachedObjectByKey(cls,primary_key):
+    key_ = cls.__name__ + "_" + primary_key
     try:
-        result = memcache.get(key_+"_object")
+        result = memcache.get(key_)
     except Exception:
         result = None
     if result is None:
-        result = query.get()
+        result = cls.get(primary_key)
         memcache.add(key=key_, value=result, time=CACHE_TIME)
     else:
-        logging.debug("cache_manager.getCachedObject(). key:%s, query:%s",key_,query)
+        logging.debug("cache_manager.getCachedObjectByKey(). class:%s, primary_key:%s",cls,primary_key)
     return result
 
 def delteCachedObjectList(key):
     memcache.delete(key+"_list")
+    
 
-def delteCachedObject(key):
-    memcache.delete(key+"_object")
+def delteCachedObjectByKey(cls,primary_key):
+    memcache.delete(cls.__name__ + "_" + primary_key)
 
 
 CACHE_KEY_PREFIX = {

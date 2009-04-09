@@ -31,13 +31,13 @@
             };
 
             var myColumnDefs = [
-                {key:"check",resizeable:true,label:"Select",formatter:YAHOO.widget.DataTable.formatCheckbox,className:"align_center"},
+                {key:"check",resizeable:true,label:"",formatter:YAHOO.widget.DataTable.formatCheckbox,className:"align_center"},
                 {key:"name",resizeable:true,label:"Column Name",editor: new YAHOO.widget.TextboxCellEditor({disableBtns:true})},
                 {key:"type",resizeable:true,label:"Column Type",editor:new YAHOO.widget.DropdownCellEditor({dropdownOptions:["Checkbox","String","Category","Number","Yes/No","Date"],disableBtns:true})},
                 {key:"up",resizeable:true,label:"Up",formatter:imageFormatter},
                 {key:"down",resizeable:true,label:"Down",formatter:imageFormatter}
             ];
-            {% if template %}
+            {% if checklist %}
                 var myDataSource = new YAHOO.util.DataSource({{template_columns}});
             {% else %}
                 var myDataSource = new YAHOO.util.DataSource([{name:"Checkbox",type:"Checkbox"},{name:"Item",type:"String"}]);
@@ -170,30 +170,52 @@
             var cancelClick = function(){
                  window.location.href = "/list";
             };
+            var checkChooseColumns = function(){
+                if(this.checked){
+                    YAHOO.util.Dom.setStyle(['columns_selector'], 'display', "");
+                }else{
+                    YAHOO.util.Dom.setStyle(['columns_selector'], 'display', "none");
+                }
+            };
             var selectTemplate = function(){
                 var template_key = YAHOO.util.Dom.get("template_choice").value;
-                YAHOO.util.Connect.asyncRequest('POST', '/json/getTemplate',
-                {
-                    success: function (o) {
-                        if (!YAHOO.lang.isNull(o.responseText)) {
-                            var responese = YAHOO.lang.JSON.parse(o.responseText);
-                            YAHOO.util.Dom.get("template_desc").innerHTML =  responese.template.description;
-                            myDataTable.addRows(responese.columns);
-                        }
-                    },
-                    failure: function (o) {
-                        alert(o.statusText);
-                    },
-                    scope:this
-                }, "arg0="+template_key
-                        );
+                if (template_key!=null && template_key.trim()!="") {
+                    YAHOO.util.Connect.asyncRequest('POST', '/json/getTemplate',
+                    {
+                        success: function (o) {
+                            if (!YAHOO.lang.isNull(o.responseText)) {
+                                var responese = YAHOO.lang.JSON.parse(o.responseText);
+                                YAHOO.util.Dom.get("template_desc").innerHTML = responese.template.description;
+                                myDataTable.initializeTable();
+                                myDataTable.addRows(responese.columns);
+                                myDataTable.render();
+                            }
+                        },
+                        failure: function (o) {
+                            alert(o.statusText);
+                        },
+                        scope:this
+                    }, "template_key=" + template_key
+                            );
+                }else{
+                    YAHOO.util.Dom.get("template_desc").innerHTML = "";
+                }
                 
             };
+
+            {% if checklist %}
+                YAHOO.util.Dom.setStyle(['columns_selector'], 'display', "");
+                YAHOO.util.Dom.get("chooese_columns_chkbox").checked = true;
+            {% else %}
+                YAHOO.util.Dom.setStyle(['columns_selector'], 'display', "none");
+                YAHOO.util.Dom.get("chooese_columns_chkbox").checked = false;
+            {% endif %}
 
             YAHOO.util.Event.addListener(["addColumn","deleteColumn"], "click", handleClick);
             YAHOO.util.Event.addListener("updateBtn", "click", saveChecklist);
             YAHOO.util.Event.addListener("cancelBtn", "click", cancelClick);
             YAHOO.util.Event.addListener("template_choice", "change", selectTemplate);
+            YAHOO.util.Event.addListener("chooese_columns_chkbox", "click", checkChooseColumns);
             return {
                 ds: myDataSource,
                 dt: myDataTable
@@ -219,53 +241,58 @@
                 <td>Checklist template:</td>
                 <td>
                     <select id="template_choice">
+                            <option value="" selected>--</option>
                         {% for template in checklist_templates %}
                             <option value="{{template.key}}">{{template.name}}</option>
                         {% endfor %}
                     </select>
-                    <div id="template_desc"></div>
                 </td>
             </tr>
             <tr>
-                <td colspan="2">
-                    <fieldset>
-                        <legend>The columns you would like to have in your checklist:</legend>
-                        <table>
-                         
-                            <tr>
-                                <td id="columns_td">
-                                    Columns:<br>
-                                    <select multiple id="columns_choices"
-                                            style="width:185px;height:230px;font-family:Courier New,monospace">
-                                        <option value="Checkbox" class="Checkbox"> Checkbox----Checkbox</option>
-                                        <option value="Item" class="String"> Item--------String</option>
-                                        <option value="Flag" class="Yes/No"> Flag--------Yes/No</option>
-                                        <option value="Priority" class="Number"> Priority----Number</option>
-                                        <option value="Amount" class="Number"> Amount------Number</option>
-                                        <option value="Units" class="Category"> Units-------Category</option>
-                                        <option value="Category" class="Category"> Category----Category</option>
-                                        <option value="Date" class="Date"> Date--------Date</option>
-                                        <option value="Notes" class="String"> Notes-------String</option>
-                                        <option value="New" class="String"> --New-------String</option>
-                                        <option value="New" class="Category"> --New-------Category</option>
-                                        <option value="New" class="Number"> --New-------Number</option>
-                                        <option value="New" class="Yes/No"> --New-------Yes/No</option>
-                                        <option value="New" class="Date"> --New-------Date</option>
-                                    </select>
-                                </td>
-                                <td style="text-align:center;line-height:10px" id="columns_btn_td">
-                                    <input type="button" value=">" class="movebutton" id="addColumn">
-                                    <br><br>
-                                    <input type="button" value="<" class="movebutton" id="deleteColumn">
-                                </td>
-                                <td>
-                                    <div id="columns_container"
-                                         style="overflow:auto;height:230px;font-family:Courier New,monospace">
-                                    </div>
-                                </td>
-                            </tr>
-                        </table>
-                    </fieldset>
+                <td>&nbsp;</td>
+                <td><div id="template_desc"></div></td>
+            </tr>
+            <tr>
+                <td>Choose more checklist column(s):</td>
+                <td><input type="checkbox" id="chooese_columns_chkbox"></td>
+            </tr>
+            <tr>
+                <td>
+                    <table id="columns_selector">
+                        <tr>
+                            <td>
+                                Columns selector:<br>
+                                <select multiple id="columns_choices"
+                                        style="width:185px;height:230px;font-family:Courier New,monospace">
+                                    <option value="Checkbox" class="Checkbox"> Checkbox----Checkbox</option>
+                                    <option value="Item" class="String"> Item--------String</option>
+                                    <option value="Flag" class="Yes/No"> Flag--------Yes/No</option>
+                                    <option value="Priority" class="Number"> Priority----Number</option>
+                                    <option value="Amount" class="Number"> Amount------Number</option>
+                                    <option value="Units" class="Category"> Units-------Category</option>
+                                    <option value="Category" class="Category"> Category----Category</option>
+                                    <option value="Date" class="Date"> Date--------Date</option>
+                                    <option value="Notes" class="String"> Notes-------String</option>
+                                    <option value="New" class="String"> --New-------String</option>
+                                    <option value="New" class="Category"> --New-------Category</option>
+                                    <option value="New" class="Number"> --New-------Number</option>
+                                    <option value="New" class="Yes/No"> --New-------Yes/No</option>
+                                    <option value="New" class="Date"> --New-------Date</option>
+                                </select>
+                            </td>
+                            <td style="text-align:center;line-height:10px">
+                                <input type="button" value=">" class="movebutton" id="addColumn">
+                                <br><br>
+                                <input type="button" value="<" class="movebutton" id="deleteColumn">
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+                <td>
+                    The columns you would like to have in your checklist:
+                    <div id="columns_container"
+                         style="overflow:auto;height:230px;font-family:Courier New,monospace">
+                    </div>
                 </td>
             </tr>
             <tr>
