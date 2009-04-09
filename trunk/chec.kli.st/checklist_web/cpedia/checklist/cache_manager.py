@@ -36,44 +36,12 @@ import simplejson
 import cgi
 import urllib, hashlib
 
+"""This class used to manager the complex cache objects.
+   If we only need simple cache manager, we just extend
+   the Model to MemcachedModel
+"""
+
 CACHE_TIME = 3600
-
-#common method for get cached object list.
-#In most case, you can always pass in a class name as the key 
-def getCachedObjectList(key_,query):
-    try:
-        result = memcache.get(key_+"_list") #for avoid key name confuse when using the class name as key.
-    except Exception:
-        result = None
-    if result is None:
-        result = query.fetch(1000)
-        memcache.add(key=key_, value=result, time=CACHE_TIME)
-    else:
-        logging.debug("cache_manager.getCachedObjectList(). key:%s, query:%s",key_,query)
-    return result
-
-
-#common method for get cached object by object primary key.
-def getCachedObjectByKey(cls,primary_key):
-    key_ = cls.__name__ + "_" + primary_key
-    try:
-        result = memcache.get(key_)
-    except Exception:
-        result = None
-    if result is None:
-        result = cls.get(primary_key)
-        memcache.add(key=key_, value=result, time=CACHE_TIME)
-    else:
-        logging.debug("cache_manager.getCachedObjectByKey(). class:%s, primary_key:%s",cls,primary_key)
-    return result
-
-def delteCachedObjectList(key):
-    memcache.delete(key+"_list")
-    
-
-def delteCachedObjectByKey(cls,primary_key):
-    memcache.delete(cls.__name__ + "_" + primary_key)
-
 
 CACHE_KEY_PREFIX = {
 "user_checklist_page":"user_checklist_page_",
