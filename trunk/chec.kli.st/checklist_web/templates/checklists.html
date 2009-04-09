@@ -41,7 +41,7 @@
                 {key:"created_date", label:"Create Date", sortable:true,formatter:"date"},
                 {key:"last_updated_date", label:"Update Date", sortable:true,formatter:"date"},
                 {key:"key",resizeable:true,label:"Edit",formatter:function(elCell, oRecord, oColumn, oData){
-                    elCell.innerHTML = "<a href='/list/"+oData+"'>Edit</a>";
+                    elCell.innerHTML = "<a href='/edit/list/"+oData+"'>Edit</a>";
                 }}
             ];
 

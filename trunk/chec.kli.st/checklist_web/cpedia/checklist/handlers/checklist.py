@@ -165,11 +165,10 @@ class CreateList(BaseRequestHandler):
 
     @authorized.role("user")
     def post(self):
-        checklist = models.UserChecklist()
+        checklist = models.UserChecklist(user=users.get_current_user())
         checklist.name = self.request.get('checklistName')
         checklist.description = self.request.get('description')
         checklist.tags_commas = self.request.get('tags')
-        checklist.user = users.get_current_user()
         checklist.last_updated_user = users.get_current_user()
         checklist.put()
         columns = self.request.get('checklist_columns')
@@ -277,7 +276,10 @@ class ChecklistEditAdmin(BaseRequestHandler):
         columns = []
         for column in checklist_columns:
             columns +=[column.to_json()]
+        query = models.ChecklistTemplate.gql('WHERE active =:1 ORDER BY order ASC',True)
+        templates = cache_manager.getCachedObjectList(models.ChecklistTemplate.__name__,query)
         template_values = {
+        "templates":templates,
         "checklist":checklist,
         "checklist_columns":simplejson.dumps(columns),
         }
@@ -306,8 +308,10 @@ class ChecklistEditAdmin(BaseRequestHandler):
             checklist_column.order = column['order']
             checklist_column.checklist_template = checklist
             checklist_column.put()
-
+        query = models.ChecklistTemplate.gql('WHERE active =:1 ORDER BY order ASC',True)
+        templates = cache_manager.getCachedObjectList(models.ChecklistTemplate.__name__,query)
         template_values = {
+        "templates":templates,
         "checklist":checklist,
         "checklist_columns":simplejson.dumps(columns),
         }
