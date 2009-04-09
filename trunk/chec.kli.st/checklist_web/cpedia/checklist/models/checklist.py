@@ -53,7 +53,7 @@ class Tagable(models.SerializableModel):
 
     def set_tags(self, tags):
         if tags:
-            self.tags = [db.Category(urllib.quote(tag.strip().encode('utf8'))) for tag in tags.split(',')]
+            self.tags = [db.Category(urllib.quote(tag.strip().encode('utf8'))) for tag in tags.split(',') if tag.strip()!='']
 
     tags_commas = property(get_tags,set_tags)
 

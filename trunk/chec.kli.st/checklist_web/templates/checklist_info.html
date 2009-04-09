@@ -144,17 +144,20 @@
 
             //save template.
             var saveChecklist = function() {
-                var templateName = YAHOO.util.Dom.get("templateName").value;
-                if (templateName.trim() == "") {
+                var checklistName = YAHOO.util.Dom.get("checklistName").value;
+                if (checklistName.trim() == "") {
                     alert("Please input checklist name.");
-                    YAHOO.util.Dom.get("templateName").focus();
+                    YAHOO.util.Dom.get("checklistName").focus();
                     return;
                 }
+
+                var tags = YAHOO.util.Dom.get("tags");
+                tags.value = tags.value.trim();
+                
                 var index = myDataTable.getRecordSet().getLength();
                 if (YAHOO.lang.isNumber(index) && index > 0) {
                     var formObject = YAHOO.util.Dom.get('submitForm');
                     formObject["checklist_columns"].value = YAHOO.lang.JSON.stringify(getDataSet(myDataTable));
-                    //YAHOO.util.Connect.setForm(formObject, true);
                     {% if checklist %}
                     formObject.action = "/edit/list/{{template.key}}";
                     {% else %}
@@ -228,14 +231,20 @@
         <input name=checklist_columns type="hidden"/>
         <table class="noborder_table">
             <tr>
-                <td>
+                <td style="width:235px">
                     Checklist name:
                 </td>
-                <td><input type="text" size="40" id="checklistName" name="checklistName" value="{% if checklist %}{{checklist.name}}{% endif %}"></td>
+                <td><input type="text" size="50" id="checklistName" name="checklistName" value="{% if checklist %}{{checklist.name}}{% endif %}"></td>
             </tr>
             <tr>
                 <td>Checklist description:</td>
-                <td><textarea rows="2" cols="37" id="description" name="description">{% if checklist %}{{checklist.description}}{% endif %}</textarea></td>
+                <td><textarea rows="2" cols="47" id="description" name="description">{% if checklist %}{{checklist.description}}{% endif %}</textarea></td>
+            </tr>
+            <tr>
+                <td>Tags:</td>
+                <td><input type=text size="50" id="tags" name="tags" value="{% if checklist %}{{checklist.tags_commas}}{% endif %}">
+                    <div class="form_desc">Seperated by commas. E.g. shopping, book, favorite song</div>
+                </td>
             </tr>
             <tr>
                 <td>Checklist template:</td>
