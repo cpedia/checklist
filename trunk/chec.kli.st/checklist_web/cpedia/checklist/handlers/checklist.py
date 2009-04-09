@@ -165,7 +165,7 @@ class CreateList(BaseRequestHandler):
 
     @authorized.role("user")
     def post(self):
-        checklist = models.ChecklistTemplate()
+        checklist = models.UserChecklist()
         checklist.name = self.request.get('checklistName')
         checklist.description = self.request.get('description')
         checklist.tags_commas = self.request.get('tags')
@@ -181,6 +181,7 @@ class CreateList(BaseRequestHandler):
             checklist_column.order = column['order']
             checklist_column.checklist = checklist
             checklist_column.put()
+        #todo:delete the cache.
         self.redirect('/list')
 
 class CreateQucikList(BaseRequestHandler):
