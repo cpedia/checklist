@@ -98,6 +98,63 @@ class SerializableModel(db.Model):
         #return simplejson.dumps(values)   #simplejson.dumps will be applied when do the rpc call.
         return values
 
+class MemcachedModel(SerializableModel):
+    def delete(self):
+        super(MemcachedModel, self).delete()
+        memcache.delete(self.__class__.memcache_list_key())
+        if self.key():
+            memcache.delete(self.__class__.memcache_object_key(self.key()))
+
+
+    def put(self):
+        key = super(MemcachedModel, self).put()
+        memcache.delete(self.__class__.memcache_list_key())
+        memcache.set(self.__class__.memcache_object_key(key),self)
+        return key
+
+    @classmethod
+    def get_or_insert(cls, key_name, **kwds):
+        obj = super(MemcachedModel, cls).get_or_insert(key_name, **kwds)
+        memcache.delete(cls.memcache_list_key())
+        return obj
+
+    @classmethod
+    def memcache_list_key(cls):
+        return cls.__name__ + '_list'
+
+    @classmethod
+    def memcache_object_key(cls,primary_key):
+        return cls.__name__ + '_' + primary_key
+
+    @classmethod
+    def get_cached(cls,primary_key):
+        key_ = cls.__name__ + "_" + primary_key
+        try:
+            result = memcache.get(key_)
+        except Exception:
+            result = None
+        if result is None:
+            result = cls.get(primary_key)
+            memcache.set(key=key_, value=result)
+        return result
+
+    @classmethod
+    def get_cached_list(cls, key_,query,nocache=False):
+        """Return the cached list with the specified key.
+        User must keep the key unique, and the query must
+        be same instance of the class .
+        TODO: These cache need to flush manually.
+        We recommand to use the query parameter as the key.
+        """
+        try:
+            result = memcache.get(key_ +"_list")
+        except Exception:
+            result = None
+        if result is None:
+            result = query.fetch(1000)
+            memcache.add(key=key_, value=result)
+        return result
+
 
 class Counter(object):
     """A counter using sharded writes to prevent contentions.

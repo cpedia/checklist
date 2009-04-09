@@ -44,7 +44,7 @@ class Tag(models.SerializableModel):
     entrycount = db.IntegerProperty(default=0)
     valid = db.BooleanProperty(default = True)
 
-class Tagable(models.SerializableModel):
+class Tagable(models.MemcachedModel):
     tags = db.ListProperty(db.Category)
 
     def get_tags(self):
