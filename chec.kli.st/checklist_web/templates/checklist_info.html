@@ -38,7 +38,7 @@
                 {key:"down",resizeable:true,label:"Down",formatter:imageFormatter}
             ];
             {% if checklist %}
-                var myDataSource = new YAHOO.util.DataSource({{template_columns}});
+                var myDataSource = new YAHOO.util.DataSource({{checklist_columns}});
             {% else %}
                 var myDataSource = new YAHOO.util.DataSource([{name:"Checkbox",type:"Checkbox"},{name:"Item",type:"String"}]);
             {% endif %}

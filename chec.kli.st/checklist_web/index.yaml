@@ -16,13 +16,13 @@ indexes:
   - name: active
   - name: ORDER
 
-# Used 38 times in query history.
+# Used 81 times in query history.
 - kind: ChecklistTemplate
   properties:
   - name: active
   - name: order
 
-# Used 4 times in query history.
+# Used 7 times in query history.
 - kind: UserChecklist
   properties:
   - name: user
