@@ -74,8 +74,9 @@ class RPCHandler(webapp.RequestHandler):
         return returnValue
 
     #get template.
-    def getTemplate(self,template_key):
-        template = models.ChecklistTemplate.get(template_key)
+    def getTemplate(self,request):
+        template_key = request.get("template_key")
+        template = cache_manager.getCachedObjectByKey(models.ChecklistTemplate,template_key)
         columns = []
         for column in template.checklistcolumntemplate_set:
             columns+=[column.to_json()]
