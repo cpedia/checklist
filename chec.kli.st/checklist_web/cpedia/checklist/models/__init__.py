@@ -168,7 +168,7 @@ class MemcachedModel(SerializableModel):
             if query_key in cls.querys:
                 params_ = [cls.querys[query_key]] + params
                 query = db.GqlQuery(*params_ )
-                result = eval(query).fetch(1000)
+                result = query.fetch(1000)
                 memcache.add(key=key_, value=result)
             else:
                 raise Exception("Query for object list does not define in the Class Model.")
