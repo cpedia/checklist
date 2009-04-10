@@ -70,6 +70,9 @@ class Checklist(Tagable):
 #system reserved checklist templates. Administrator can maintain these templates,
 #user can create a checklist from the template.
 class ChecklistTemplate(Checklist):
+    querys = {
+        "active_templates": 'select * from ChecklistTemplate WHERE active = TRUE ORDER BY order ASC',
+    }
     user = db.UserProperty(required=True)
     order = db.IntegerProperty(default=0)
     active = db.BooleanProperty(default = False)
@@ -77,17 +80,6 @@ class ChecklistTemplate(Checklist):
     last_updated_date = db.DateTimeProperty(auto_now_add=True)
     last_updated_user = db.UserProperty()
 
-    #query and page_querys formatter:
-    #key:[gql,paramater0,parameter1...]
-    querys = {
-        "active_templates": 'select * from ChecklistTemplate WHERE active =True ORDER BY order ASC',
-    }
-
-    page_querys = {
-        "user_checklist": 'select * from ChecklistTemplate WHERE user=:1 ORDER BY last_updated_date desc',
-        "user_starred_checklist": 'select * from ChecklistTemplate WHERE user=:1 and starred = TRUE ORDER BY last_updated_date desc',
-        "user_public_checklist": 'select * from ChecklistTemplate WHERE user=:1 and public =TRUE ORDER BY last_updated_date desc',
-    }
 
 class ChecklistColumnTemplate(Tagable):
     name = db.StringProperty(multiline=False)
@@ -97,6 +89,12 @@ class ChecklistColumnTemplate(Tagable):
     checklist_template = db.ReferenceProperty(ChecklistTemplate)
 
 class UserChecklist(Checklist):
+    page_querys = {
+        "user_checklist": 'select * from UserChecklist WHERE user=:1 ORDER BY last_updated_date desc',
+        "user_starred_checklist": 'select * from UserChecklist WHERE user=:1 and starred = TRUE ORDER BY last_updated_date desc',
+        "user_public_checklist": 'select * from UserChecklist WHERE user=:1 and public =TRUE ORDER BY last_updated_date desc',
+    }
+    
     user = db.UserProperty(required=True)
     starred = db.BooleanProperty(default = False)
     public = db.BooleanProperty(default = False)
