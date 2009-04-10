@@ -131,11 +131,11 @@ class MemcachedModel(SerializableModel):
 
     @classmethod
     def memcache_list_key(cls):
-        return [cls.__name__ +"_list_" +  query_key  for query_key in cls.querys.keys()]
+        return [cls.__name__ +"_list_" +  query_key  for query_key in cls.querys]
 
     @classmethod
     def memcache_page_key(cls):
-        return [cls.__name__ +"_page_" + query_key  for query_key in cls.page_querys.keys()]
+        return [cls.__name__ +"_page_" + query_key  for query_key in cls.page_querys]
 
     @classmethod
     def memcache_object_key(cls,primary_key):
@@ -154,7 +154,7 @@ class MemcachedModel(SerializableModel):
         return result
 
     @classmethod
-    def get_cached_list(cls, query_key,nocache=False):
+    def get_cached_list(cls, query_key,params=[],nocache=False):
         """Return the cached list with the specified key.
         User must keep the key unique, and the query must
         be same instance of the class .
@@ -166,7 +166,8 @@ class MemcachedModel(SerializableModel):
             result = None
         if nocache or result is None:
             if query_key in cls.querys:
-                query = "db.Query("+','.join(value for value in cls.querys[query_key])+")"
+                params_ = [cls.querys[query_key]] + params
+                query = db.GqlQuery(*params_ )
                 result = eval(query).fetch(1000)
                 memcache.add(key=key_, value=result)
             else:
@@ -174,7 +175,7 @@ class MemcachedModel(SerializableModel):
         return result
 
     @classmethod
-    def get_cached_page(cls, query_key,page,num_per_page,count=None,params=None,nocache=False):
+    def get_cached_page(cls, query_key,page,num_per_page,count=None,params=[],nocache=False):
         """Return the cached list with the specified key and page.
         for example we need to query the user's checklist page,
         then we set: query_ley = "user_checklist"+user.email()
@@ -190,15 +191,16 @@ class MemcachedModel(SerializableModel):
             obj_pages = None
         if obj_pages is None or page not in obj_pages:
             try:
-                if query_key in cls.page_querys.keys():
-                    query = "db.Query("+cls.page_querys[query_key]+","+",".join(params)+")"
-                    obj_page = GqlQueryPaginator(eval(query),page,num_per_page,count).page()
+                if query_key in cls.page_querys:
+                    params_ = [cls.page_querys[query_key]] + params
+                    query = db.GqlQuery(*params_ )
+                    obj_page = GqlQueryPaginator(query,page,num_per_page,count).page()
                     if obj_pages is None:
                         obj_pages = {}
                     obj_pages[page] = obj_page
                     memcache.set(key=key_, value=obj_pages)
                 else:
-                    raise Exception("Query for object page does not define in the Class Model.")
+                    raise Exception("Query for object page does not define in the Class %s.", cls.__name__)
             except InvalidPage:
                 return None
         else:
