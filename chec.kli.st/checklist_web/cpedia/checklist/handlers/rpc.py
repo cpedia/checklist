@@ -32,7 +32,7 @@ from google.appengine.ext import db
 import cpedia.checklist.models.checklist as models
 import authorized
 import config
-from cpedia.checklist import cache_manager
+import cpedia.checklist.cache.util as cache_util
 
 
 # This handler allows the functions defined in the RPCHandler class to
@@ -76,7 +76,7 @@ class RPCHandler(webapp.RequestHandler):
     #get template.
     def getTemplate(self,request):
         template_key = request.get("template_key")
-        template = cache_manager.getCachedObjectByKey(models.ChecklistTemplate,template_key)
+        template = models.ChecklistTemplate.get_cached(template_key)
         columns = []
         for column in template.checklistcolumntemplate_set:
             columns+=[column.to_json()]
@@ -92,7 +92,6 @@ class RPCHandler(webapp.RequestHandler):
             for column in template_columns:
                 column.delete()
             template.delete()   
-        cache_manager.delteCachedObjectList(models.ChecklistTemplate.__name__)
         return True
 
     @authorized.role('admin')
@@ -104,7 +103,6 @@ class RPCHandler(webapp.RequestHandler):
             template.last_updated_date = datetime.datetime.now()
             template.last_updated_user = users.get_current_user()
             template.put()
-        cache_manager.delteCachedObjectList(models.ChecklistTemplate.__name__)
         return True
 
     @authorized.role('admin')
@@ -116,7 +114,6 @@ class RPCHandler(webapp.RequestHandler):
             template.last_updated_date = datetime.datetime.now()
             template.last_updated_user = users.get_current_user()
             template.put()
-        cache_manager.delteCachedObjectList(models.ChecklistTemplate.__name__)
         return True
 
     #get checklist template list.
@@ -125,7 +122,7 @@ class RPCHandler(webapp.RequestHandler):
         user = users.get_current_user()
         page = startIndex +1
         #get checklist pagination from cache.
-        checklist_page = cache_manager.getUserChecklistPagination(user,page,checklist_num_per_page)
+        checklist_page = cache_util.getUserChecklistPagination(user,page,checklist_num_per_page)
         checklists = []
         for checklist in checklist_page.object_list:
             checklists+=[checklist.to_json()]
