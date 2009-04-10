@@ -7,6 +7,9 @@ from google.appengine.ext import db
 from google.appengine.api import users
 from google.appengine.api import datastore_types
 
+from cpedia.pagination.GqlQueryPaginator import GqlQueryPaginator,GqlPage
+from cpedia.pagination.paginator import InvalidPage,Paginator
+
 import simplejson
 
 def to_dict(model_obj, attr_list, init_dict_func=None):
@@ -99,9 +102,15 @@ class SerializableModel(db.Model):
         return values
 
 class MemcachedModel(SerializableModel):
+    #All the query to this model need to be self-stored.
+    #The dict need to set a unique key, and the value must be db.Query() object.
+    querys = {}
+    page_querys = {}
+
     def delete(self):
         super(MemcachedModel, self).delete()
         memcache.delete(self.__class__.memcache_list_key())
+        memcache.delete(self.__class__.memcache_page_key())
         if self.key():
             memcache.delete(self.__class__.memcache_object_key(self.key()))
 
@@ -109,6 +118,7 @@ class MemcachedModel(SerializableModel):
     def put(self):
         key = super(MemcachedModel, self).put()
         memcache.delete(self.__class__.memcache_list_key())
+        memcache.delete(self.__class__.memcache_page_key())
         memcache.set(self.__class__.memcache_object_key(key),self)
         return key
 
@@ -116,44 +126,83 @@ class MemcachedModel(SerializableModel):
     def get_or_insert(cls, key_name, **kwds):
         obj = super(MemcachedModel, cls).get_or_insert(key_name, **kwds)
         memcache.delete(cls.memcache_list_key())
+        memcache.delete(cls.memcache_page_key())
         return obj
 
     @classmethod
     def memcache_list_key(cls):
-        return cls.__name__ + '_list'
+        return [cls.__name__ +"_list_" +  query_key  for query_key in cls.querys.keys()]
+
+    @classmethod
+    def memcache_page_key(cls):
+        return [cls.__name__ +"_page_" + query_key  for query_key in cls.page_querys.keys()]
 
     @classmethod
     def memcache_object_key(cls,primary_key):
         return cls.__name__ + '_' + primary_key
 
     @classmethod
-    def get_cached(cls,primary_key):
+    def get_cached(cls,primary_key,nocache=False):
         key_ = cls.__name__ + "_" + primary_key
         try:
             result = memcache.get(key_)
         except Exception:
             result = None
-        if result is None:
+        if nocache or result is None:
             result = cls.get(primary_key)
             memcache.set(key=key_, value=result)
         return result
 
     @classmethod
-    def get_cached_list(cls, key_,query,nocache=False):
+    def get_cached_list(cls, query_key,nocache=False):
         """Return the cached list with the specified key.
         User must keep the key unique, and the query must
         be same instance of the class .
-        TODO: These cache need to flush manually.
-        We recommand to use the query parameter as the key.
         """
+        key_ = cls.__name__ +"_list_" + query_key
         try:
-            result = memcache.get(key_ +"_list")
+            result = memcache.get(key_)
         except Exception:
             result = None
-        if result is None:
-            result = query.fetch(1000)
-            memcache.add(key=key_, value=result)
+        if nocache or result is None:
+            if query_key in cls.querys:
+                query = "db.Query("+','.join(value for value in cls.querys[query_key])+")"
+                result = eval(query).fetch(1000)
+                memcache.add(key=key_, value=result)
+            else:
+                raise Exception("Query for object list does not define in the Class Model.")
         return result
+
+    @classmethod
+    def get_cached_page(cls, query_key,page,num_per_page,count=None,params=None,nocache=False):
+        """Return the cached list with the specified key and page.
+        for example we need to query the user's checklist page,
+        then we set: query_ley = "user_checklist"+user.email()
+
+        the params is used for inject to gql.
+        """
+        key_ = cls.__name__ +"_page_" + query_key
+        if params is not None:
+            key_ = key_ + "_" + "_".join(params)
+        try:
+            obj_pages = memcache.get(key_)
+        except Exception:
+            obj_pages = None
+        if obj_pages is None or page not in obj_pages:
+            try:
+                if query_key in cls.page_querys.keys():
+                    query = "db.Query("+cls.page_querys[query_key]+","+",".join(params)+")"
+                    obj_page = GqlQueryPaginator(eval(query),page,num_per_page,count).page()
+                    if obj_pages is None:
+                        obj_pages = {}
+                    obj_pages[page] = obj_page
+                    memcache.set(key=key_, value=obj_pages)
+                else:
+                    raise Exception("Query for object page does not define in the Class Model.")
+            except InvalidPage:
+                return None
+        else:
+            return obj_pages[page]
 
 
 class Counter(object):

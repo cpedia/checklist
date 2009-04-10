@@ -46,12 +46,8 @@ import authorized
 import view
 import config
 
-from cpedia.checklist import cache_manager
+import cpedia.checklist.cache.util as cache_util
 
-querys = {
-   "active_checklist": models.ChecklistTemplate.gql('WHERE active =:1 ORDER BY order ASC',True),
-   "active_templates": "", 
-}
 
 class BaseRequestHandler(webapp.RequestHandler):
     """Supplies a common template generation function.
@@ -92,7 +88,7 @@ class MainPage(BaseRequestHandler):
         else:
             checklist_num_per_page = config.CHECKLIST["checklist_num_per_page"];
 
-        checklist_page = cache_manager.getUserChecklistPagination(user,page,checklist_num_per_page)
+        checklist_page = cache_util.getUserChecklistPagination(user,page,checklist_num_per_page)
         template_values = {
         "checklist_page":checklist_page,
         }
@@ -123,7 +119,7 @@ class UserPublicChecklistPage(BaseRequestHandler):
         else:
             checklist_num_per_page = config.CHECKLIST["checklist_num_per_page"];
 
-        checklist_page = cache_manager.getUserPublicChecklistPagination(user,page,checklist_num_per_page)
+        checklist_page = cache_util.getUserPublicChecklistPagination(user,page,checklist_num_per_page)
         template_values = {
         "checklist_page":checklist_page,
         }
@@ -143,7 +139,7 @@ class UserStarredChecklistPage(BaseRequestHandler):
             checklist_num_per_page = int(checklist_num_per_page_)
         else:
             checklist_num_per_page = config.CHECKLIST["checklist_num_per_page"];
-        checklist_page = cache_manager.getUserStarredChecklistPagination(user,page,checklist_num_per_page)
+        checklist_page = cache_util.getUserStarredChecklistPagination(user,page,checklist_num_per_page)
         template_values = {
         "checklist_page":checklist_page,
         }
@@ -160,8 +156,7 @@ class UserChecklist(BaseRequestHandler):
 class CreateList(BaseRequestHandler):
     @authorized.role("user")
     def get(self):
-        query = models.ChecklistTemplate.gql('WHERE active =:1 ORDER BY order ASC',True)
-        templates = models.ChecklistTemplate.get_cached_list(models.ChecklistTemplate.__name__,query)
+        templates = models.ChecklistTemplate.get_cached_list("active_templates")
         template_values = {
         "checklist_templates":templates,
         }
@@ -211,10 +206,9 @@ class TemplateCreateAdmin(BaseRequestHandler):
 
     @authorized.role("admin")
     def post(self):
-        checklist_template = models.ChecklistTemplate()
+        checklist_template = models.ChecklistTemplate(user=users.get_current_user())
         checklist_template.name = self.request.get('templateName')
         checklist_template.description = self.request.get('description')
-        checklist_template.user = users.get_current_user()
         checklist_template.last_updated_user = users.get_current_user()
         checklist_template.put()
         columns = self.request.get('template_columns')
@@ -231,7 +225,7 @@ class TemplateCreateAdmin(BaseRequestHandler):
 class TemplateEditAdmin(BaseRequestHandler):
     @authorized.role("admin")
     def get(self,templateKey):
-        template = models.ChecklistTemplate.get(templateKey)
+        template = models.ChecklistTemplate.get_cached(templateKey)
         template_columns = template.checklistcolumntemplate_set
         columns = []
         for column in template_columns:
@@ -244,7 +238,7 @@ class TemplateEditAdmin(BaseRequestHandler):
 
     @authorized.role("admin")
     def post(self,templateKey):
-        checklist_template = models.ChecklistTemplate.get(templateKey)
+        checklist_template = models.ChecklistTemplate.get_cached(templateKey)
         checklist_template.name = self.request.get('templateName')
         checklist_template.description = self.request.get('description')
         checklist_template.last_updated_date = datetime.datetime.now()
@@ -279,8 +273,7 @@ class ChecklistEditAdmin(BaseRequestHandler):
         columns = []
         for column in checklist_columns:
             columns +=[column.to_json()]
-        query = models.ChecklistTemplate.gql('WHERE active =:1 ORDER BY order ASC',True)
-        templates = models.ChecklistTemplate.get_cached_list(models.ChecklistTemplate.__name__,query)
+        templates = models.ChecklistTemplate.get_cached_list("active_templates")
         template_values = {
         "templates":templates,
         "checklist":checklist,
@@ -311,8 +304,7 @@ class ChecklistEditAdmin(BaseRequestHandler):
             checklist_column.order = column['order']
             checklist_column.checklist_template = checklist
             checklist_column.put()
-        query = models.ChecklistTemplate.gql('WHERE active =:1 ORDER BY order ASC',True)
-        templates = models.ChecklistTemplate.get_cached_list(models.ChecklistTemplate.__name__,query)
+        templates = models.ChecklistTemplate.get_cached_list("active_templates")
         template_values = {
         "templates":templates,
         "checklist":checklist,
