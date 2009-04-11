@@ -107,26 +107,34 @@ class MemcachedModel(SerializableModel):
     querys = {}
     page_querys = {}
 
+    def delete_cached_list_page(self):
+        memcache_list_keys = self.__class__.memcache_list_key()
+        email = None
+        if self.user:
+            email = self.user.email()
+        memcache_page_keys = self.__class__.memcache_page_key(email)
+        if memcache_list_keys is not None and len(memcache_list_keys) > 0:
+            memcache.delete_multi(memcache_list_keys)
+        if memcache_page_keys is not None and len(memcache_page_keys) > 0:
+            memcache.delete_multi(memcache_page_keys)
+
     def delete(self):
         super(MemcachedModel, self).delete()
-        memcache.delete(self.__class__.memcache_list_key())
-        memcache.delete(self.__class__.memcache_page_key())
+        self.delete_cached_list_page()
         if self.key():
             memcache.delete(self.__class__.memcache_object_key(self.key()))
 
 
     def put(self):
         key = super(MemcachedModel, self).put()
-        memcache.delete(self.__class__.memcache_list_key())
-        memcache.delete(self.__class__.memcache_page_key())
+        self.delete_cached_list_page()
         memcache.set(self.__class__.memcache_object_key(key),self)
         return key
 
     @classmethod
     def get_or_insert(cls, key_name, **kwds):
         obj = super(MemcachedModel, cls).get_or_insert(key_name, **kwds)
-        memcache.delete(cls.memcache_list_key())
-        memcache.delete(cls.memcache_page_key())
+        self.delete_cached_list_page()
         return obj
 
     @classmethod
@@ -134,12 +142,16 @@ class MemcachedModel(SerializableModel):
         return [cls.__name__ +"_list_" +  query_key  for query_key in cls.querys]
 
     @classmethod
-    def memcache_page_key(cls):
-        return [cls.__name__ +"_page_" + query_key  for query_key in cls.page_querys]
+    def memcache_page_key(cls, user_email=None):
+        if user_email is not None:
+            user_email = "_"+user_email
+        else:
+            user_email = ""
+        return [cls.__name__ +"_page_" + query_key + user_email  for query_key in cls.page_querys]
 
     @classmethod
     def memcache_object_key(cls,primary_key):
-        return cls.__name__ + '_' + primary_key
+        return cls.__name__ + '_' + str(primary_key)
 
     @classmethod
     def get_cached(cls,primary_key,nocache=False):

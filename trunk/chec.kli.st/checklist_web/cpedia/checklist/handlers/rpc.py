@@ -124,11 +124,12 @@ class RPCHandler(webapp.RequestHandler):
         #get checklist pagination from cache.
         checklist_page = cache_util.getUserChecklistPagination(user,page,checklist_num_per_page)
         checklists = []
-        for checklist in checklist_page.object_list:
-            checklists+=[checklist.to_json()]
-        totalRecords = checklist_page.paginator.count
+        totalRecords = 0
+        if checklist_page is not None:
+            for checklist in checklist_page.object_list:
+                checklists+=[checklist.to_json()]
+            totalRecords = checklist_page.paginator.count
         returnValue = {"records":checklists,"totalRecords":totalRecords,"startIndex":startIndex}
         return returnValue
 
-      
 
