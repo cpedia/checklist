@@ -110,9 +110,9 @@ class MemcachedModel(SerializableModel):
     def delete_cached_list_page(self):
         memcache_list_keys = self.__class__.memcache_list_key()
         email = None
-        if self.user:
+        if hasattr(self,"user") and self.user:
             email = self.user.email()
-        memcache_page_keys = self.__class__.memcache_page_key(email)
+        memcache_page_keys = self.__class__.memcache_page_key(user_email=email)
         if memcache_list_keys is not None and len(memcache_list_keys) > 0:
             memcache.delete_multi(memcache_list_keys)
         if memcache_page_keys is not None and len(memcache_page_keys) > 0:
@@ -196,7 +196,7 @@ class MemcachedModel(SerializableModel):
         """
         key_ = cls.__name__ +"_page_" + query_key
         if params is not None:
-            key_ = key_ + "_" + "_".join(params)
+            key_ = key_ + "_" + "_".join(str(param) for param in params)
         try:
             obj_pages = memcache.get(key_)
         except Exception:

@@ -39,26 +39,23 @@ import simplejson
 #get user's checklists pagination. Cached.
 def getUserChecklistPagination(user,page,checklist_num_per_page):
     key_ = "user_checklist"
-    email = user.email()
     user_obj = getUser(user)
     count = user_obj.checklists_count
-    return models.UserChecklist.get_cached_page(key_,page,checklist_num_per_page,count,params=[email])
+    return models.UserChecklist.get_cached_page(key_,page,checklist_num_per_page,count,params=[user])
 
 #get user's checklists pagination. Cached.
 def getUserStarredChecklistPagination(user,page,checklist_num_per_page):
     key_ = "user_starred_checklist"
-    email = user.email()
     user_obj = getUser(user)
     count = user_obj.starred_checklists_count
-    return models.UserChecklist.get_cached_page(key_,page,checklist_num_per_page,count,params=[email])
+    return models.UserChecklist.get_cached_page(key_,page,checklist_num_per_page,count,params=[user])
 
 #get user's checklists pagination. Cached.
 def getUserPublicChecklistPagination(user,page,checklist_num_per_page):
     key_ = "user_public_checklist"
-    email = user.email()
     user_obj = getUser(user)
     count = user_obj.public_checklists_count
-    return models.UserChecklist.get_cached_page(key_,page,checklist_num_per_page,count,params=[email])
+    return models.UserChecklist.get_cached_page(key_,page,checklist_num_per_page,count,params=[user])
 
 def getUser(user_,nocache=False):
     key_ = "user_"+user_.email()
