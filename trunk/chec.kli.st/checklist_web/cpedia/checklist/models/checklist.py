@@ -21,6 +21,7 @@ import pickle
 from google.appengine.ext import db
 from google.appengine.ext.db import polymodel
 from google.appengine.ext import search
+from google.appengine.api import memcache
 import logging
 import datetime
 import urllib
@@ -32,11 +33,15 @@ import config
 from cpedia.checklist import models
 
 class User(models.SerializableModel):
-    user = db.UserProperty()
+    user = db.UserProperty(required=True)
     date_joined = db.DateTimeProperty(auto_now_add=True)
     checklists_count = db.IntegerProperty(default=0)
     starred_checklists_count = db.IntegerProperty(default=0)
     public_checklists_count = db.IntegerProperty(default=0)
+
+    def save(self):
+        memcache.delete("user_"+self.user.email())
+        self.put()
 
 class Tag(models.SerializableModel):
     user = db.UserProperty()
@@ -111,7 +116,7 @@ class UserChecklist(Checklist):
                 usernew.public_checklists_count=1
             if self.starred is True:
                 usernew.starred_checklists_count=1
-            usernew.put()
+            usernew.save()
         else:
             if not update:
                 users[0].checklists_count+=1
@@ -119,7 +124,7 @@ class UserChecklist(Checklist):
                     users[0].public_checklists_count+=1
                 if self.starred is True:
                     users[0].starred_checklists_count+=1
-                users[0].put()
+                users[0].save()
 
     def save(self):
         self.update_user(False)
@@ -136,7 +141,7 @@ class UserChecklist(Checklist):
         users = User.all().filter('user',self.user).fetch(10)
         if users != []:
             users[0].starred_checklists_count+=1
-            users[0].put()
+            users[0].save()
         self.put()
 
     def unstarred(self):
@@ -144,7 +149,7 @@ class UserChecklist(Checklist):
         users = User.all().filter('user',self.user).fetch(10)
         if users != []:
             users[0].starred_checklists_count-=1
-            users[0].put()
+            users[0].save()
         self.put()
 
     #if a checklist is already public, then the starred method should not be called.
@@ -153,7 +158,7 @@ class UserChecklist(Checklist):
         users = User.all().filter('user',self.user).fetch(10)
         if users != []:
             users[0].public_checklists_count+=1
-            users[0].put()
+            users[0].save()
         self.put()
 
     def unpublic(self):
@@ -161,7 +166,7 @@ class UserChecklist(Checklist):
         users = User.all().filter('user',self.user).fetch(10)
         if users != []:
             users[0].public_checklists_count-=1
-            users[0].put()
+            users[0].save()
         self.put()
 
 
@@ -171,7 +176,7 @@ class UserChecklist(Checklist):
             self.delete()
         else:
             users[0].checklists_count-=1
-            users[0].put()
+            users[0].save()
 
 
 class ChecklistColumn(Tagable):

@@ -66,12 +66,12 @@ class BaseRequestHandler(webapp.RequestHandler):
 class NotFoundHandler(webapp.RequestHandler):
     def get(self):
         self.error(404)
-        view.ViewPage(cache_time=36000).render(self)
+        view.ViewPage(cache_time=36000).render(self,"notfound.html")
 
 class UnauthorizedHandler(webapp.RequestHandler):
     def get(self):
         self.error(403)
-        view.ViewPage(cache_time=36000).render(self)
+        view.ViewPage(cache_time=36000).render(self,"unauthorized.html")
 
 class MainPage(BaseRequestHandler):
     @authorized.role("user")
@@ -153,6 +153,7 @@ class UserChecklist(BaseRequestHandler):
         }
         self.generate('checklist_main.html',template_values)
 
+#create a checklist by login user.
 class CreateList(BaseRequestHandler):
     @authorized.role("user")
     def get(self):
@@ -169,7 +170,7 @@ class CreateList(BaseRequestHandler):
         checklist.description = self.request.get('description')
         checklist.tags_commas = self.request.get('tags')
         checklist.last_updated_user = users.get_current_user()
-        checklist.put()
+        checklist.save()
         columns = self.request.get('checklist_columns')
         checklist_columns = simplejson.loads(columns)
         for column in checklist_columns:
@@ -179,6 +180,56 @@ class CreateList(BaseRequestHandler):
             checklist_column.order = column['order']
             checklist_column.checklist = checklist
             checklist_column.put()
+        self.redirect('/list')
+
+#edit a checklist by login user.
+class ChecklistEditAdmin(BaseRequestHandler):
+    @authorized.role("user")
+    def get(self,checklistKey):
+        checklist = models.UserChecklist.get_cached(checklistKey)
+        checklist_columns = checklist.checklistcolumn_set
+        columns = []
+        for column in checklist_columns:
+            columns +=[column.to_json()]
+        templates = models.ChecklistTemplate.get_cached_list("active_templates")
+        template_values = {
+        "templates":templates,
+        "checklist":checklist,
+        "checklist_columns":simplejson.dumps(columns),
+        }
+        self.generate('checklist_info.html',template_values)
+
+    @authorized.role("user")
+    def post(self,checklistKey):
+        checklist = models.UserChecklist.get_cached(checklistKey)
+        if checklist is not None and checklist.user != users.get_current_user():
+            self.redirect('/403.html')
+        checklist.name = self.request.get('checklistName')
+        checklist.description = self.request.get('description')
+        checklist.tags_commas = self.request.get('tags')
+        checklist.last_updated_date = datetime.datetime.now()
+        checklist.last_updated_user = users.get_current_user()
+
+        checklist_columns = checklist.checklistcolumn_set
+        for column in checklist_columns:
+            column.delete()
+        checklist.update()
+
+        columns = self.request.get('checklist_columns')
+        checklist_columns = simplejson.loads(columns)
+        for column in checklist_columns:
+            checklist_column = models.ChecklistColumnTemplate()
+            checklist_column.name = column['name']
+            checklist_column.type = column['type']
+            checklist_column.order = column['order']
+            checklist_column.checklist_template = checklist
+            checklist_column.put()
+        templates = models.ChecklistTemplate.get_cached_list("active_templates")
+        template_values = {
+        "templates":templates,
+        "checklist":checklist,
+        "checklist_columns":simplejson.dumps(columns),
+        }
         self.redirect('/list')
 
 class CreateQucikList(BaseRequestHandler):
@@ -265,50 +316,4 @@ class TemplateEditAdmin(BaseRequestHandler):
         }
         self.redirect('/admin/templates')
 
-class ChecklistEditAdmin(BaseRequestHandler):
-    @authorized.role("user")
-    def get(self,checklistKey):
-        checklist = models.UserChecklist.get_cached(checklistKey)
-        checklist_columns = checklist.checklistcolumn_set
-        columns = []
-        for column in checklist_columns:
-            columns +=[column.to_json()]
-        templates = models.ChecklistTemplate.get_cached_list("active_templates")
-        template_values = {
-        "templates":templates,
-        "checklist":checklist,
-        "checklist_columns":simplejson.dumps(columns),
-        }
-        self.generate('checklist_info.html',template_values)
-
-    @authorized.role("user")
-    def post(self,checklistKey):
-        checklist = models.UserChecklist.get_cached(checklistKey)
-        checklist.name = self.request.get('checklistName')
-        checklist.description = self.request.get('description')
-        checklist.tags_commas = self.request.get('tags')
-        checklist.last_updated_date = datetime.datetime.now()
-        checklist.last_updated_user = users.get_current_user()
-
-        checklist_columns = checklist.checklistcolumn_set
-        for column in checklist_columns:
-            column.delete()
-        checklist.put()
-
-        columns = self.request.get('checklist_columns')
-        checklist_columns = simplejson.loads(columns)
-        for column in checklist_columns:
-            checklist_column = models.ChecklistColumnTemplate()
-            checklist_column.name = column['name']
-            checklist_column.type = column['type']
-            checklist_column.order = column['order']
-            checklist_column.checklist_template = checklist
-            checklist_column.put()
-        templates = models.ChecklistTemplate.get_cached_list("active_templates")
-        template_values = {
-        "templates":templates,
-        "checklist":checklist,
-        "checklist_columns":simplejson.dumps(columns),
-        }
-        self.redirect('/list')
 
