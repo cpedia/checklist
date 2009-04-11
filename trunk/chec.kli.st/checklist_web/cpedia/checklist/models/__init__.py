@@ -215,8 +215,7 @@ class MemcachedModel(SerializableModel):
                     raise Exception("Query for object page does not define in the Class %s.", cls.__name__)
             except InvalidPage:
                 return None
-        else:
-            return obj_pages[page]
+        return obj_pages[page]
 
 
 class Counter(object):
