@@ -22,7 +22,7 @@ indexes:
   - name: active
   - name: order
 
-# Used 15 times in query history.
+# Used 16 times in query history.
 - kind: UserChecklist
   properties:
   - name: user

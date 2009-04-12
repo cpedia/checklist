@@ -148,10 +148,16 @@ class UserStarredChecklistPage(BaseRequestHandler):
 class UserChecklist(BaseRequestHandler):
     @authorized.role("user")
     def get(self,checklist_key):
-
+        checklist = models.UserChecklist.get_cached(checklistKey)
+        checklist_columns = checklist.checklistcolumn_set
+        columns = []
+        for column in checklist_columns:
+            columns +=[column.to_json()]
         template_values = {
+        "checklist":checklist,
+        "checklist_columns":simplejson.dumps(columns),
         }
-        self.generate('checklist_main.html',template_values)
+        self.generate('checklist_items.html',template_values)
 
 #create a checklist by login user.
 class CreateList(BaseRequestHandler):

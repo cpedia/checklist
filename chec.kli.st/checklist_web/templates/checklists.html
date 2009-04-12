@@ -29,15 +29,18 @@
     YAHOO.util.Event.addListener(window, "load", function() {
         YAHOO.checklist.DynamicData = function() {
             var imageFormatter = function(elCell, oRecord, oColumn) {
-                elCell.innerHTML = '<input type="image" src="/static/images/' + oColumn.key + '.png" name="' + oColumn.key + '" title="' + oColumn.label + ' row" />';
+                elCell.innerHTML = '<input type="image" src="/static/images/starred.png"/>';
                 elCell.style.cursor = 'pointer';
+            };
+            var detailLinkFormatter = function(elCell, oRecord, oColumn,oData) {
+                elCell.innerHTML = '<a href="/list/' + oRecord.getData()['key'] + '"' + '>'+oRecord.getData()[oColumn.key]+'</a>';
             };
             // Column definitions
             var myColumnDefs = [ // sortable:true enables sorting
                 {key:"check",resizeable:true,label:"Select Row",formatter:YAHOO.widget.DataTable.formatCheckbox,className:"align_center"},
                 {key:"starred",resizeable:true,label:"Starred",formatter:imageFormatter,className:"align_center"},
-                {key:"name", label:"Name", sortable:true},
-                {key:"description", label:"Description", sortable:false},
+                {key:"name", label:"Name", formatter:detailLinkFormatter,sortable:true},
+                {key:"description", label:"Description",formatter:detailLinkFormatter, sortable:false},
                 {key:"created_date", label:"Create Date", sortable:true,formatter:"date"},
                 {key:"last_updated_date", label:"Update Date", sortable:true,formatter:"date"},
                 {key:"key",resizeable:true,label:"Edit",formatter:function(elCell, oRecord, oColumn, oData){
