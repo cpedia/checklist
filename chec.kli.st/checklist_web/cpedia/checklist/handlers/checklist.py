@@ -147,7 +147,7 @@ class UserStarredChecklistPage(BaseRequestHandler):
 
 class UserChecklist(BaseRequestHandler):
     @authorized.role("user")
-    def get(self,checklist_key):
+    def get(self,checklistKey):
         checklist = models.UserChecklist.get_cached(checklistKey)
         checklist_columns = checklist.checklistcolumn_set
         columns = []
