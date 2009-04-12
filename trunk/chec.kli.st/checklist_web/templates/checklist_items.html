@@ -1,0 +1,318 @@
+{% extends "base.html" %}
+{% block title %}{{title}} - checklist {% endblock %}
+{% block checklist %}
+<!--CSS file (default YUI Sam Skin) -->
+<link type="text/css" rel="stylesheet"
+      href="http://yui.yahooapis.com/2.7.0/build/datatable/assets/skins/sam/datatable.css">
+<!-- Dependencies -->
+<script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/yahoo-dom-event/yahoo-dom-event.js"></script>
+<script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/element/element-min.js"></script>
+<script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/datasource/datasource-min.js"></script>
+<!-- OPTIONAL: JSON Utility (for DataSource) -->
+<script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/json/json-min.js"></script>
+<!-- OPTIONAL: Connection Manager (enables XHR for DataSource) -->
+<script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/connection/connection-min.js"></script>
+<!-- OPTIONAL: Drag Drop (enables resizeable or reorderable columns) -->
+<script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/dragdrop/dragdrop-min.js"></script>
+<!-- Source files -->
+<script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/datatable/datatable-min.js"></script>
+<script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/button/button-min.js"></script>
+<style type="text/css">
+    .align_center {
+        text-align: center !important;
+    }
+</style>
+<script type="text/javascript">
+    YAHOO.util.Event.addListener(window, "load", function() {
+        YAHOO.checklist.columns.RowDataMod = function() {
+            var imageFormatter = function(elCell, oRecord, oColumn) {
+                elCell.innerHTML = '<input type="image" src="/static/images/' + oColumn.key + '.png" name="' + oColumn.key + '" title="' + oColumn.label + ' row" />';
+                elCell.style.cursor = 'pointer';
+            };
+
+            var myColumnDefs = [
+                {key:"check",resizeable:true,label:"",formatter:YAHOO.widget.DataTable.formatCheckbox,className:"align_center"},
+                {key:"name",resizeable:true,label:"Column Name",editor: new YAHOO.widget.TextboxCellEditor({disableBtns:true})},
+                {key:"type",resizeable:true,label:"Column Type",editor:new YAHOO.widget.DropdownCellEditor({dropdownOptions:["Checkbox","String","Category","Number","Yes/No","Date"],disableBtns:true})},
+                {key:"up",resizeable:true,label:"Up",formatter:imageFormatter},
+                {key:"down",resizeable:true,label:"Down",formatter:imageFormatter}
+            ];
+            {% if checklist %}
+                var myDataSource = new YAHOO.util.DataSource({{checklist_columns}});
+            {% else %}
+                var myDataSource = new YAHOO.util.DataSource([{name:"Checkbox",type:"Checkbox"},{name:"Item",type:"String"}]);
+            {% endif %}
+            myDataSource.responseType = YAHOO.util.DataSource.TYPE_JSARRAY;
+            myDataSource.responseSchema = {
+                fields: ["name","type"]
+            };
+
+            var myDataTable = new YAHOO.widget.DataTable("columns_container",
+                    myColumnDefs, myDataSource, {});
+
+            // Subscribe to events for row selection
+            //myDataTable.subscribe("rowMouseoverEvent", myDataTable.onEventHighlightRow);
+            //myDataTable.subscribe("rowMouseoutEvent", myDataTable.onEventUnhighlightRow);
+            //myDataTable.subscribe("rowClickEvent", myDataTable.onEventSelectRow);
+
+            // Selects any cell that receives a checkbox click
+            myDataTable.subscribe("checkboxClickEvent", function(oArgs) {
+                var elCheckbox = oArgs.target;
+                var elRow = this.getTrEl(elCheckbox);
+                if (elCheckbox.checked) {
+                    this.selectRow(elRow);
+                } else {
+                    this.unselectRow(elRow);
+                }
+            });
+
+            // Move up/down the row that receives a up/down img click
+            myDataTable.subscribe("buttonClickEvent", function(oArgs) {
+                var elImage = oArgs.target;
+                var elRow = this.getTrEl(elImage),
+                        index = this.getTrIndex(elImage),
+                        recordData = this.getRecord(elRow).getData();
+                var mode = elImage.name;
+                if (mode == "up") {
+                    if (!YAHOO.lang.isNull(this.getPreviousTrEl(elImage))) {
+                        this.deleteRow(index);
+                        this.addRows([{name:recordData.name, type:recordData.type}], index - 1);
+                    }
+                } else if (mode == "down") {
+                    if (!YAHOO.lang.isNull(this.getNextTrEl(elImage))) {
+                        this.deleteRow(index);
+                        this.addRows([{name:recordData.name, type:recordData.type}], index + 1);
+                    }
+                }
+            });
+
+            myDataTable.subscribe("cellClickEvent", myDataTable.onEventShowCellEditor);
+
+            var getSelectedColumns = function(columns_choices) {
+                if (columns_choices && columns_choices.selectedIndex != -1) {
+                    var allData = [];
+                    for (var i = 0,options = columns_choices.options; i < options.length; i++) {
+                        if (options[i].selected) {
+                            allData.push({name:options[i].value, type:options[i].className});
+                        }
+                    }
+                    return allData;
+                }
+                else {
+                    return [];
+                }
+            };
+
+            // Add/update/delete rows as indicated
+            var handleClick = function() {
+                var mode = this.id,
+                        columns_choices = YAHOO.util.Dom.get("columns_choices"),
+                        index = myDataTable.getRecordSet().getLength();
+
+                if (YAHOO.lang.isNumber(index)) {
+                    switch (mode) {
+                        case "addColumn":
+                            var selectedColumns = getSelectedColumns(columns_choices);
+                            if (selectedColumns.length > 0) {
+                                myDataTable.addRows(selectedColumns, index);
+                            }
+                            return;
+                        case "deleteColumn":
+                            var selected = myDataTable.getSelectedRows();
+                            var rset = myDataTable.getRecordSet();
+                            for (var x = 0; x < selected.length; x++) {
+                                myDataTable.deleteRow(rset.getRecordIndex(rset.getRecord(selected[x])));
+                            }
+                            return;
+                        default:
+                            break;
+                    }
+
+                }
+                YAHOO.log("Could not continue due to invalid index.");
+            };
+
+            var getDataSet = function(myDataTable) {
+                var allData = [];
+                for (var i = 0,recordSet = myDataTable.getRecordSet(); i < recordSet.getLength(); i++) {
+                    var data = recordSet.getRecord(i).getData();
+                    data['order'] = i;
+                    allData.push(data);
+                }
+                return allData;
+            };
+
+            //save template.
+            var saveChecklist = function() {
+                var checklistName = YAHOO.util.Dom.get("checklistName").value;
+                if (checklistName.trim() == "") {
+                    alert("Please input checklist name.");
+                    YAHOO.util.Dom.get("checklistName").focus();
+                    return;
+                }
+
+                var tags = YAHOO.util.Dom.get("tags");
+                tags.value = tags.value.trim();
+                
+                var index = myDataTable.getRecordSet().getLength();
+                if (YAHOO.lang.isNumber(index) && index > 0) {
+                    var formObject = YAHOO.util.Dom.get('submitForm');
+                    formObject["checklist_columns"].value = YAHOO.lang.JSON.stringify(getDataSet(myDataTable));
+                    {% if checklist %}
+                    formObject.action = "/edit/list/{{template.key}}";
+                    {% else %}
+                    formObject.action = "/create/list";
+                    {% endif %}
+                    formObject.submit();
+                } else {
+                    alert("Please choose at least one column to your checklist.");
+                    YAHOO.util.Dom.get("columns_choices").focus();
+                }
+            };
+
+            var cancelClick = function(){
+                 window.location.href = "/list";
+            };
+            var checkChooseColumns = function(){
+                if(this.checked){
+                    YAHOO.util.Dom.setStyle(['columns_selector'], 'display', "");
+                }else{
+                    YAHOO.util.Dom.setStyle(['columns_selector'], 'display', "none");
+                }
+            };
+            var selectTemplate = function(){
+                var template_key = YAHOO.util.Dom.get("template_choice").value;
+                if (template_key!=null && template_key.trim()!="") {
+                    YAHOO.util.Connect.asyncRequest('POST', '/json/getTemplate',
+                    {
+                        success: function (o) {
+                            if (!YAHOO.lang.isNull(o.responseText)) {
+                                var responese = YAHOO.lang.JSON.parse(o.responseText);
+                                YAHOO.util.Dom.get("template_desc").innerHTML = responese.template.description;
+                                myDataTable.initializeTable();
+                                myDataTable.addRows(responese.columns);
+                                myDataTable.render();
+                            }
+                        },
+                        failure: function (o) {
+                            alert(o.statusText);
+                        },
+                        scope:this
+                    }, "template_key=" + template_key
+                            );
+                }else{
+                    YAHOO.util.Dom.get("template_desc").innerHTML = "";
+                }
+                
+            };
+
+            {% if checklist %}
+                YAHOO.util.Dom.setStyle(['columns_selector'], 'display', "");
+                YAHOO.util.Dom.get("chooese_columns_chkbox").checked = true;
+            {% else %}
+                YAHOO.util.Dom.setStyle(['columns_selector'], 'display', "none");
+                YAHOO.util.Dom.get("chooese_columns_chkbox").checked = false;
+            {% endif %}
+
+            YAHOO.util.Event.addListener(["addColumn","deleteColumn"], "click", handleClick);
+            YAHOO.util.Event.addListener("updateBtn", "click", saveChecklist);
+            YAHOO.util.Event.addListener("cancelBtn", "click", cancelClick);
+            YAHOO.util.Event.addListener("template_choice", "change", selectTemplate);
+            YAHOO.util.Event.addListener("chooese_columns_chkbox", "click", checkChooseColumns);
+            return {
+                ds: myDataSource,
+                dt: myDataTable
+            };
+        }();
+    });
+</script>
+<div>
+    <form method=post id="submitForm">
+        <input name=checklist_columns type="hidden"/>
+        <table class="noborder_table">
+            <tr>
+                <td style="width:235px">
+                    Checklist name:
+                </td>
+                <td><input type="text" size="50" id="checklistName" name="checklistName" value="{% if checklist %}{{checklist.name}}{% endif %}"></td>
+            </tr>
+            <tr>
+                <td>Checklist description:</td>
+                <td><textarea rows="2" cols="47" id="description" name="description">{% if checklist %}{{checklist.description}}{% endif %}</textarea></td>
+            </tr>
+            <tr>
+                <td>Tags:</td>
+                <td><input type=text size="50" id="tags" name="tags" value="{% if checklist %}{{checklist.tags_commas}}{% endif %}">
+                    <div class="form_desc">Seperated by commas. E.g. shopping, book, favorite song</div>
+                </td>
+            </tr>
+            <tr>
+                <td>Checklist template:</td>
+                <td>
+                    <select id="template_choice">
+                            <option value="" selected>--</option>
+                        {% for template in checklist_templates %}
+                            <option value="{{template.key}}">{{template.name}}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>&nbsp;</td>
+                <td><div id="template_desc"></div></td>
+            </tr>
+            <tr>
+                <td>Choose more checklist column(s):</td>
+                <td><input type="checkbox" id="chooese_columns_chkbox"></td>
+            </tr>
+            <tr>
+                <td>
+                    <table id="columns_selector">
+                        <tr>
+                            <td>
+                                Columns selector:<br>
+                                <select multiple id="columns_choices"
+                                        style="width:185px;height:230px;font-family:Courier New,monospace">
+                                    <option value="Checkbox" class="Checkbox"> Checkbox----Checkbox</option>
+                                    <option value="Item" class="String"> Item--------String</option>
+                                    <option value="Flag" class="Yes/No"> Flag--------Yes/No</option>
+                                    <option value="Priority" class="Number"> Priority----Number</option>
+                                    <option value="Amount" class="Number"> Amount------Number</option>
+                                    <option value="Units" class="Category"> Units-------Category</option>
+                                    <option value="Category" class="Category"> Category----Category</option>
+                                    <option value="Date" class="Date"> Date--------Date</option>
+                                    <option value="Notes" class="String"> Notes-------String</option>
+                                    <option value="New" class="String"> --New-------String</option>
+                                    <option value="New" class="Category"> --New-------Category</option>
+                                    <option value="New" class="Number"> --New-------Number</option>
+                                    <option value="New" class="Yes/No"> --New-------Yes/No</option>
+                                    <option value="New" class="Date"> --New-------Date</option>
+                                </select>
+                            </td>
+                            <td style="text-align:center;line-height:10px">
+                                <input type="button" value=">" class="movebutton" id="addColumn">
+                                <br><br>
+                                <input type="button" value="<" class="movebutton" id="deleteColumn">
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+                <td>
+                    The columns you would like to have in your checklist:
+                    <div id="columns_container"
+                         style="overflow:auto;height:230px;font-family:Courier New,monospace">
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <input type="button" id="updateBtn" value="Submit">
+                    <input type="button" id="cancelBtn" value="Cancel">
+                </td>
+            </tr>
+        </table>
+    </form>
+</div>
+<br>
+{% endblock %}
+
