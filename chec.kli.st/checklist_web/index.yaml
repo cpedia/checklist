@@ -16,20 +16,28 @@ indexes:
   - name: active
   - name: ORDER
 
-# Used 90 times in query history.
+# Used 91 times in query history.
 - kind: ChecklistTemplate
   properties:
   - name: active
   - name: order
 
-# Used 3 times in query history.
+# Used 12 times in query history.
 - kind: Tag
   properties:
   - name: user
   - name: entrycount
     direction: desc
 
-# Used 11 times in query history.
+# Used 10 times in query history.
+- kind: UserChecklist
+  properties:
+  - name: tags
+  - name: user
+  - name: last_updated_date
+    direction: desc
+
+# Used 21 times in query history.
 - kind: UserChecklist
   properties:
   - name: user

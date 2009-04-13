@@ -39,9 +39,9 @@ class User(models.SerializableModel):
     starred_checklists_count = db.IntegerProperty(default=0)
     public_checklists_count = db.IntegerProperty(default=0)
 
-    def save(self):
+    def put(self):
         memcache.delete("user_"+self.user.email())
-        self.put()
+        super(User, self).put()
 
 class Tag(models.SerializableModel):
     user = db.UserProperty(required=True)
@@ -49,9 +49,9 @@ class Tag(models.SerializableModel):
     entrycount = db.IntegerProperty(default=0)
     valid = db.BooleanProperty(default = True)
 
-    def save_or_update(self):
+    def put(self):
         memcache.delete("tag_"+str(self.user.email())) 
-        self.put()
+        super(Tag, self).put()
 
 class Tagable(models.MemcachedModel):
     tags = db.ListProperty(db.Category)
@@ -102,7 +102,7 @@ class UserChecklist(Checklist):
         "user_checklist": 'select * from UserChecklist WHERE user=:1 ORDER BY last_updated_date desc',
         "user_starred_checklist": 'select * from UserChecklist WHERE user=:1 and starred = TRUE ORDER BY last_updated_date desc',
         "user_public_checklist": 'select * from UserChecklist WHERE user=:1 and public =TRUE ORDER BY last_updated_date desc',
-        "user_tag_checklist": 'select * from UserChecklist WHERE user=:1 and tags=:2 public =TRUE ORDER BY last_updated_date desc',
+        "user_tag_checklist": 'select * from UserChecklist WHERE user=:1 and tags=:2 ORDER BY last_updated_date desc',
     }
     
     user = db.UserProperty(required=True)
@@ -121,7 +121,7 @@ class UserChecklist(Checklist):
                 usernew.public_checklists_count=1
             if self.starred is True:
                 usernew.starred_checklists_count=1
-            usernew.save()
+            usernew.put()
         else:
             if not update:
                 users[0].checklists_count+=1
@@ -129,7 +129,7 @@ class UserChecklist(Checklist):
                     users[0].public_checklists_count+=1
                 if self.starred is True:
                     users[0].starred_checklists_count+=1
-                users[0].save()
+                users[0].put()
 
     def update_tags(self,update):
         """Update Tag cloud info"""
@@ -139,11 +139,12 @@ class UserChecklist(Checklist):
                 tags = Tag.all().filter('tag',tag_).filter('user',self.user).fetch(10)
                 if tags == []:
                     tagnew = Tag(tag=tag_,user=self.user,entrycount=1)
-                    tagnew.save_or_update()
+                    tagnew.put()
                 else:
+                    memcache.delete(self.__class__.__name__+"_page_"+"user_tag_checklist"+"_"+str(self.user.email())+"_"+tag_)                    
                     if not update:
                         tags[0].entrycount+=1
-                        tags[0].save_or_update()
+                        tags[0].put()
 
     def save(self):
         self.update_user(False)
@@ -162,7 +163,7 @@ class UserChecklist(Checklist):
         users = User.all().filter('user',self.user).fetch(10)
         if users != []:
             users[0].starred_checklists_count+=1
-            users[0].save()
+            users[0].put()
         self.put()
 
     def unstarred(self):
@@ -170,7 +171,7 @@ class UserChecklist(Checklist):
         users = User.all().filter('user',self.user).fetch(10)
         if users != []:
             users[0].starred_checklists_count-=1
-            users[0].save()
+            users[0].put()
         self.put()
 
     #if a checklist is already public, then the starred method should not be called.
@@ -179,7 +180,7 @@ class UserChecklist(Checklist):
         users = User.all().filter('user',self.user).fetch(10)
         if users != []:
             users[0].public_checklists_count+=1
-            users[0].save()
+            users[0].put()
         self.put()
 
     def unpublic(self):
@@ -187,7 +188,7 @@ class UserChecklist(Checklist):
         users = User.all().filter('user',self.user).fetch(10)
         if users != []:
             users[0].public_checklists_count-=1
-            users[0].save()
+            users[0].put()
         self.put()
 
 
@@ -197,7 +198,7 @@ class UserChecklist(Checklist):
             pass
         else:
             users[0].checklists_count-=1
-            users[0].save()
+            users[0].put()
         if self.tags:
             for tag_ in self.tags:
                 #tag_ = tag.encode('utf8')
@@ -208,8 +209,8 @@ class UserChecklist(Checklist):
                     #The only case to update a tag. The tag can not be deleted.
                     memcache.delete(self.__class__.__name__+"_page_"+"user_tag_checklist"+"_"+str(self.user.email())+"_"+tag_)
                     tags[0].entrycount-=1
-                    tags[0].save_or_update()
-        self.delete()
+                    tags[0].put()
+        super(UserChecklist, self).delete()
 
 
 

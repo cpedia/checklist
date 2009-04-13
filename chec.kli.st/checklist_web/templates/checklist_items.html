@@ -32,19 +32,24 @@
 
             var myColumnDefs = [
                 {key:"check",resizeable:true,label:"",formatter:YAHOO.widget.DataTable.formatCheckbox,className:"align_center"},
-                {key:"name",resizeable:true,label:"Column Name",editor: new YAHOO.widget.TextboxCellEditor({disableBtns:true})},
-                {key:"type",resizeable:true,label:"Column Type",editor:new YAHOO.widget.DropdownCellEditor({dropdownOptions:["Checkbox","String","Category","Number","Yes/No","Date"],disableBtns:true})},
+                {% for column in checklist_columns%}
+                   {key:"{{column.name}}",resizeable:true,label:"{{column.name}}"},
+                {% endfor %}
                 {key:"up",resizeable:true,label:"Up",formatter:imageFormatter},
                 {key:"down",resizeable:true,label:"Down",formatter:imageFormatter}
             ];
 
-            var myDataSource = new YAHOO.util.DataSource([{name:"Checkbox",type:"Checkbox"},{name:"Item",type:"String"}]);
+            var myDataSource = new YAHOO.util.DataSource({{checklist.checklist_items}});
             myDataSource.responseType = YAHOO.util.DataSource.TYPE_JSARRAY;
             myDataSource.responseSchema = {
-                fields: ["name","type"]
+                fields: [
+                    {% for column in checklist_columns%}
+                          "{{column.name}}"{% if not forloop.last %},{% endif %}
+                    {% endfor %}
+                        ]
             };
 
-            var myDataTable = new YAHOO.widget.DataTable("columns_container",
+            var myDataTable = new YAHOO.widget.DataTable("checklist_items",
                     myColumnDefs, myDataSource, {});
 
             // Selects any cell that receives a checkbox click
@@ -76,6 +81,7 @@
                     Checklist name:
                 </td>
                 <td>{% if checklist %}{{checklist.name}}{% endif %}</td>
+                <td align="right"><img src="/static/images/printer.png">Print</td>
             </tr>
             <tr>
                 <td>Checklist description:</td>
@@ -91,7 +97,14 @@
             </tr>
         </table>
     </form>
-    <div id="checklist_items"></div>
+    <br>
+    <div>
+        <div style="padding-bottom:3px">
+            <button id="addItem">Create New Item</button>
+            <button id="deleteItem">Delete</button>
+        </div>
+       <div id="checklist_items"></div>
+    </div>
 </div>
 <br>
 {% endblock %}
