@@ -132,4 +132,20 @@ class RPCHandler(webapp.RequestHandler):
         returnValue = {"records":checklists,"totalRecords":totalRecords,"startIndex":startIndex}
         return returnValue
 
+    #get taged checklist list.
+    @authorized.role('user')
+    def getUserTagChecklists(self,tag,startIndex,checklist_num_per_page):
+        user = users.get_current_user()
+        page = startIndex +1
+        #get checklist pagination from cache.
+        checklist_page = cache_util.getUserTagChecklistPagination(user,tag,page,checklist_num_per_page)
+        checklists = []
+        totalRecords = 0
+        if checklist_page is not None:
+            for checklist in checklist_page.object_list:
+                checklists+=[checklist.to_json()]
+            totalRecords = checklist_page.paginator.count
+        returnValue = {"records":checklists,"totalRecords":totalRecords,"startIndex":startIndex}
+        return returnValue
+
 

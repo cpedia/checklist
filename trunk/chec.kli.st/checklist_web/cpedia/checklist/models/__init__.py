@@ -121,7 +121,7 @@ class MemcachedModel(SerializableModel):
     def delete(self):
         super(MemcachedModel, self).delete()
         self.delete_cached_list_page()
-        if self.key():
+        if self.is_saved():
             memcache.delete(self.__class__.memcache_object_key(self.key()))
 
 

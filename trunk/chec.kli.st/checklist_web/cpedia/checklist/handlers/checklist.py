@@ -322,4 +322,11 @@ class TemplateEditAdmin(BaseRequestHandler):
         }
         self.redirect('/admin/templates')
 
+class TagHandler(BaseRequestHandler):
+    def get(self, encoded_tag):
+        tag = encoded_tag
+        template_values = {
+          'tag':tag,
+          }
+        self.generate('checklists_tagged.html',template_values)
 

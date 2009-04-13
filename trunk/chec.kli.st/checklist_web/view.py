@@ -33,6 +33,8 @@ import string
 
 import config
 
+import cpedia.checklist.cache.util as cache_util
+
 
 class ViewPage(object):
     def __init__(self, cache_time=None):
@@ -56,6 +58,7 @@ class ViewPage(object):
                 'sign_url': url,
                 'request': handler.request,
                 "user_is_admin": users.is_current_user_admin(),
+                "user_tags": cache_util.get_user_tags(users.get_current_user()),
             }
             template_params.update(params)
             return template.render(template_file, template_params, debug=config.DEBUG)

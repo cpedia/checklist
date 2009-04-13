@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}{{title}} - checklists{% endblock %}
+{% block title %}{{title}} - checklists - {{tag|unquote}}{% endblock %}
 {% block checklist %}
 <!--CSS file (default YUI Sam Skin) -->
 <link type="text/css" rel="stylesheet"
@@ -27,7 +27,7 @@
 </style>
 <script type="text/javascript">
     YAHOO.util.Event.addListener(window, "load", function() {
-        YAHOO.checklist.DynamicData = function() {
+        YAHOO.checklist.TagedDynamicData = function() {
             var imageFormatter = function(elCell, oRecord, oColumn) {
                 elCell.innerHTML = '<input type="image" src="/static/images/star.png"/>';
                 elCell.style.cursor = 'pointer';
@@ -62,7 +62,7 @@
             };
 
             // DataSource instance
-            var myDataSource = new YAHOO.util.DataSource("/json/getUserChecklists");
+            var myDataSource = new YAHOO.util.DataSource("/json/getUserTagChecklists");
             myDataSource.responseType = YAHOO.util.DataSource.TYPE_JSON;
             myDataSource.responseSchema = {
                 resultsList: "records",
@@ -187,8 +187,7 @@
     });
 </script>
 <div>
-    Checklists<br><br>
-
+    Checklists tagged by <em>{{tag|unquote}}</em><br><br>
     <div style="padding-bottom:3px">
         <button id="addChecklist">Create New Checklist</button>
         <button id="deleteChecklist">Delete</button>

@@ -17,8 +17,12 @@
 </div>
     <br><br>
 <fieldset id="checklist_tags_div">
-    <legend>Popular Tags</legend>
+    <legend>My Tags</legend>
     <div class="fieldsetdiv">
-        Shopping ToDO GTD
+        {%if user_tags%}
+        {%for tag in user_tags%}
+        <a href="/tag/{{tag.tag|unquote}}">{{tag.tag|unquote}}</a>{% if not forloop.last %},{% endif %}&nbsp; 
+        {% endfor%}
+        {% endif%}
     </div>
 </fieldset>
