@@ -50,7 +50,7 @@
             };
 
             var myDataTable = new YAHOO.widget.DataTable("checklist_items",
-                    myColumnDefs, myDataSource, {});
+                    myColumnDefs, myDataSource, {draggableColumns:true});
 
             // Selects any cell that receives a checkbox click
             myDataTable.subscribe("checkboxClickEvent", function(oArgs) {
