@@ -4,6 +4,8 @@
 <!--CSS file (default YUI Sam Skin) -->
 <link type="text/css" rel="stylesheet"
       href="http://yui.yahooapis.com/2.7.0/build/datatable/assets/skins/sam/datatable.css">
+<link rel="stylesheet" type="text/css"
+      href="http://yui.yahooapis.com/2.7.0/build/container/assets/skins/sam/container.css">
 <!-- Dependencies -->
 <script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/yahoo-dom-event/yahoo-dom-event.js"></script>
 <script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/element/element-min.js"></script>
@@ -17,6 +19,8 @@
 <!-- Source files -->
 <script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/datatable/datatable-min.js"></script>
 <script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/button/button-min.js"></script>
+<script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/animation/animation-min.js"></script>
+<script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/container/container-min.js"></script>        
 <style type="text/css">
     .align_center {
         text-align: center !important;
@@ -65,6 +69,16 @@
 
             myDataTable.subscribe("cellClickEvent", myDataTable.onEventShowCellEditor);
 
+           var dialog1 = new YAHOO.widget.Dialog("dialog_addItem", 
+                                        { width : "30em",
+                                          fixedcenter : true,
+                                          visible : false,
+                                          constraintoviewport : true,
+                                          buttons : [ { text:"Submit", handler:handleSubmit, isDefault:true },
+                                                  { text:"Cancel", handler:handleCancel } ]
+                                        });
+
+
             return {
                 ds: myDataSource,
                 dt: myDataTable
@@ -105,6 +119,14 @@
         </div>
        <div id="checklist_items"></div>
     </div>
+</div>
+<div id="dialog_addItem">
+<div class="hd">Please enter your information</div>
+<div class="bd">
+<form method="POST" action="assets/post.php">
+    <label for="firstname">First Name:</label><input type="textbox" name="firstname" />
+</form>
+</div>
 </div>
 <br>
 {% endblock %}
