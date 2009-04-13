@@ -57,8 +57,8 @@
             };
 
             var buildQueryString = function (state, dt) {
-                return "?arg0=" + state.pagination.recordOffset +
-                       "&arg1=" + state.pagination.rowsPerPage + '&time=' + new Date().getTime();
+                return "?arg0="+encodeURIComponent("{{tag|unquote}}")+"&arg1=" + state.pagination.recordOffset +
+                       "&arg2=" + state.pagination.rowsPerPage + '&time=' + new Date().getTime();
             };
 
             // DataSource instance
@@ -87,7 +87,7 @@
 
             // DataTable configuration
             var myConfigs = {
-                initialRequest: "?arg0=0&arg1=10&time=" + new Date().getTime(),  //'startIndex=0&results=25'
+                initialRequest: "?arg0=\""+encodeURIComponent("{{tag|unquote}}")+"\"&arg1=0&arg2=10&time=" + new Date().getTime(),  //'startIndex=0&results=25'
                 generateRequest: buildQueryString,
                 dynamicData: true, // Enables dynamic server-driven data
                 sortedBy : {key:"last_updated_date", dir:YAHOO.widget.DataTable.CLASS_ASC}, // Sets UI initial sort arrow

@@ -116,6 +116,31 @@ class RPCHandler(webapp.RequestHandler):
             template.put()
         return True
 
+    #get checklist.
+    def getChecklist(self,request):
+        checklist_key = request.get("checklist_key")
+        checklist = models.UserChecklist.get_cached(checklist_key)
+        columns = []
+        for column in checklist.checklistcolumn_set:
+            columns+=[column.to_json()]
+        returnValue = {"columns":columns,"checklist":checklist.to_json()}
+        return returnValue
+
+    @authorized.role('user')
+    def deleteChecklists(self,request):
+        checklist_keys = request.get("checklist_keys")
+        checklists =  models.UserChecklist.get(checklist_keys.split(","))
+        for checklist in checklists:
+            checklist_columns = checklist.checklistcolumn_set
+            for column in checklist_columns:
+                column.delete()
+            checklist_items = checklist.checklistitem_set
+            for item in checklist_items:
+                item.delete()
+            checklist.delete()
+        return True
+
+
     #get checklist template list.
     @authorized.role('admin')
     def getUserChecklists(self,startIndex,checklist_num_per_page):
@@ -137,6 +162,7 @@ class RPCHandler(webapp.RequestHandler):
     def getUserTagChecklists(self,tag,startIndex,checklist_num_per_page):
         user = users.get_current_user()
         page = startIndex +1
+        tag = tag.replace("\"","")
         #get checklist pagination from cache.
         checklist_page = cache_util.getUserTagChecklistPagination(user,tag,page,checklist_num_per_page)
         checklists = []

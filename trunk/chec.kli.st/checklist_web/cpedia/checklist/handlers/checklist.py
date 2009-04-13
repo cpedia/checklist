@@ -150,12 +150,14 @@ class UserChecklist(BaseRequestHandler):
     def get(self,checklistKey):
         checklist = models.UserChecklist.get_cached(checklistKey)
         checklist_columns = checklist.checklistcolumn_set
-        columns = []
-        for column in checklist_columns:
-            columns +=[column.to_json()]
+        checklist_items = checklist.checklistitem_set
+        items = []
+        for item in checklist_items:
+            items +=[item.to_json()]
         template_values = {
         "checklist":checklist,
-        "checklist_columns":simplejson.dumps(columns),
+        "checklist_columns":checklist_columns,
+        "checklist_items":simplejson.dumps(items),
         }
         self.generate('checklist_items.html',template_values)
 
