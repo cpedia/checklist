@@ -57,6 +57,12 @@ def getUserPublicChecklistPagination(user,page,checklist_num_per_page):
     count = user_obj.public_checklists_count
     return models.UserChecklist.get_cached_page(key_,page,checklist_num_per_page,count,params=[user])
 
+#get user's checklists pagination by Tag. Cached.
+def getUserTagChecklistPagination(user,tag,page,checklist_num_per_page):
+    key_ = "user_tag_checklist"
+    #todo: we assue the user will not have more than 1000 checklists for one tag, so we don't pass the count parameter.
+    return models.UserChecklist.get_cached_page(key_,page,checklist_num_per_page,params=[user,tag])
+
 def getUser(user_,nocache=False):
     key_ = "user_"+user_.email()
     try:
@@ -73,3 +79,19 @@ def getUser(user_,nocache=False):
     else:
         logging.debug("getUser from cache.")
     return user
+
+
+def get_user_tags(user_,nocache=False):
+    if user_ is not None:
+        key_ = "tag_"+user_.email()
+        try:
+            tags = memcache.get(key_)
+        except Exception:
+            tags = None
+        if nocache or tags is None:
+            tags = models.Tag.gql('WHERE user=:1 ORDER BY entrycount desc',user_).fetch(1000)
+            memcache.add(key=key_, value=tags)
+        else:
+            logging.debug("get_user_tags from cache.")
+        return tags
+    return None

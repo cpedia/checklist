@@ -10,19 +10,26 @@ indexes:
 # automatically uploaded to the admin console when you next deploy
 # your application using appcfg.py.
 
-# Used 19 times in query history.
+# Used 35 times in query history.
 - kind: ChecklistTemplate
   properties:
   - name: active
   - name: ORDER
 
-# Used 6 times in query history.
+# Used 90 times in query history.
 - kind: ChecklistTemplate
   properties:
   - name: active
   - name: order
 
-# Used 16 times in query history.
+# Used 3 times in query history.
+- kind: Tag
+  properties:
+  - name: user
+  - name: entrycount
+    direction: desc
+
+# Used 11 times in query history.
 - kind: UserChecklist
   properties:
   - name: user

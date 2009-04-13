@@ -246,6 +246,7 @@
                     <div class="form_desc">Seperated by commas. E.g. shopping, book, favorite song</div>
                 </td>
             </tr>
+            {% if not checklist %}
             <tr>
                 <td>Checklist template:</td>
                 <td>
@@ -261,6 +262,7 @@
                 <td>&nbsp;</td>
                 <td><div id="template_desc"></div></td>
             </tr>
+            {% endif %}
             <tr>
                 <td>Choose more checklist column(s):</td>
                 <td><input type="checkbox" id="chooese_columns_chkbox"></td>

@@ -55,6 +55,7 @@ def main():
                                         ('/list/starred/(.*)/*$', checklist.UserStarredChecklistPage),
                                         ('/list/user/(.*)/*$', checklist.UserPublicChecklistPage),
                                         ('/list/(.*)/*$', checklist.UserChecklist),
+                                        ('/tag/(.*)/*$', checklist.TagHandler),
                                         ('/*$', checklist.MainPage),
                                        ],
                                        debug=config.DEBUG)
