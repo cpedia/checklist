@@ -66,20 +66,34 @@
                     this.unselectRow(elRow);
                 }
             });
-
             myDataTable.subscribe("cellClickEvent", myDataTable.onEventShowCellEditor);
 
-           var dialog1 = new YAHOO.widget.Dialog("dialog_addItem", 
-                                        { width : "30em",
-                                          fixedcenter : true,
-                                          visible : false,
-                                          constraintoviewport : true,
-                                          buttons : [ { text:"Submit", handler:handleSubmit, isDefault:true },
-                                                  { text:"Cancel", handler:handleCancel } ]
-                                        });
+            // Define various event handlers for Dialog
+            var handleSubmit = function() {
+                
+                //this.submit();
+            };
+            var handleCancel = function() {
+                this.cancel();
+            };
+            var myDlg = new YAHOO.widget.SimpleDialog("dialog_addItem",
+            { width : "30em",
+                fixedcenter : true,
+                visible : false,
+                constraintoviewport : true,
+                buttons : [ { text:"Submit", handler:handleSubmit },
+                    { text:"Cancel", handler:handleCancel } ]
+            });
+            myDlg.render();
 
+            // Nulls out myDlg to force a new one to be created
+            myDataTable.subscribe("columnReorderEvent", function() {
 
-            return {
+            }, this, true);
+
+            YAHOO.util.Event.addListener("addItem", "click", myDlg.show, myDlg, true);
+
+    return {
                 ds: myDataSource,
                 dt: myDataTable
             };
@@ -87,7 +101,6 @@
     });
 </script>
 <div>
-    <form method=post id="submitForm">
         <input name=checklist_columns type="hidden"/>
         <table class="noborder_table">
             <tr>
@@ -110,7 +123,6 @@
                 </td>
             </tr>
         </table>
-    </form>
     <br>
     <div>
         <div style="padding-bottom:3px">
@@ -121,11 +133,14 @@
     </div>
 </div>
 <div id="dialog_addItem">
-<div class="hd">Please enter your information</div>
+<div class="hd">Please enter the item information</div>
 <div class="bd">
-<form method="POST" action="assets/post.php">
-    <label for="firstname">First Name:</label><input type="textbox" name="firstname" />
-</form>
+    <table class="noborder_table">
+    {% for column in checklist_columns %}
+        <tr><td> <label for="{{column.name}}">{{column.name}}:</label></td>
+            <td><input type="textbox" name="{{column.name}}" /></td></tr>
+    {% endfor %}
+     </table>
 </div>
 </div>
 <br>
