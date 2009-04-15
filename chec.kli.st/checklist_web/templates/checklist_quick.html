@@ -11,12 +11,14 @@
            var Event = YAHOO.util.Event;
            //var DDM = YAHOO.util.DragDropMgr;
            var deleteChecklistItem = function(e){
-               var delete_icon = YAHOO.util.Event.getTarget(e);
-               var li = delete_icon.parentNode;
-               Dom.get("item_list").removeChild(li);
-               var delete_icons = Dom.getElementsByClassName("delete_icon");
-               if(delete_icons.length==1){
-                 Dom.setStyle(delete_icons[0],"display","none");
+               if (Dom.getChildren("item_list").length>1) {
+                   var delete_icon = YAHOO.util.Event.getTarget(e);
+                   var li = delete_icon.parentNode;
+                   Dom.get("item_list").removeChild(li);
+                   var delete_icons = Dom.getElementsByClassName("delete_icon");
+                   if (delete_icons.length == 1) {
+                       Dom.setStyle(delete_icons[0], "display", "none");
+                   }
                }
            };
            var addChecklistItem = function(e){
@@ -25,7 +27,8 @@
                    target.checked=false;
                }
                var item_list = Dom.get("item_list");
-               var node = item_list.childNodes[1].cloneNode(true);
+               var node = Dom.getFirstChild("item_list").cloneNode(true);
+               Event.addListener(node, 'click', deleteChecklistItem);               
                item_list.appendChild(node);
                var delete_icons = Dom.getElementsByClassName("delete_icon");
                if(delete_icons.length >1){
