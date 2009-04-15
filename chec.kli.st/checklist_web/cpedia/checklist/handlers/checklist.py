@@ -246,7 +246,7 @@ class CreateQucikList(BaseRequestHandler):
 
         template_values = {
         }
-        self.generate('checklist_main.html',template_values)
+        self.generate('checklist_quick.html',template_values)
 
 class TemplateListAdmin(BaseRequestHandler):
     @authorized.role("admin")

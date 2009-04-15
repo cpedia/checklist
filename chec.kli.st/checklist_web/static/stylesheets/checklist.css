@@ -13,6 +13,10 @@ a:hover {
     background-color: #F4F2E4;
 }
 
+p {
+    padding: 0 0 1em!important;
+}
+
 .gbh {
     border-top: 1px solid #C9D7F1;
     height: 4px;
@@ -66,12 +70,13 @@ a:hover {
 
 #footer {
     background: #fbfaf4;
-    height: 2.5em;
+    height: 3.5em;
     margin-bottom: 20px;
     margin-top: 20px;
     min-width: 750px;
     overflow: hidden;
     text-align: center;
+    line-height:1.5em;
 }
 
 #google_ad {
@@ -96,4 +101,48 @@ a:hover {
 .form_desc {
     font-size: 8pt;
     padding-bottom: 5px;
+}
+
+input#checklist_name {
+    font-size: 1.3em;
+    width: 100%;
+    font-weight:bold;
+}
+
+input.checklist_item_block_name {
+    width: 60%;
+    font-weight:bold;
+}
+input.checklist_item {
+    width: 80%;
+    font-weight:normal;
+}
+#checklist_items li{
+    line-height:1.5em;
+    padding:0.5em 0 0 0;
+}
+textarea#checklist_desc {
+    width: 100%;
+}
+
+div.editable_div {
+    background-color: #FFF4C2;
+}
+
+div.saved {
+    background-color: #FFFFFF;
+}
+
+div.checklist_item_block {
+    cursor: move;
+    padding: 0.5em 2em 1.5em;
+    position: relative;
+}
+.delete_icon {
+    background:url(/static/images/delete_16x16.gif) no-repeat;
+    height: 16px;
+    margin-left: 5px;
+    width: 20px;
+    position:relative;
+    cursor:pointer
 }
