@@ -22,7 +22,7 @@ indexes:
   - name: active
   - name: order
 
-# Used 12 times in query history.
+# Used 13 times in query history.
 - kind: Tag
   properties:
   - name: user

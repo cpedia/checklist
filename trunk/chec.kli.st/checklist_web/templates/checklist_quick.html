@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}{{title}} - checklists{% endblock %}
+{% block checklist %}
+<script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/yahoo-dom-event/yahoo-dom-event.js"></script>
+<script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/animation/animation-min.js"></script>
+<script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/dragdrop/dragdrop-min.js"></script>
+<script type="text/javascript">
+   YAHOO.util.Event.addListener(window, "load", function() {
+       YAHOO.checklist.items.DDMod = function() {
+           var Dom = YAHOO.util.Dom;
+           var Event = YAHOO.util.Event;
+           //var DDM = YAHOO.util.DragDropMgr;
+           var deleteChecklistItem = function(e){
+               var delete_icon = YAHOO.util.Event.getTarget(e);
+               var li = delete_icon.parentNode;
+               Dom.get("item_list").removeChild(li);
+               var delete_icons = Dom.getElementsByClassName("delete_icon");
+               if(delete_icons.length==1){
+                 Dom.setStyle(delete_icons[0],"display","none");
+               }
+           };
+           var addChecklistItem = function(e){
+               var target = YAHOO.util.Event.getTarget(e);
+               if(target.type=="checkbox"){
+                   target.checked=false;
+               }
+               var item_list = Dom.get("item_list");
+               var node = item_list.childNodes[1].cloneNode(true);
+               item_list.appendChild(node);
+               var delete_icons = Dom.getElementsByClassName("delete_icon");
+               if(delete_icons.length >1){
+                 Dom.setStyle(delete_icons,"display","");
+               }
+           };
+           var deleteIcons = Dom.getElementsByClassName("delete_icon");
+           for(var i=0;i<deleteIcons.length;i++){
+               Event.addListener(deleteIcons[i], 'click', deleteChecklistItem);
+           }
+           var new_checklist_item = Dom.getElementsByClassName("new_checklist_item");
+           for(var i=0;i<new_checklist_item.length;i++){
+               Event.addListener(new_checklist_item[i], 'click', addChecklistItem);
+           }
+           //var item_edit_blocks = Dom.get("ul_item_edit_blocks");
+           //item_edit_block.appendChild();
+
+           var create_item_edit_block = function(li){
+               var div = document.createElement("div")
+               
+               li.createElement()
+           };
+
+       }();
+   });
+</script>
+<div>
+    <input type="text" name="checklist_name" id="checklist_name" value="Untitled Checklist">
+    <p> </p>
+    <textarea rows="3" cols="50" name="checklist_desc" id="checklist_desc">You can put some description for the checklist here.</textarea>
+    <p/>
+    <div id="checklist_items">
+      <ul id="ul_item_edit_blocks" class="draglist">
+        <li class="list1" id="li1_1">
+            <div class="checklist_item_block editable_div" id="item_edit_block">
+                <input type="text" class="checklist_item_block_name" value="Untitled Block Name">
+                <ul id="item_list">
+                    <li><input type="checkbox"> <input type="text" class="checklist_item" name="checklist_item"> <span
+                            class="delete_icon" >&nbsp;&nbsp;&nbsp;&nbsp;</span></li>
+                </ul>
+                <li>
+                    <input type="checkbox" style="opacity: 0.5;" class="new_checklist_item"/>
+                    <input type="text" style="opacity: 0.5;" class="checklist_item new_checklist_item"/>
+                </li>
+                <br/>
+                <input type="button" value="Done">
+            </div>
+        </li>
+        <li class="list1" id="li1_2">list 1, item 2</li>
+        <li class="list1" id="li1_3">list 1, item 3</li>
+      </ul>
+    </div>
+
+
+</div>
+{% endblock %}
