@@ -60,11 +60,22 @@
                 }
             };
 
+            var onMouseOverChecklistBlock = function(e,li_id){
+                Dom.setStyle(li_id+"_item_saved_block","backgroundColor","#93B2CC");
+            };
+
+            var onMouseOutChecklistBlock = function(e,li_id){
+                Dom.setStyle(li_id+"_item_saved_block","backgroundColor","transparent");
+            };
+
             var appendListener = function(li_id) {
                 var new_checklist_item = Dom.getElementsByClassName("new_checklist_item", "input", li_id);
                 Event.addListener(new_checklist_item, 'click', addChecklistItem, li_id);
                 Event.addListener(li_id+"_done_btn", 'click', saveChecklistBlock, li_id);
                 Event.addListener(li_id+"_delete_btn", 'click', deleteChecklistBlock, li_id);
+                //var new_checklist_item = Dom.getElementsByClassName("new_checklist_item", "input", li_id);
+                Event.addListener(li_id+"_item_saved_list", "onmouseover",onMouseOverChecklistBlock, li_id);
+                Event.addListener(li_id+"_item_saved_list", "onmouseout",onMouseOutChecklistBlock, li_id);
             };
 
             var editable_block_html =
@@ -92,7 +103,7 @@
                 var innerHtml = "<div class='checklist_item_block_name'>\n" + title + "</div>" +
                                 "<ul id='li_1_item_saved_list'>\n";
                 for (var i = 0; i < items.length; i++) {
-                    innerHtml += " <li>&nbsp;<input type='checkbox'> <span class='checklist_item'> " + items.value + "</span></li>\n";
+                    innerHtml += " <li>&nbsp;<input type='checkbox'> <span class='checklist_item'> " + items[i].value + "</span></li>\n";
                 }
                 //todo: add other properties for the checklist item here.
                 innerHtml += "</ul> \n";
