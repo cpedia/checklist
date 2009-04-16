@@ -114,7 +114,7 @@ input.checklist_item_block_name {
     font-weight:bold;
 }
 input.checklist_item {
-    width: 80%;
+    width: 70%;
     font-weight:normal;
 }
 #checklist_items li{
@@ -125,15 +125,8 @@ textarea#checklist_desc {
     width: 100%;
 }
 
-div.editable_div {
-    background-color: #FFF4C2;
-}
-
-div.saved {
-    background-color: #FFFFFF;
-}
-
-div.checklist_item_block {
+div.checklist_item_editable_block {
+    background-color: #EDF5FF;
     cursor: move;
     padding: 0.5em 2em 1.5em;
     position: relative;
@@ -145,4 +138,26 @@ div.checklist_item_block {
     width: 20px;
     position:relative;
     cursor:pointer
+}
+.checklist_block_top_button {
+    position: absolute;
+    right: 1em;
+    top: 0.5em;
+    display:block;
+}
+
+.checklist_block_top_button_edit_div {
+    -moz-border-radius-bottomleft:2px;
+    -moz-border-radius-bottomright:2px;
+    -moz-border-radius-topleft:2px;
+    -moz-border-radius-topright:2px;
+    background: #DDE1EB url(/static/images/bk_1x20.gif) no-repeat center;
+    border: 1px solid #BCC7D4;
+    cursor: pointer;
+    height: 20px;
+    width: 20px;
+}
+.checklist_block_top_button_edit {
+    background: #DDE1EB url(/static/images/edit_16x16.gif) no-repeat center;
+    cursor: pointer;
 }
