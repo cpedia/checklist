@@ -17,6 +17,13 @@ p {
     padding: 0 0 1em!important;
 }
 
+.moz-border{
+    -moz-border-radius-bottomleft: 2px;
+    -moz-border-radius-bottomright: 2px;
+    -moz-border-radius-topleft: 2px;
+    -moz-border-radius-topright: 2px;
+}
+
 .gbh {
     border-top: 1px solid #C9D7F1;
     height: 4px;
@@ -109,11 +116,11 @@ input#checklist_name {
     font-weight:bold;
 }
 
-input.checklist_item_block_name {
+.checklist_item_block_name {
     width: 60%;
     font-weight:bold;
 }
-input.checklist_item {
+.checklist_item {
     width: 70%;
     font-weight:normal;
 }
@@ -131,6 +138,12 @@ div.checklist_item_editable_block {
     padding: 0.5em 2em 1.5em;
     position: relative;
 }
+
+div.checklist_item_saved_block {
+    cursor: move;
+    position: relative;
+}
+
 .delete_icon {
     background:url(/static/images/delete_16x16.gif) no-repeat;
     height: 16px;
@@ -160,4 +173,13 @@ div.checklist_item_editable_block {
 .checklist_block_top_button_edit {
     background: #DDE1EB url(/static/images/edit_16x16.gif) no-repeat center;
     cursor: pointer;
+}
+
+.checklist_action_button {
+    border: 1px solid #F9F9F9;
+    color: #333333;
+    cursor: pointer;
+    font-weight: bold;
+    padding: 0.17em 0.5em;
+    width:auto;
 }
