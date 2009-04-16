@@ -5,83 +5,105 @@
 <script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/animation/animation-min.js"></script>
 <script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/dragdrop/dragdrop-min.js"></script>
 <script type="text/javascript">
-   YAHOO.util.Event.addListener(window, "load", function() {
-       YAHOO.checklist.items.DDMod = function() {
-           var Dom = YAHOO.util.Dom;
-           var Event = YAHOO.util.Event;
-           //var DDM = YAHOO.util.DragDropMgr;
-           var deleteChecklistItem = function(e){
-               if (Dom.getChildren("item_list").length>1) {
-                   var delete_icon = YAHOO.util.Event.getTarget(e);
-                   var li = delete_icon.parentNode;
-                   Dom.get("item_list").removeChild(li);
-                   var delete_icons = Dom.getElementsByClassName("delete_icon");
-                   if (delete_icons.length == 1) {
-                       Dom.setStyle(delete_icons[0], "display", "none");
-                   }
-               }
-           };
-           var addChecklistItem = function(e){
-               var target = YAHOO.util.Event.getTarget(e);
-               if(target.type=="checkbox"){
-                   target.checked=false;
-               }
-               var item_list = Dom.get("item_list");
-               var node = Dom.getFirstChild("item_list").cloneNode(true);
-               Event.addListener(node, 'click', deleteChecklistItem);               
-               item_list.appendChild(node);
-               var delete_icons = Dom.getElementsByClassName("delete_icon");
-               if(delete_icons.length >1){
-                 Dom.setStyle(delete_icons,"display","");
-               }
-           };
-           var deleteIcons = Dom.getElementsByClassName("delete_icon");
-           for(var i=0;i<deleteIcons.length;i++){
-               Event.addListener(deleteIcons[i], 'click', deleteChecklistItem);
-           }
-           var new_checklist_item = Dom.getElementsByClassName("new_checklist_item");
-           for(var i=0;i<new_checklist_item.length;i++){
-               Event.addListener(new_checklist_item[i], 'click', addChecklistItem);
-           }
-           //var item_edit_blocks = Dom.get("ul_item_edit_blocks");
-           //item_edit_block.appendChild();
+    YAHOO.util.Event.addListener(window, "load", function() {
+        YAHOO.checklist.items.DDMod = function() {
+            var Dom = YAHOO.util.Dom;
+            var Event = YAHOO.util.Event;
+            //var DDM = YAHOO.util.DragDropMgr;
+            var deleteChecklistItem = function(e, li_id) {
+                if (Dom.getChildren("item_list").length > 1) {
+                    var delete_icon = YAHOO.util.Event.getTarget(e);
+                    var li = delete_icon.parentNode;
+                    Dom.get(li_id + "_item_list").removeChild(li);
+                    var delete_icons = Dom.getElementsByClassName("delete_icon");
+                    if (delete_icons.length == 1) {
+                        Dom.setStyle(delete_icons[0], "display", "none");
+                    }
+                }
+            };
 
-           var create_item_edit_block = function(li){
-               var div = document.createElement("div")
-               
-               li.createElement()
-           };
+            var addChecklistItem = function(e, li_id) {
+                var target = YAHOO.util.Event.getTarget(e);
+                if (target.type == "checkbox") {
+                    target.checked = false;
+                }
+                var item_list = Dom.get(li_id + "_item_list");
+                var node = Dom.getFirstChild(li_id + "_item_list").cloneNode(true);
+                item_list.appendChild(node);
+                var delete_icons = Dom.getElementsByClassName("delete_icon",item_list);
+                if (delete_icons.length > 1) {
+                    Dom.setStyle(delete_icons, "display", "");
+                    Event.addListener(delete_icons, "click", deleteChecklistItem, li_id);
+                } else {
+                    Dom.setStyle(delete_icons, "display", "none");
+                }
+            };
 
-       }();
-   });
+            var appendListener = function(li_id) {
+                var new_checklist_item = Dom.getElementsByClassName("new_checklist_item", "input", li_id);
+                Event.addListener(new_checklist_item, 'click', addChecklistItem, li_id);
+            };
+
+            var editable_block_html =
+                    "<div class='checklist_item_editable_block' id='li_1_item_edit_block'>\n" +
+                    "<input type='text' class='checklist_item_block_name' value='Untitled Block Name'>\n" +
+                    "<ul id='li_1_item_list'>\n" +
+                    "<li><input type='checkbox'> <input type='text' class='checklist_item' name='checklist_item'>\n" +
+                    " <span class='delete_icon' >&nbsp;&nbsp;&nbsp;&nbsp;</span></li>\n" +
+                    "</ul> \n" +
+                    " <li>\n " +
+                    " <input type='checkbox' style='opacity: 0.5;' class='new_checklist_item' id='li_1_new_checklist_item_checkbox'/>\n " +
+                    " <input type='text' style='opacity: 0.5;' class='checklist_item new_checklist_item' id='li_1_new_checklist_item_text'/>\n" +
+                    " </li>\n" +
+                    " <br/>\n" +
+                    " <input type='button' value='Done' class='done_btn' id='li_1_done_btn'>\n" +
+                    " <input type='button' value='Delete' class='delete_btn' id='li_1_delete_btn'> \n" +
+                    "</div>\n";
+
+            var li_count = 1;
+            var create_item_edit_block = function() {
+                var li = document.createElement("li");
+                li.id = "li_" + li_count++;
+                li.innerHTML = editable_block_html.replace(/li_1/g, li.id);
+                Dom.get("ul_item_edit_blocks").appendChild(li);
+                //append the listener to the new added edit block.
+                appendListener(li.id);
+            };
+            Event.addListener("add_new_block", "click", create_item_edit_block);
+
+            //when page load, create a default checklist edit block.
+            create_item_edit_block();
+        }();
+    });
 </script>
 <div>
     <input type="text" name="checklist_name" id="checklist_name" value="Untitled Checklist">
-    <p> </p>
+
+    <p></p>
     <textarea rows="3" cols="50" name="checklist_desc" id="checklist_desc">You can put some description for the checklist here.</textarea>
-    <p/>
+
+    <p></p>
+    <input type="button" value="Add New Block" id="add_new_block">
+
     <div id="checklist_items">
-      <ul id="ul_item_edit_blocks" class="draglist">
-        <li class="list1" id="li1_1">
-            <div class="checklist_item_block editable_div" id="item_edit_block">
-                <input type="text" class="checklist_item_block_name" value="Untitled Block Name">
-                <ul id="item_list">
-                    <li><input type="checkbox"> <input type="text" class="checklist_item" name="checklist_item"> <span
-                            class="delete_icon" >&nbsp;&nbsp;&nbsp;&nbsp;</span></li>
-                </ul>
-                <li>
-                    <input type="checkbox" style="opacity: 0.5;" class="new_checklist_item"/>
-                    <input type="text" style="opacity: 0.5;" class="checklist_item new_checklist_item"/>
-                </li>
-                <br/>
-                <input type="button" value="Done">
-            </div>
-        </li>
-        <li class="list1" id="li1_2">list 1, item 2</li>
-        <li class="list1" id="li1_3">list 1, item 3</li>
-      </ul>
+        <ul id="ul_item_edit_blocks" class="dragable_list">
+        </ul>
     </div>
 
+    <!--<div class='checklist_item_editable_block' id='li_1_item_edit_block'>
+                <input type='text' class='checklist_item_block_name' value='Untitled Block Name'>
+                <ul id='li_1_item_list'>
+                    <li><input type='checkbox'> <input type='text' class='checklist_item' name='checklist_item'> <span
+                            class='delete_icon' >&nbsp;&nbsp;&nbsp;&nbsp;</span></li>
+                </ul>
+                <li>
+                    <input type='checkbox' style='opacity: 0.5;' class='new_checklist_item' id='li_1_new_checklist_item_checkbox'/>
+                    <input type='text' style='opacity: 0.5;' class='checklist_item new_checklist_item' id='li_1_new_checklist_item_text'/>
+                </li>
+                <br/>
+                <input type='button' value='Done' class='done_btn' id='li_1_done_btn'>
+                <input type='button' value='Delete' class='delete_btn' id='li_1_delete_btn'>
+            </div>-->
 
 </div>
 {% endblock %}
