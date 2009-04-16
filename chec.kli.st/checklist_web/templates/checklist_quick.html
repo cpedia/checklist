@@ -11,11 +11,15 @@
             var Event = YAHOO.util.Event;
             //var DDM = YAHOO.util.DragDropMgr;
             var deleteChecklistItem = function(e, li_id) {
-                if (Dom.getChildren("item_list").length > 1) {
+                var delete_icons_ = Dom.getElementsByClassName("delete_icon","span",li_id + "_item_list");
+                if (delete_icons_.length > 1) {
                     var delete_icon = YAHOO.util.Event.getTarget(e);
                     var li = delete_icon.parentNode;
-                    Dom.get(li_id + "_item_list").removeChild(li);
-                    var delete_icons = Dom.getElementsByClassName("delete_icon");
+                    try {
+                        Dom.get(li_id + "_item_list").removeChild(li);
+                    } catch(e) {
+                    }
+                    var delete_icons = Dom.getElementsByClassName("delete_icon","span",li_id + "_item_list");
                     if (delete_icons.length == 1) {
                         Dom.setStyle(delete_icons[0], "display", "none");
                     }
@@ -29,8 +33,10 @@
                 }
                 var item_list = Dom.get(li_id + "_item_list");
                 var node = Dom.getFirstChild(li_id + "_item_list").cloneNode(true);
+                Dom.getElementsByClassName("checklist_item", "input", node)[0].value = "Checklist Item " + (item_list.childNodes.length - 1);
                 item_list.appendChild(node);
-                var delete_icons = Dom.getElementsByClassName("delete_icon",item_list);
+                //set default value.
+                var delete_icons = Dom.getElementsByClassName("delete_icon","span",li_id + "_item_list");
                 if (delete_icons.length > 1) {
                     Dom.setStyle(delete_icons, "display", "");
                     Event.addListener(delete_icons, "click", deleteChecklistItem, li_id);
@@ -39,26 +45,59 @@
                 }
             };
 
+            var saveChecklistBlock = function(e,li_id){
+                var checklist_items = Dom.getElementsByClassName("checklist_item","input",li_id + "_item_list");
+                var checklist_item_block_name = Dom.getElementsByClassName("checklist_item_block_name","input",li_id + "_item_edit_block");
+                Dom.setStyle(li_id+"_item_edit_block","display","none");
+                Dom.get(li_id+"_item_saved_block").innerHTML = saved_block_html(checklist_item_block_name[0].value,checklist_items);
+                Dom.setStyle(li_id+"_item_saved_block","display","");
+            };
+
+            var deleteChecklistBlock = function(e,li_id){
+                if(window.confirm("Are you sure you want to discard this block?")){
+                    var node = Dom.get(li_id+"_item_edit_block").parentNode;
+                    Dom.get("ul_item_edit_blocks").removeChild(node);
+                }
+            };
+
             var appendListener = function(li_id) {
                 var new_checklist_item = Dom.getElementsByClassName("new_checklist_item", "input", li_id);
                 Event.addListener(new_checklist_item, 'click', addChecklistItem, li_id);
+                Event.addListener(li_id+"_done_btn", 'click', saveChecklistBlock, li_id);
+                Event.addListener(li_id+"_delete_btn", 'click', deleteChecklistBlock, li_id);
             };
 
             var editable_block_html =
                     "<div class='checklist_item_editable_block' id='li_1_item_edit_block'>\n" +
                     "<input type='text' class='checklist_item_block_name' value='Untitled Block Name'>\n" +
                     "<ul id='li_1_item_list'>\n" +
-                    "<li><input type='checkbox'> <input type='text' class='checklist_item' name='checklist_item'>\n" +
+                    "<li><input type='checkbox'> <input type='text' class='checklist_item' name='checklist_item' value='Checklist Item 1'>\n" +
                     " <span class='delete_icon' >&nbsp;&nbsp;&nbsp;&nbsp;</span></li>\n" +
+                    //todo: add other properties for the checklist item here.
                     "</ul> \n" +
-                    " <li>\n " +
+                    " <li id='li_1_new_item_li'>\n " +
                     " <input type='checkbox' style='opacity: 0.5;' class='new_checklist_item' id='li_1_new_checklist_item_checkbox'/>\n " +
                     " <input type='text' style='opacity: 0.5;' class='checklist_item new_checklist_item' id='li_1_new_checklist_item_text'/>\n" +
                     " </li>\n" +
+                    " <div id='li_1_btn_div'>" +
                     " <br/>\n" +
                     " <input type='button' value='Done' class='done_btn' id='li_1_done_btn'>\n" +
                     " <input type='button' value='Delete' class='delete_btn' id='li_1_delete_btn'> \n" +
+                    " </div>\n"+
+                    "</div>\n"+
+                    "<div class='checklist_item_saved_block' id='li_1_item_saved_block' style='display:\'none\''>\n"+
                     "</div>\n";
+
+            var saved_block_html = function(title, items) {
+                var innerHtml = "<div class='checklist_item_block_name'>\n" + title + "</div>" +
+                                "<ul id='li_1_item_saved_list'>\n";
+                for (var i = 0; i < items.length; i++) {
+                    innerHtml += " <li>&nbsp;<input type='checkbox'> <span class='checklist_item'> " + items.value + "</span></li>\n";
+                }
+                //todo: add other properties for the checklist item here.
+                innerHtml += "</ul> \n";
+                return innerHtml;
+            };
 
             var li_count = 1;
             var create_item_edit_block = function() {
@@ -77,13 +116,16 @@
     });
 </script>
 <div>
+    <div>
+        <input type="button" value="Save Checklist" id="save_checklist_btn" class="checklist_action_button moz-border">
+        <input type="button" value="Add New Block" id="add_new_block" class="checklist_action_button moz-border">
+        <p></p>
+    </div>
+
     <input type="text" name="checklist_name" id="checklist_name" value="Untitled Checklist">
 
     <p></p>
     <textarea rows="3" cols="50" name="checklist_desc" id="checklist_desc">You can put some description for the checklist here.</textarea>
-
-    <p></p>
-    <input type="button" value="Add New Block" id="add_new_block">
 
     <div id="checklist_items">
         <ul id="ul_item_edit_blocks" class="dragable_list">
