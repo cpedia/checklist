@@ -132,6 +132,7 @@ input#checklist_name {
 
 .checklist_item_label {
     cursor: pointer;
+    width: 70%;    
 }
 
 #checklist_items li {

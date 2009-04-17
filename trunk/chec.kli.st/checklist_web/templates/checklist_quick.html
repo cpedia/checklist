@@ -103,6 +103,7 @@
                 var new_checklist_item = Dom.getElementsByClassName("new_checklist_item", "input", li_id);
                 Event.addListener(new_checklist_item, 'click', addChecklistItem, li_id);
                 Event.addListener(li_id + "_done_btn", 'click', saveChecklistBlock, li_id);
+                Event.addListener(li_id + "_delete_btn", 'click', deleteChecklistBlock, li_id);
             };
 
             var editable_block_html =
@@ -120,6 +121,7 @@
                     " <div id='li_1_btn_div'>" +
                     " <br/>\n" +
                     " <input type='button' value='Done' class='done_btn' id='li_1_done_btn'>\n" +
+                    " <input type='button' value='Delete' class='delete_btn' id='li_1_delete_btn'>\n" +
                     " </div>\n" +
                     "</div>\n" +
                     "<div class='checklist_item_saved_block' id='li_1_item_saved_block' style='display:none'>\n" +
