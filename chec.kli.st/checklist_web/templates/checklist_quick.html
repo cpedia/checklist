@@ -36,7 +36,12 @@
                 var item_list = Dom.get(li_id + "_item_list");
                 var node = Dom.getFirstChild(li_id + "_item_list").cloneNode(true);
                 Dom.getElementsByClassName("checklist_item", "input", node)[0].value = "Checklist Item " + (item_list.childNodes.length - 1);
+                Dom.getElementsByClassName("checklist_item", "input", node)[0].defaultValue = "Checklist Item " + (item_list.childNodes.length - 1);
                 item_list.appendChild(node);
+                var last_node = Dom.getLastChild(li_id + "_item_list");
+                var last_input = Dom.getElementsByClassName("checklist_item", "input", last_node)[0];
+                last_input.select();
+                init_input_default_value(last_input);
                 //set default value.
                 var delete_icons = Dom.getElementsByClassName("delete_icon", "span", li_id + "_item_list");
                 if (delete_icons.length > 1) {
@@ -51,9 +56,8 @@
                 var checklist_items = Dom.getElementsByClassName("checklist_item", "input", li_id + "_item_list");
                 var checklist_item_block_name = Dom.getElementsByClassName("checklist_item_block_name", "input", li_id + "_item_edit_block");
                 Dom.setStyle(li_id + "_item_edit_block", "display", "none");
-                Dom.get(li_id + "_item_saved_block").innerHTML = saved_block_html(checklist_item_block_name[0].value, checklist_items).replace(/li_1/g, li_id);
-                ;
                 Event.onAvailable(li_id + "_item_saved_block", function() {
+                    Dom.get(li_id + "_item_saved_block").innerHTML = saved_block_html(checklist_item_block_name[0].value, checklist_items).replace(/li_1/g, li_id);
                     Dom.setStyle(li_id + "_item_saved_block", "display", "");
                     Event.addListener(li_id + "_item_saved_block", "mouseover", onMouseOverChecklistBlock, li_id);
                     Event.addListener(li_id + "_item_saved_block", "mouseout", onMouseOutChecklistBlock, li_id);
@@ -62,12 +66,28 @@
 
             var copyChecklistBlock = function(e, li_id) {
                 var li = document.createElement("li");
+                var copied = Dom.get(li_id);
                 li.id = "li_" + (li_count++);
-                li.innerHTML = Dom.get(li_id + "_item_edit_block").parentNode.innerHTML.replace(new RegExp(li_id, "g"), li.id);
+                li.innerHTML = copied.innerHTML.replace(new RegExp(li_id, "g"), li.id);
                 Dom.get("ul_item_edit_blocks").appendChild(li);
-                //append the listener to the new added edit block.
+
                 Dom.setStyle(li.id + "_item_edit_block", "display", "");
                 Dom.setStyle(li.id + "_item_saved_block", "display", "none");
+
+                 //copy the value to the new Dom.
+                var copied_title = Dom.getElementsByClassName("checklist_item_title", "div", li.id + "_item_saved_block")[0];
+                var title = Dom.getElementsByClassName("checklist_item_block_name", "input", li.id + "_item_edit_block")[0];
+                title.value = copied_title.innerHTML.trim();
+                title.select();
+                var checklist_item_block_name_copied = Dom.getElementsByClassName("checklist_item_label", "label", li.id + "_item_saved_block");
+                var checklist_item_block_name = Dom.getElementsByClassName("checklist_item", "input", li.id + "_item_edit_block");
+                for (var i = 0; i < checklist_item_block_name.length; i++) {
+                    if(!YAHOO.lang.isUndefined(checklist_item_block_name_copied[i])){
+                     checklist_item_block_name[i].value = checklist_item_block_name_copied[i].innerHTML.trim() ;
+                    }
+                }
+
+                //append the listener to the new added edit block.
                 appendListener(li.id);
             };
 
@@ -111,18 +131,18 @@
                     "<input type='text' class='checklist_item_block_name' value='Untitled Block Name'>\n" +
                     "<ul id='li_1_item_list'>\n" +
                     "<li><input type='checkbox'> <input type='text' class='checklist_item' name='checklist_item' value='Checklist Item 1'>\n" +
-                    " <span class='delete_icon' style='display:none' >&nbsp;&nbsp;&nbsp;&nbsp;</span></li>\n" +
+                    "<span class='delete_icon' style='display:none' >&nbsp;&nbsp;&nbsp;&nbsp;</span></li>\n" +
                         //todo: add other properties for the checklist item here.
                     "</ul> \n" +
-                    " <li id='li_1_new_item_li'>\n " +
-                    " <input type='checkbox' style='opacity: 0.5;' class='new_checklist_item' id='li_1_new_checklist_item_checkbox'/>\n " +
-                    " <input type='text' style='opacity: 0.5;' class='checklist_item new_checklist_item' id='li_1_new_checklist_item_text'/>\n" +
-                    " </li>\n" +
-                    " <div id='li_1_btn_div'>" +
-                    " <br/>\n" +
-                    " <input type='button' value='Done' class='done_btn' id='li_1_done_btn'>\n" +
-                    " <input type='button' value='Delete' class='delete_btn' id='li_1_delete_btn'>\n" +
-                    " </div>\n" +
+                    "<li id='li_1_new_item_li'>\n " +
+                    "<input type='checkbox' style='opacity: 0.5;' class='new_checklist_item'/>\n " +
+                    "<input type='text' style='opacity: 0.5;' class='checklist_item new_checklist_item'/>\n" +
+                    "</li>\n" +
+                    "<div id='li_1_btn_div'>" +
+                    "<br/>\n" +
+                    "<input type='button' value='Done' class='done_btn' id='li_1_done_btn'>\n" +
+                    "<input type='button' value='Delete' class='delete_btn' id='li_1_delete_btn'>\n" +
+                    "</div>\n" +
                     "</div>\n" +
                     "<div class='checklist_item_saved_block' id='li_1_item_saved_block' style='display:none'>\n" +
                     "</div>\n";
@@ -131,16 +151,16 @@
                 var innerHtml =
                         "<div class='checklist-block checklist_block_top_button' id='li_1_checklist_block_top_button'  style='display:none'> " +
                         "<div class='moz-border checklist-inline-block checklist_block_top_button_div'>" +
-                        " <div class='checklist_block_top_button_edit' id='li_1_checklist_block_top_button_edit'>&nbsp;</div> " +
-                        " </div> " +
-                        " <div class='moz-border checklist-inline-block checklist_block_top_button_div'> " +
-                        " <div class='checklist_block_top_button_copy' id='li_1_checklist_block_top_button_copy'>&nbsp;</div>" +
-                        " </div>" +
-                        " <div class='moz-border checklist-inline-block checklist_block_top_button_div'>" +
-                        " <div class='checklist_block_top_button_delete' id='li_1_checklist_block_top_button_delete'>&nbsp;</div>" +
-                        " </div>" +
+                        "<div class='checklist_block_top_button_edit' id='li_1_checklist_block_top_button_edit'>&nbsp;</div> " +
+                        "</div> " +
+                        "<div class='moz-border checklist-inline-block checklist_block_top_button_div'> " +
+                        "<div class='checklist_block_top_button_copy' id='li_1_checklist_block_top_button_copy'>&nbsp;</div>" +
                         "</div>" +
-                        "<div class='checklist_item_block_name'>\n" + title + "</div>";
+                        "<div class='moz-border checklist-inline-block checklist_block_top_button_div'>" +
+                        "<div class='checklist_block_top_button_delete' id='li_1_checklist_block_top_button_delete'>&nbsp;</div>" +
+                        "</div>" +
+                        "</div>" +
+                        "<div class='checklist_item_block_name checklist_item_title'>\n" + title + "</div>";
                 var li_html = "<ul id='li_1_item_saved_list'>\n";
                 for (var i = 0; i < items.length; i++) {
                     li_html += " <li>&nbsp;" +
@@ -157,6 +177,12 @@
                 li.id = "li_" + (li_count++);
                 li.innerHTML = editable_block_html.replace(/li_1/g, li.id);
                 Dom.get("ul_item_edit_blocks").appendChild(li);
+
+                var title = Dom.getElementsByClassName("checklist_item_block_name", "input", li.id + "_item_edit_block")[0];
+                init_input_default_value(title);
+                var checklist_item_block_name = Dom.getElementsByClassName("checklist_item", "input", li.id + "_item_edit_block");
+                init_input_default_value(checklist_item_block_name);
+                
                 //append the listener to the new added edit block.
                 appendListener(li.id);
             };
@@ -164,7 +190,7 @@
 
             //when page load, create a default checklist edit block.
             create_item_edit_block();
-            init_input_default_value("quick_checklist");
+            init_input_default_value(["checklist_name","checklist_desc"]);
         }();
     });
 </script>
