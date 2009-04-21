@@ -195,37 +195,38 @@
             init_input_default_value(["checklist_name","checklist_desc"]);
 
             var getFormJSON = function(){
-                var title = Dom.get("checklist_name").value;
-                var description = Dom.get("checklist_desc").value;
+                var title = Dom.get("checklist_name").value.trim();
+                var description = Dom.get("checklist_desc").value.trim();
                 var blocks = Dom.getElementsByClassName("checklist_item_editable_block");
                 var checklist_items = [];
                 for(var i=0;i<blocks.length;i++){
                     var block_items =[];
-                    var block_title = Dom.getElementsByClassName("checklist_item_block_name","input",blocks[i])[0].value;
+                    var block_title = Dom.getElementsByClassName("checklist_item_block_name","input",blocks[i])[0].value.trim();
                     var block_checkboxs = Dom.getElementsByClassName("checklist_item","input",blocks[i]);
                     for(var j=0;j<block_checkboxs.length;j++){
-                        var checklist_item;
-                        checklist_item['item'] = block_checkboxs[j].value;
+                        var checklist_item = {};
+                        checklist_item['item'] = block_checkboxs[j].value.trim();
                         block_items.push(checklist_item);
                     }
-                    var checklist_group;
+                    var checklist_group = {};
                     checklist_group['item'] = block_title;
                     checklist_group['sub_items'] = block_items;
                     checklist_items.push(checklist_group);
                 }
-                var checklist;
-                checklist['title'] =title;
+                var checklist={};
+                checklist['name'] =title;
                 checklist['description'] =description;
                 checklist['checklist_items'] =checklist_items;
                 return checklist;
             };
 
             var save_checklist = function(){
-                var json = YAHOO.lang.JSON.stringify(getFormJSON());
+                var checklist = YAHOO.lang.JSON.stringify(getFormJSON());
                 YAHOO.util.Connect.asyncRequest('POST', '/create/quicklist',
                 {
                     success: function (o) {
                         if (o.responseText == 'true') {
+                            alert(o.responseText);
                         } else {
                             alert(o.responseText);
                         }
@@ -234,8 +235,7 @@
                         alert(o.statusText);
                     },
                     scope:this
-                }
-                        );
+                },"checklist="+checklist);
             };
             Event.addListener("save_checklist_btn","click",save_checklist);
 

@@ -250,7 +250,27 @@ class CreateQucikList(BaseRequestHandler):
 
     @authorized.role("user")
     def post(self):
-        pass
+        checklist_json = self.request.get('checklist')
+        checklist_ = simplejson.loads(checklist_json)
+        checklist = models.UserChecklist(user=users.get_current_user())
+        checklist.name = checklist_['name']
+        checklist.description = checklist_['description']
+        checklist.save()
+        i=0
+        for checklist_item_ in checklist_['checklist_items']:
+            i=i+1
+            checklist_item = models.ChecklistItem(checklist=checklist)
+            checklist_item.item = checklist_item_['item']
+            checklist_item.order = i
+            checklist_item.put()
+            j=0
+            for sub_item_ in checklist_item_['sub_items']:
+                j = j+1
+                sub_item = models.ChecklistItem(checklist=checklist,parent_checklist_item=checklist_item)
+                sub_item.item = sub_item_['item']
+                sub_item.order = j
+                sub_item.put()
+        self.response.out.write(simplejson.dumps((checklist)))
 
 class TemplateListAdmin(BaseRequestHandler):
     @authorized.role("admin")
