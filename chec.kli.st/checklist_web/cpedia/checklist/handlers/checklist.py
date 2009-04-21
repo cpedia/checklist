@@ -175,7 +175,7 @@ class PrintChecklist(BaseRequestHandler):
         "checklist_columns":checklist_columns,
         "checklist_items":simplejson.dumps(items),
         }
-        self.generate('checklist_items.html',template_values)
+        self.generate('checklist_print.html',template_values)
 
 #create a checklist by login user.
 class CreateList(BaseRequestHandler):
