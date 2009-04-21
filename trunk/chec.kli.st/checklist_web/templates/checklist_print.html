@@ -226,8 +226,8 @@
                 {
                     success: function (o) {
                         if (o.responseText == 'true') {
-                            alert("Create checklist successfully.");
-                            window.href.location="/list/print/"+o.responseText.checklist_key;                            
+                            alert(o.responseText);
+                            Dom.setStyle("review_url","display","");
                         } else {
                             alert(o.responseText);
                         }
@@ -255,6 +255,9 @@
         <button type="button" id="add_new_block" class="checklist_action_button moz-border">Add New Block</button>
 
         <p></p>
+        <div id="review_url" style="display:none">
+          You can view the saved checklist form here: /list/print/<span id="checklist_key"></span>
+        </div>
     </div>
 
     <input type="text" name="checklist_name" id="checklist_name" value="Untitled Checklist">
