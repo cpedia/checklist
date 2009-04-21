@@ -22,7 +22,7 @@ indexes:
   - name: active
   - name: order
 
-# Used 13 times in query history.
+# Used 14 times in query history.
 - kind: Tag
   properties:
   - name: user
@@ -37,7 +37,7 @@ indexes:
   - name: last_updated_date
     direction: desc
 
-# Used 22 times in query history.
+# Used 23 times in query history.
 - kind: UserChecklist
   properties:
   - name: user
