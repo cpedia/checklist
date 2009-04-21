@@ -238,6 +238,7 @@ class ChecklistColumn(Tagable):
 
 class ChecklistItem(db.Expando):
     checklist = db.ReferenceProperty(UserChecklist)
+    item = db.StringProperty()
     order = db.IntegerProperty(default=0)
     created_date = db.DateTimeProperty(auto_now_add=True)
     last_updated_date = db.DateTimeProperty(auto_now_add=True)
