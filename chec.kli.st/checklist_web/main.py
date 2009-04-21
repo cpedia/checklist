@@ -54,6 +54,7 @@ def main():
                                         ('/list/*$', checklist.UserChecklistPage),
                                         ('/list/starred/(.*)/*$', checklist.UserStarredChecklistPage),
                                         ('/list/user/(.*)/*$', checklist.UserPublicChecklistPage),
+                                        ('/list/print/(.*)/*$', checklist.PrintChecklist),
                                         ('/list/(.*)/*$', checklist.UserChecklist),
                                         ('/tag/(.*)/*$', checklist.TagHandler),
                                         ('/*$', checklist.MainPage),

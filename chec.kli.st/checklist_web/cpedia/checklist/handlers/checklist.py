@@ -161,6 +161,22 @@ class UserChecklist(BaseRequestHandler):
         }
         self.generate('checklist_items.html',template_values)
 
+class PrintChecklist(BaseRequestHandler):
+    @authorized.role("user")
+    def get(self,checklistKey):
+        checklist = models.UserChecklist.get_cached(checklistKey)
+        checklist_columns = checklist.checklistcolumn_set
+        checklist_items = checklist.checklistitem_set
+        items = []
+        for item in checklist_items:
+            items +=[item.to_json()]
+        template_values = {
+        "checklist":checklist,
+        "checklist_columns":checklist_columns,
+        "checklist_items":simplejson.dumps(items),
+        }
+        self.generate('checklist_items.html',template_values)
+
 #create a checklist by login user.
 class CreateList(BaseRequestHandler):
     @authorized.role("user")
@@ -270,7 +286,7 @@ class CreateQucikList(BaseRequestHandler):
                 sub_item.item = sub_item_['item']
                 sub_item.order = j
                 sub_item.put()
-        self.response.out.write(simplejson.dumps((checklist.to_json())))
+        self.response.out.write(simplejson.dump({"checklist_key":str(checklist.key())}))
 
 class TemplateListAdmin(BaseRequestHandler):
     @authorized.role("admin")
