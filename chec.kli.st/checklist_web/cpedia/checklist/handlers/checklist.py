@@ -270,7 +270,7 @@ class CreateQucikList(BaseRequestHandler):
                 sub_item.item = sub_item_['item']
                 sub_item.order = j
                 sub_item.put()
-        self.response.out.write(simplejson.dumps((checklist)))
+        self.response.out.write(simplejson.dumps((checklist.to_json())))
 
 class TemplateListAdmin(BaseRequestHandler):
     @authorized.role("admin")
