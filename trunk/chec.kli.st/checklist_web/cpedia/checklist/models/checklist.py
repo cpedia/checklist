@@ -82,12 +82,12 @@ class ChecklistTemplate(Checklist):
     querys = {
         "active_templates": 'select * from ChecklistTemplate WHERE active = TRUE ORDER BY order ASC',
     }
-    user = db.UserProperty(required=True)
+    user = db.UserProperty(required=True,auto_current_user_add=False)
     order = db.IntegerProperty(default=0)
     active = db.BooleanProperty(default = False)
     created_date = db.DateTimeProperty(auto_now_add=True)
     last_updated_date = db.DateTimeProperty(auto_now_add=True)
-    last_updated_user = db.UserProperty()
+    last_updated_user = db.UserProperty(auto_current_user=True)
 
 
 class ChecklistColumnTemplate(Tagable):
@@ -105,12 +105,12 @@ class UserChecklist(Checklist):
         "user_tag_checklist": 'select * from UserChecklist WHERE user=:1 and tags=:2 ORDER BY last_updated_date desc',
     }
     
-    user = db.UserProperty(required=True)
+    user = db.UserProperty(required=True,auto_current_user_add=False)
     starred = db.BooleanProperty(default = False)
     public = db.BooleanProperty(default = False)
     created_date = db.DateTimeProperty(auto_now_add=True)
     last_updated_date = db.DateTimeProperty(auto_now_add=True)
-    last_updated_user = db.UserProperty()
+    last_updated_user = db.UserProperty(auto_current_user=True)
 
     def update_user(self,update):
         """Update User info"""
@@ -242,7 +242,7 @@ class ChecklistItem(db.Expando):
     order = db.IntegerProperty(default=0)
     created_date = db.DateTimeProperty(auto_now_add=True)
     last_updated_date = db.DateTimeProperty(auto_now_add=True)
-    last_updated_user = db.UserProperty()
+    last_updated_user = db.UserProperty(auto_current_user=True)
     starred = db.BooleanProperty(default = False)
     parent_checklist_item = db.SelfReferenceProperty()
 
