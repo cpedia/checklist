@@ -1,14 +1,16 @@
 {% extends "base.html" %}
 {% block title %}{{title}} - checklists{% endblock %}
 {% block checklist %}
-<script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/yahoo-dom-event/yahoo-dom-event.js"></script>
 <script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/animation/animation-min.js"></script>
 <script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/dragdrop/dragdrop-min.js"></script>
+<script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/json/json-min.js"></script>
+<script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/connection/connection-min.js"></script>
 <script type="text/javascript">
     YAHOO.util.Event.addListener(window, "load", function() {
         YAHOO.checklist.items.DDMod = function() {
             var Dom = YAHOO.util.Dom;
             var Event = YAHOO.util.Event;
+            var init_input_default_value =  YAHOO.checklist.init_input_default_value;
             //var DDM = YAHOO.util.DragDropMgr;
             var li_count = 1;    //counter for checklist block "li"
 
@@ -134,10 +136,10 @@
                     "<span class='delete_icon' style='display:none' >&nbsp;&nbsp;&nbsp;&nbsp;</span></li>\n" +
                         //todo: add other properties for the checklist item here.
                     "</ul> \n" +
-                    "<li id='li_1_new_item_li'>\n " +
+                    "<ul><li id='li_1_new_item_li'>\n " +
                     "<input type='checkbox' style='opacity: 0.5;' class='new_checklist_item'/>\n " +
                     "<input type='text' style='opacity: 0.5;' class='checklist_item new_checklist_item'/>\n" +
-                    "</li>\n" +
+                    "</li></ul>\n" +
                     "<div id='li_1_btn_div'>" +
                     "<br/>\n" +
                     "<input type='button' value='Done' class='done_btn' id='li_1_done_btn'>\n" +
@@ -191,13 +193,65 @@
             //when page load, create a default checklist edit block.
             create_item_edit_block();
             init_input_default_value(["checklist_name","checklist_desc"]);
+
+            var getFormJSON = function(){
+                var title = Dom.get("checklist_name").value;
+                var description = Dom.get("checklist_desc").value;
+                var blocks = Dom.getElementsByClassName("checklist_item_editable_block");
+                var checklist_items = [];
+                for(var i=0;i<blocks.length;i++){
+                    var block_items =[];
+                    var block_title = Dom.getElementsByClassName("checklist_item_block_name","input",blocks[i])[0].value;
+                    var block_checkboxs = Dom.getElementsByClassName("checklist_item","input",blocks[i]);
+                    for(var j=0;j<block_checkboxs.length;j++){
+                        var checklist_item;
+                        checklist_item['item'] = block_checkboxs[j].value;
+                        block_items.push(checklist_item);
+                    }
+                    var checklist_group;
+                    checklist_group['item'] = block_title;
+                    checklist_group['sub_items'] = block_items;
+                    checklist_items.push(checklist_group);
+                }
+                var checklist;
+                checklist['title'] =title;
+                checklist['description'] =description;
+                checklist['checklist_items'] =checklist_items;
+                return checklist;
+            };
+
+            var save_checklist = function(){
+                var json = YAHOO.lang.JSON.stringify(getFormJSON());
+                YAHOO.util.Connect.asyncRequest('POST', '/create/quicklist',
+                {
+                    success: function (o) {
+                        if (o.responseText == 'true') {
+                        } else {
+                            alert(o.responseText);
+                        }
+                    },
+                    failure: function (o) {
+                        alert(o.statusText);
+                    },
+                    scope:this
+                }
+                        );
+            };
+            Event.addListener("save_checklist_btn","click",save_checklist);
+
+            var enable_save_btn = function(type, args){
+                YAHOO.util.Dom.get("save_checklist_btn").disabled = false;
+            };
+            YAHOO.checklist.inputChange.subscribe(enable_save_btn);
+
         }();
     });
 </script>
 <div id="quick_checklist">
+    <input type="hidden" id="checklist_json">
     <div>
-        <input type="button" value="Save Checklist" id="save_checklist_btn" class="checklist_action_button moz-border">
-        <input type="button" value="Add New Block" id="add_new_block" class="checklist_action_button moz-border">
+        <button type="button" id="save_checklist_btn" class="checklist_action_button moz-border" disabled>Save Checklist</button> &nbsp;
+        <button type="button" id="add_new_block" class="checklist_action_button moz-border">Add New Block</button>
 
         <p></p>
     </div>

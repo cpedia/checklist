@@ -198,7 +198,6 @@ div.checklist_item_saved_block {
 .checklist_action_button {
     background: #B6CDE1 url(/static/images/bg_hd.gif) repeat-x scroll 0 0;
     border: 1px solid #93B2CC;
-    color: #333333;
     cursor: pointer;
     font-weight: bold;
     padding: 0.17em 0.5em;

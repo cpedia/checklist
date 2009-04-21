@@ -248,6 +248,10 @@ class CreateQucikList(BaseRequestHandler):
         }
         self.generate('checklist_quick.html',template_values)
 
+    @authorized.role("user")
+    def post(self):
+        pass
+
 class TemplateListAdmin(BaseRequestHandler):
     @authorized.role("admin")
     def get(self):
