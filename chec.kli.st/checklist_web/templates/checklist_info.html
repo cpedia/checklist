@@ -1,19 +1,13 @@
 {% extends "base.html" %}
 {% block title %}{{title}} - checklist {% endblock %}
 {% block checklist %}
-<!--CSS file (default YUI Sam Skin) -->
 <link type="text/css" rel="stylesheet"
       href="http://yui.yahooapis.com/2.7.0/build/datatable/assets/skins/sam/datatable.css">
-<!-- Dependencies -->
 <script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/element/element-min.js"></script>
 <script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/datasource/datasource-min.js"></script>
-<!-- OPTIONAL: JSON Utility (for DataSource) -->
 <script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/json/json-min.js"></script>
-<!-- OPTIONAL: Connection Manager (enables XHR for DataSource) -->
 <script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/connection/connection-min.js"></script>
-<!-- OPTIONAL: Drag Drop (enables resizeable or reorderable columns) -->
 <script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/dragdrop/dragdrop-min.js"></script>
-<!-- Source files -->
 <script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/datatable/datatable-min.js"></script>
 <script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/button/button-min.js"></script>
 <style type="text/css">
@@ -28,9 +22,17 @@
                 elCell.innerHTML = '<input type="image" src="/static/images/' + oColumn.key + '.png" name="' + oColumn.key + '" title="' + oColumn.label + ' row" />';
                 elCell.style.cursor = 'pointer';
             };
+            var disabledCheckeboxFormatter = function(elCell, oRecord, oColumn, oData) {
+                var disabled="";
+                if (oData=="Checkbox"||oData=="Item"){
+                    disabled="disabled";
+                }
+                elCell.innerHTML = "<input type=\"checkbox\"" + " class=\"" + YAHOO.widget.DataTable.CLASS_CHECKBOX + "\""+
+                       disabled + "/>";
+            };
 
             var myColumnDefs = [
-                {key:"check",resizeable:true,label:"",formatter:YAHOO.widget.DataTable.formatCheckbox,className:"align_center"},
+                {key:"name",resizeable:true,label:"",formatter:disabledCheckeboxFormatter,className:"align_center"},
                 {key:"name",resizeable:true,label:"Column Name",editor: new YAHOO.widget.TextboxCellEditor({disableBtns:true})},
                 {key:"type",resizeable:true,label:"Column Type",editor:new YAHOO.widget.DropdownCellEditor({dropdownOptions:["Checkbox","String","Category","Number","Yes/No","Date"],disableBtns:true})},
                 {key:"up",resizeable:true,label:"Up",formatter:imageFormatter},
