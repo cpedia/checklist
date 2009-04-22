@@ -166,14 +166,19 @@ class PrintChecklist(BaseRequestHandler):
     def get(self,checklistKey):
         checklist = models.UserChecklist.get_cached(checklistKey)
         checklist_columns = checklist.checklistcolumn_set
-        checklist_items = checklist.checklistitem_set
-        items = []
-        for item in checklist_items:
-            items +=[item.to_json()]
+        #checklist_items = checklist.checklistitem_set
+        checklist_item_groups = db.GqlQuery('select * from ChecklistItem where is_item_group=:1 and checklist=:2',True,
+                                            checklist).fetch(1000)
+#        groups = []
+#        for group in checklist_item_groups:
+#            items = []
+#            for item in group.sub_checklist_item_set:
+#                items+=[item.to_json()]
+#            groups+=[{"group":group,"items":items}]
         template_values = {
         "checklist":checklist,
         "checklist_columns":checklist_columns,
-        "checklist_items":simplejson.dumps(items),
+        "checklist_item_groups":checklist_item_groups,
         }
         self.generate('checklist_print.html',template_values)
 
@@ -278,15 +283,21 @@ class CreateQucikList(BaseRequestHandler):
             checklist_item = models.ChecklistItem(checklist=checklist)
             checklist_item.item = checklist_item_['item']
             checklist_item.order = i
+            checklist_item.is_item_group = True
+            checklist_item.checkable = False
+            if len(checklist_item_['sub_items'])>0:
+                checklist_item.has_sub_checklist_item=True
             checklist_item.put()
             j=0
             for sub_item_ in checklist_item_['sub_items']:
-                j = j+1
-                sub_item = models.ChecklistItem(checklist=checklist,parent_checklist_item=checklist_item)
-                sub_item.item = sub_item_['item']
-                sub_item.order = j
-                sub_item.put()
-        self.response.out.write(simplejson.dump({"checklist_key":str(checklist.key())}))
+                if sub_item_['item'].strip()!='':
+                    j = j+1
+                    sub_item = models.ChecklistItem(checklist=checklist,parent_checklist_item=checklist_item)
+                    sub_item.item = sub_item_['item']
+                    sub_item.order = j
+                    sub_item.put()
+        self.response.headers['Content-Type'] = 'application/json'
+        self.response.out.write(str(checklist.key()))
 
 class TemplateListAdmin(BaseRequestHandler):
     @authorized.role("admin")
