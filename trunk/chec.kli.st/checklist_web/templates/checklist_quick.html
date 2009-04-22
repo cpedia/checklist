@@ -222,15 +222,22 @@
 
             var save_checklist = function(){
                 var checklist = YAHOO.lang.JSON.stringify(getFormJSON());
+                Dom.get("save_checklist_btn").value = "Save Checklist...";
+                Dom.setStyle("save_checklist_btn","display","none");
                 YAHOO.util.Connect.asyncRequest('POST', '/create/quicklist',
                 {
                     success: function (o) {
-                        if (o.responseText == 'true') {
-                            alert("Create checklist successfully.");
-                            window.href.location="/list/print/"+o.responseText.checklist_key;                            
+                        if (!YAHOO.lang.isNull(o.responseText)) {
+                            if(window.confirm("Save checklist successfully. Do you want to view the printable version?")){
+                               window.location.href = "/list/print/"+o.responseText;
+                            }
                         } else {
-                            alert(o.responseText);
+                            if(window.confirm("Save checklist fail. Do you want to try again?")){
+                               save_checklist();
+                            }
                         }
+                        Dom.get("save_checklist_btn").value = "Save Checklist";
+                        Dom.setStyle("save_checklist_btn","display","");                                                
                     },
                     failure: function (o) {
                         alert(o.statusText);

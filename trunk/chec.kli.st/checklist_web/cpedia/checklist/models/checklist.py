@@ -68,7 +68,7 @@ class Tagable(models.MemcachedModel):
 
 class Checklist(Tagable):
     name = db.StringProperty(multiline=False)
-    description = db.StringProperty()
+    description = db.TextProperty()
     show_item_number = db.BooleanProperty(default = True)
     strikeout_checked_item = db.BooleanProperty(default = True)
     auto_check_parent_item = db.BooleanProperty(default = True)
@@ -244,7 +244,25 @@ class ChecklistItem(db.Expando):
     last_updated_date = db.DateTimeProperty(auto_now_add=True)
     last_updated_user = db.UserProperty(auto_current_user=True)
     starred = db.BooleanProperty(default = False)
-    parent_checklist_item = db.SelfReferenceProperty()
+    checkable = db.BooleanProperty(default = True)
+    is_item_group = db.BooleanProperty(default = False)
+    has_sub_checklist_item = db.BooleanProperty(default = False)
+    parent_checklist_item = db.SelfReferenceProperty(collection_name="sub_checklist_item_set")
+
+    json_does_not_include = []
+
+    def to_json(self, attr_list=[]):
+        def to_entity(entity):
+            """Convert datastore types in entity to
+               JSON-friendly structures."""
+            self._to_entity(entity)
+            for skipped_property in self.__class__.json_does_not_include:
+                del entity[skipped_property]
+            models.replace_datastore_types(entity)
+        values = models.to_dict(self, attr_list, to_entity)
+        #return simplejson.dumps(values)   #simplejson.dumps will be applied when do the rpc call.
+        return values
+
 
 class ChecklistColumnCategory(db.Model):
     name = db.StringProperty(multiline=False)

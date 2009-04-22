@@ -1,0 +1,40 @@
+li{
+    padding:0 0 0.5em;
+}
+.ss-checklist-body {
+    font-size: 0.8em;
+    background-color: #E8EEF7;
+    padding: 0.5em 1em;
+    font-family:Arial,sans-serif;
+}
+
+.ss-checklist-container {
+    background-color: #FFFFFF;
+    border: 1px solid #CCCCCC;
+    margin: 0 auto;
+    padding: 1em;
+    width: 45em;
+}
+
+.ss-checklist-title {
+    font-size: 1.8em;
+    padding: 0;
+}
+
+.ss-checklist-desc {
+    white-space: pre-wrap;
+    width: 99%;
+}
+
+.ss-block-title {
+    display: block;
+    font-weight: bold;
+}
+
+.ss-item {
+    list-style-image:none;
+    list-style-position:outside;
+    list-style-type:none;    
+    margin: 0.5em 0 0;
+    padding: 0;
+}
