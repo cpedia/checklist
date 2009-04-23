@@ -173,8 +173,7 @@ div.checklist_item_saved_block {
 }
 
 .checklist_block_top_button_div {
-    background: #DDE1EB url(/static/images/quicklist_icon.gif) no-repeat scroll 0 0;
-    background-position: -5px -96px;
+    background-color: #DDE1EB ;
     border:1px solid #729BD1;
     cursor: pointer;
     height: 20px;
