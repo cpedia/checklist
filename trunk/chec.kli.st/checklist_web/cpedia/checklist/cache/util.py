@@ -70,7 +70,7 @@ def getUser(user_,nocache=False):
     except Exception:
         user = None
     if nocache or user is None:
-        user = models.User.gql('WHERE user.user_id=:1',user_.user_id()).get()
+        user = models.User.gql('WHERE user_id=:1',user_.user_id()).get()
         if user is None:
             usernew = models.User(user=user_)
             usernew.put()
@@ -89,7 +89,7 @@ def get_user_tags(user_,nocache=False):
         except Exception:
             tags = None
         if nocache or tags is None:
-            tags = models.Tag.gql('WHERE user.user_id=:1 ORDER BY entrycount desc',user_.user_id()).fetch(1000)
+            tags = models.Tag.gql('WHERE user_id=:1 ORDER BY entrycount desc',user_.user_id()).fetch(1000)
             memcache.add(key=key_, value=tags)
         else:
             logging.debug("get_user_tags from cache.")
