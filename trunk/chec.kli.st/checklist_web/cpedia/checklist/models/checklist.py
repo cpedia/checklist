@@ -40,7 +40,7 @@ class User(models.SerializableModel):
     public_checklists_count = db.IntegerProperty(default=0)
 
     def put(self):
-        memcache.delete("user_"+self.user.email())
+        memcache.delete("user_"+self.user.user_id())
         super(User, self).put()
 
 class Tag(models.SerializableModel):
@@ -86,7 +86,7 @@ class ChecklistTemplate(Checklist):
     order = db.IntegerProperty(default=0)
     active = db.BooleanProperty(default = False)
     created_date = db.DateTimeProperty(auto_now_add=True)
-    last_updated_date = db.DateTimeProperty(auto_now_add=True)
+    last_updated_date = db.DateTimeProperty(auto_now=True)
     last_updated_user = db.UserProperty(auto_current_user=True)
 
 
@@ -99,22 +99,22 @@ class ChecklistColumnTemplate(Tagable):
 
 class UserChecklist(Checklist):
     page_querys = {
-        "user_checklist": 'select * from UserChecklist WHERE user=:1 ORDER BY last_updated_date desc',
-        "user_starred_checklist": 'select * from UserChecklist WHERE user=:1 and starred = TRUE ORDER BY last_updated_date desc',
-        "user_public_checklist": 'select * from UserChecklist WHERE user=:1 and public =TRUE ORDER BY last_updated_date desc',
-        "user_tag_checklist": 'select * from UserChecklist WHERE user=:1 and tags=:2 ORDER BY last_updated_date desc',
+        "user_checklist": 'select * from UserChecklist WHERE user.user_id=:1 ORDER BY created_date desc',
+        "user_starred_checklist": 'select * from UserChecklist WHERE user.user_id=:1 and starred = TRUE ORDER BY created_date desc',
+        "user_public_checklist": 'select * from UserChecklist WHERE user.user_id=:1 and public =TRUE ORDER BY created_date desc',
+        "user_tag_checklist": 'select * from UserChecklist WHERE user.user_id=:1 and tags=:2 ORDER BY created_date desc',
     }
     
     user = db.UserProperty(required=True,auto_current_user_add=False)
     starred = db.BooleanProperty(default = False)
     public = db.BooleanProperty(default = False)
     created_date = db.DateTimeProperty(auto_now_add=True)
-    last_updated_date = db.DateTimeProperty(auto_now_add=True)
+    last_updated_date = db.DateTimeProperty(auto_now=True)
     last_updated_user = db.UserProperty(auto_current_user=True)
 
     def update_user(self,update):
         """Update User info"""
-        users = User.all().filter('user',self.user).fetch(10)
+        users = User.all().filter('user.user_id',self.user.user_id()).fetch(10)
         if users == []:
             usernew = User(user=self.user,checklists_count=1)
             if self.public is True:
@@ -136,12 +136,12 @@ class UserChecklist(Checklist):
         if self.tags:
             for tag_ in self.tags:
                 #tag_ = tag.encode('utf8')
-                tags = Tag.all().filter('tag',tag_).filter('user',self.user).fetch(10)
+                tags = Tag.all().filter('tag',tag_).filter('user.user_id',self.user.user_id()).fetch(10)
                 if tags == []:
                     tagnew = Tag(tag=tag_,user=self.user,entrycount=1)
                     tagnew.put()
                 else:
-                    memcache.delete(self.__class__.__name__+"_page_"+"user_tag_checklist"+"_"+str(self.user.email())+"_"+tag_)                    
+                    memcache.delete(self.__class__.__name__+"_page_"+"user_tag_checklist"+"_"+str(self.user.user_id())+"_"+tag_)
                     if not update:
                         tags[0].entrycount+=1
                         tags[0].put()
@@ -160,7 +160,7 @@ class UserChecklist(Checklist):
     #if a checklist is already starred, then the starred method should not be called.
     def starred(self):
         self.starred = True
-        users = User.all().filter('user',self.user).fetch(10)
+        users = User.all().filter('user.user_id',self.user.user_id()).fetch(10)
         if users != []:
             users[0].starred_checklists_count+=1
             users[0].put()
@@ -168,7 +168,7 @@ class UserChecklist(Checklist):
 
     def unstarred(self):
         self.starred = False
-        users = User.all().filter('user',self.user).fetch(10)
+        users = User.all().filter('user.user_id',self.user.user_id()).fetch(10)
         if users != []:
             users[0].starred_checklists_count-=1
             users[0].put()
@@ -177,7 +177,7 @@ class UserChecklist(Checklist):
     #if a checklist is already public, then the starred method should not be called.
     def public(self):
         self.public = True
-        users = User.all().filter('user',self.user).fetch(10)
+        users = User.all().filter('user.user_id',self.user.user_id()).fetch(10)
         if users != []:
             users[0].public_checklists_count+=1
             users[0].put()
@@ -185,7 +185,7 @@ class UserChecklist(Checklist):
 
     def unpublic(self):
         self.public = False
-        users = User.all().filter('user',self.user).fetch(10)
+        users = User.all().filter('user.user_id',self.user.user_id()).fetch(10)
         if users != []:
             users[0].public_checklists_count-=1
             users[0].put()
@@ -193,7 +193,7 @@ class UserChecklist(Checklist):
 
 
     def delete(self):
-        users = User.all().filter('user',self.user).fetch(10)
+        users = User.all().filter('user.user_id',self.user.user_id()).fetch(10)
         if users == []:
             pass
         else:
@@ -202,12 +202,12 @@ class UserChecklist(Checklist):
         if self.tags:
             for tag_ in self.tags:
                 #tag_ = tag.encode('utf8')
-                tags = Tag.all().filter('tag',tag_).filter('user',self.user).fetch(10)
+                tags = Tag.all().filter('tag',tag_).filter('user.user_id',self.user.user_id()).fetch(10)
                 if tags == []:
                     pass
                 else:
                     #The only case to update a tag. The tag can not be deleted.
-                    memcache.delete(self.__class__.__name__+"_page_"+"user_tag_checklist"+"_"+str(self.user.email())+"_"+tag_)
+                    memcache.delete(self.__class__.__name__+"_page_"+"user_tag_checklist"+"_"+str(self.user.user_id())+"_"+tag_)
                     tags[0].entrycount-=1
                     tags[0].put()
         super(UserChecklist, self).delete()
@@ -241,7 +241,7 @@ class ChecklistItem(db.Expando):
     item = db.StringProperty()
     order = db.IntegerProperty(default=0)
     created_date = db.DateTimeProperty(auto_now_add=True)
-    last_updated_date = db.DateTimeProperty(auto_now_add=True)
+    last_updated_date = db.DateTimeProperty(auto_now=True)
     last_updated_user = db.UserProperty(auto_current_user=True)
     starred = db.BooleanProperty(default = False)
     checkable = db.BooleanProperty(default = True)
@@ -270,7 +270,7 @@ class ChecklistColumnCategory(db.Model):
     categorys = db.ListProperty(db.Category)
 
 class Comment(polymodel.PolyModel):
-    last_updated_date = db.DateTimeProperty(auto_now_add=True)
+    last_updated_date = db.DateTimeProperty(auto_now=True)
     last_updated_user = db.UserProperty()
     starred = db.BooleanProperty(default = False)
 

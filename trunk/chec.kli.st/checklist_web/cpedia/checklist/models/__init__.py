@@ -64,7 +64,8 @@ def replace_datastore_types(entity):
             return str(value)
         elif isinstance(value, users.User):
             return { 'nickname': value.nickname(),
-                     'email': value.email() }
+                     'email': value.email(),
+                     'user_id':value.user_id() }
         else:
             return None
 
@@ -111,8 +112,8 @@ class MemcachedModel(SerializableModel):
         memcache_list_keys = self.__class__.memcache_list_key()
         email = None
         if hasattr(self,"user") and self.user:
-            email = self.user.email()
-        memcache_page_keys = self.__class__.memcache_page_key(user_email=email)
+            user_id_ = self.user.user_id()
+        memcache_page_keys = self.__class__.memcache_page_key(user_id=user_id_)
         if memcache_list_keys is not None and len(memcache_list_keys) > 0:
             memcache.delete_multi(memcache_list_keys)
         if memcache_page_keys is not None and len(memcache_page_keys) > 0:
@@ -142,12 +143,12 @@ class MemcachedModel(SerializableModel):
         return [cls.__name__ +"_list_" +  query_key  for query_key in cls.querys]
 
     @classmethod
-    def memcache_page_key(cls, user_email=None):
-        if user_email is not None:
-            user_email = "_"+user_email
+    def memcache_page_key(cls, user_id=None):
+        if user_id is not None:
+            user_id = "_"+user_id
         else:
-            user_email = ""
-        return [cls.__name__ +"_page_" + query_key + user_email  for query_key in cls.page_querys]
+            user_id = ""
+        return [cls.__name__ +"_page_" + query_key + user_id  for query_key in cls.page_querys]
 
     @classmethod
     def memcache_object_key(cls,primary_key):
@@ -190,7 +191,7 @@ class MemcachedModel(SerializableModel):
     def get_cached_page(cls, query_key,page,num_per_page,count=None,params=[],nocache=False):
         """Return the cached list with the specified key and page.
         for example we need to query the user's checklist page,
-        then we set: query_ley = "user_checklist"+user.email()
+        then we set: query_ley = "user_checklist"+user.user_id()
 
         the params is used for inject to gql.
         """

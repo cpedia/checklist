@@ -198,7 +198,6 @@ class CreateList(BaseRequestHandler):
         checklist.name = self.request.get('checklistName')
         checklist.description = self.request.get('description')
         checklist.tags_commas = self.request.get('tags')
-        checklist.last_updated_user = users.get_current_user()
         checklist.save()
         columns = self.request.get('checklist_columns')
         checklist_columns = simplejson.loads(columns)
@@ -231,13 +230,11 @@ class ChecklistEditAdmin(BaseRequestHandler):
     @authorized.role("user")
     def post(self,checklistKey):
         checklist = models.UserChecklist.get_cached(checklistKey)
-        if checklist is not None and checklist.user != users.get_current_user():
+        if checklist is not None and checklist.user.user_id() != users.get_current_user().user_id():
             self.redirect('/403.html')
         checklist.name = self.request.get('checklistName')
         checklist.description = self.request.get('description')
         checklist.tags_commas = self.request.get('tags')
-        checklist.last_updated_date = datetime.datetime.now()
-        checklist.last_updated_user = users.get_current_user()
 
         checklist_columns = checklist.checklistcolumn_set
         for column in checklist_columns:
@@ -319,7 +316,6 @@ class TemplateCreateAdmin(BaseRequestHandler):
         checklist_template = models.ChecklistTemplate(user=users.get_current_user())
         checklist_template.name = self.request.get('templateName')
         checklist_template.description = self.request.get('description')
-        checklist_template.last_updated_user = users.get_current_user()
         checklist_template.put()
         columns = self.request.get('template_columns')
         template_columns = simplejson.loads(columns)
@@ -351,8 +347,6 @@ class TemplateEditAdmin(BaseRequestHandler):
         checklist_template = models.ChecklistTemplate.get_cached(templateKey)
         checklist_template.name = self.request.get('templateName')
         checklist_template.description = self.request.get('description')
-        checklist_template.last_updated_date = datetime.datetime.now()
-        checklist_template.last_updated_user = users.get_current_user()
 
         template_columns = checklist_template.checklistcolumntemplate_set
         for column in template_columns:
