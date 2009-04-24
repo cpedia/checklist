@@ -111,9 +111,10 @@ class MemcachedModel(SerializableModel):
     def delete_cached_list_page(self):
         memcache_list_keys = self.__class__.memcache_list_key()
         email = None
+        memcache_page_keys = None
         if hasattr(self,"user") and self.user:
             user_id_ = self.user.user_id()
-        memcache_page_keys = self.__class__.memcache_page_key(user_id=user_id_)
+            memcache_page_keys = self.__class__.memcache_page_key(user_id=user_id_)
         if memcache_list_keys is not None and len(memcache_list_keys) > 0:
             memcache.delete_multi(memcache_list_keys)
         if memcache_page_keys is not None and len(memcache_page_keys) > 0:

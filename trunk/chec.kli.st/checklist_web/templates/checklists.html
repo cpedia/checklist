@@ -23,6 +23,9 @@
     .align_center {
         text-align: center !important;
     }
+    .nowrap{
+        white-space:nowrap;
+    }
 </style>
 <script type="text/javascript">
     YAHOO.util.Event.addListener(window, "load", function() {
@@ -36,10 +39,10 @@
             };
             // Column definitions
             var myColumnDefs = [ // sortable:true enables sorting
-                {key:"check",resizeable:true,label:"Select Row",formatter:YAHOO.widget.DataTable.formatCheckbox,className:"align_center"},
-                {key:"starred",resizeable:true,label:"Starred",formatter:imageFormatter,className:"align_center"},
+                {key:"check",resizeable:true,label:"",formatter:YAHOO.widget.DataTable.formatCheckbox,className:"align_center"},
+                {key:"starred",resizeable:true,label:"",formatter:imageFormatter,className:"align_center"},
                 {key:"name", label:"Name", formatter:detailLinkFormatter,sortable:true},
-                {key:"description", label:"Description",formatter:detailLinkFormatter, sortable:false},
+                {key:"description", label:"Description",formatter:detailLinkFormatter, sortable:false,className:'nowrap'},
                 {key:"created_date", label:"Create Date", sortable:true,formatter:"date"},
                 {key:"last_updated_date", label:"Update Date", sortable:true,formatter:"date"},
                 {key:"key",resizeable:true,label:"Edit",formatter:function(elCell, oRecord, oColumn, oData){
@@ -89,7 +92,7 @@
                 initialRequest: "?arg0=0&arg1=10&time=" + new Date().getTime(),  //'startIndex=0&results=25'
                 generateRequest: buildQueryString,
                 dynamicData: true, // Enables dynamic server-driven data
-                sortedBy : {key:"last_updated_date", dir:YAHOO.widget.DataTable.CLASS_ASC}, // Sets UI initial sort arrow
+                sortedBy : {key:"created_date", dir:YAHOO.widget.DataTable.CLASS_DESC}, // Sets UI initial sort arrow
                 paginator: myPaginator // Enables pagination
             };
 
