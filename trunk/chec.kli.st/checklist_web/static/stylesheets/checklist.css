@@ -116,6 +116,7 @@ p {
 .form_desc {
     font-size: 8pt;
     padding-bottom: 5px;
+    font-style:italic;
 }
 
 input#checklist_name {
