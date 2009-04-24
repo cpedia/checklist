@@ -190,7 +190,7 @@ class CreateList(BaseRequestHandler):
         template_values = {
         "checklist_templates":templates,
         }
-        self.generate('checklist_info.html',template_values)
+        self.generate('checklist_detail.html',template_values)
 
     @authorized.role("user")
     def post(self):
