@@ -223,7 +223,7 @@
             var save_checklist = function(){
                 var checklist = YAHOO.lang.JSON.stringify(getFormJSON());
                 Dom.get("save_checklist_btn").value = "Save Checklist...";
-                Dom.setStyle("save_checklist_btn","display","none");
+                Dom.setStyle("save_checklist_btn","disabled",true);
                 YAHOO.util.Connect.asyncRequest('POST', '/create/quicklist',
                 {
                     success: function (o) {
@@ -237,7 +237,7 @@
                             }
                         }
                         Dom.get("save_checklist_btn").value = "Save Checklist";
-                        Dom.setStyle("save_checklist_btn","display","");                                                
+                        Dom.setStyle("save_checklist_btn","disabled",false);
                     },
                     failure: function (o) {
                         alert(o.statusText);

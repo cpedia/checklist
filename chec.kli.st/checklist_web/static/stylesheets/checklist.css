@@ -24,6 +24,10 @@ p {
     -moz-border-radius-topright: 2px;
 }
 
+.yui-skin-sam .yui-dt table{
+   width:100% 
+}
+
 .gbh {
     border-top: 1px solid #C9D7F1;
     height: 4px;

@@ -11,13 +11,19 @@ indexes:
 # your application using appcfg.py.
 
 # Used once in query history.
+- kind: ChecklistTemplate
+  properties:
+  - name: active
+  - name: order
+
+# Used once in query history.
 - kind: Tag
   properties:
   - name: user_id
   - name: entrycount
     direction: desc
 
-# Used once in query history.
+# Used 3 times in query history.
 - kind: UserChecklist
   properties:
   - name: user_id
