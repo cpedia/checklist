@@ -148,6 +148,10 @@ textarea#checklist_desc {
     width: 100%;
 }
 
+input#tags {
+    width: 100%;
+}
+
 div.checklist_item_editable_block {
     background-color: #EDF5FF;
     cursor: move;
