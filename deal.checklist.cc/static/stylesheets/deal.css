@@ -1,0 +1,212 @@
+body {
+    background: #fff;
+    color: #333;
+}
+
+a, a:link, a:visited, a:link {
+    color: #555;
+    text-decoration: underline;
+    border-bottom-color: #555;
+}
+
+a:hover {
+    background-color: #F4F2E4;
+}
+
+p {
+    padding: 0 0 1em !important;
+}
+
+.moz-border {
+    -moz-border-radius-bottomleft: 2px;
+    -moz-border-radius-bottomright: 2px;
+    -moz-border-radius-topleft: 2px;
+    -moz-border-radius-topright: 2px;
+}
+
+.yui-skin-sam .yui-dt table{
+   width:100% 
+}
+
+.gbh {
+    border-top: 1px solid #C9D7F1;
+    height: 4px;
+    margin-top: 4px;
+    position: absolute;
+    width: 100%;
+}
+
+#gaia {
+    text-align: right;
+}
+
+#logodiv {
+    margin: 6px;
+}
+
+.noborder_table {
+    border: none;
+}
+
+.noborder_table th {
+    border: none;
+    padding: .4em;
+    font-weight: bold;
+    text-align: center;
+}
+
+.noborder_table td {
+    border: none;
+    padding: .4em;
+    text-align: left;
+}
+
+.error {
+    background: #f8f7ef none repeat scroll 0 0;
+    border: medium none red;
+    border-left: 4px solid;
+    font-weight: bold;
+    margin: 10px 0;
+    padding-bottom: 10px;
+    padding-left: 10px;
+}
+
+#title a, #title a:hover, #title a:link, #title a:visited {
+    background-color: inherit !important;
+    border-style: none;
+    font-size: 2.4em !important;
+    text-decoration: none;
+}
+
+#footer {
+    background: #fbfaf4;
+    height: 3.5em;
+    margin-bottom: 20px;
+    margin-top: 20px;
+    min-width: 750px;
+    overflow: hidden;
+    text-align: center;
+    line-height: 1.5em;
+}
+.checklist-inline-block{
+    display:inline-block;
+}
+.checklist-block{
+    display:block;
+}
+#google_ad {
+    padding-left: 5px;
+    padding-top: 10px;
+}
+
+#logo {
+    background: #efefef;
+    border: 1px #cccccc solid;
+    height: 148px;
+    padding-right: 5px;
+    padding-top: 2px;
+    text-align: right;
+}
+
+.movebutton {
+    width: 30px;
+    text-align: center;
+}
+
+.form_desc {
+    font-size: 8pt;
+    padding-bottom: 5px;
+    font-style:italic;
+}
+
+input#checklist_name {
+    font-size: 1.3em;
+    width: 100%;
+    font-weight: bold;
+}
+
+.checklist_item_block_name {
+    width: 60%;
+    font-weight: bold;
+}
+
+.checklist_item {
+    width: 70%;
+    font-weight: normal;
+}
+
+.checklist_item_label {
+    cursor: pointer;
+    width: 70%;    
+}
+
+#checklist_items li {
+    line-height: 1.5em;
+    padding: 0.5em 0 0 0;
+}
+
+textarea#checklist_desc {
+    width: 100%;
+}
+
+input#tags {
+    width: 100%;
+}
+
+div.checklist_item_editable_block {
+    background-color: #EDF5FF;
+    cursor: move;
+    padding: 0.5em 2em 1.5em;
+    position: relative;
+}
+
+div.checklist_item_saved_block {
+    cursor: move;
+    position: relative;
+}
+
+.delete_icon {
+    background: url(/static/images/delete_16x16.gif) no-repeat;
+    height: 16px;
+    margin-left: 5px;
+    width: 20px;
+    position: relative;
+    cursor: pointer
+}
+
+.checklist_block_top_button {
+    position: absolute;
+    right: 1em;
+    top: 0.5em;
+    display: block;
+}
+
+.checklist_block_top_button_div {
+    background-color: #DDE1EB ;
+    border:1px solid #729BD1;
+    cursor: pointer;
+    height: 20px;
+    width: 24px;
+    padding-top:2px;
+    position: relative;
+}
+.checklist_block_top_button_edit{
+    background: transparent url(/static/images/edit_16x16.gif) no-repeat scroll center;
+    text-align:center;
+}
+.checklist_block_top_button_copy{
+    background: transparent url(/static/images/copy_16x16.gif) no-repeat scroll center;
+    text-align:center;
+}
+.checklist_block_top_button_delete{
+    background: transparent url(/static/images/delete_div_16x16.gif) no-repeat scroll center;
+    text-align:center;    
+}
+
+.checklist_action_button {
+    background: #B6CDE1 url(/static/images/bg_hd.gif) repeat-x scroll 0 0;
+    border: 1px solid #93B2CC;
+    cursor: pointer;
+    font-weight: bold;
+    padding: 0.17em 0.5em;
+}
