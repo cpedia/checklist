@@ -1,0 +1,3 @@
+cron:
+- url: /tasks/getdeals
+  schedule: every 5 minutes
