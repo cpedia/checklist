@@ -1,0 +1,30 @@
+application: androideal
+version: 1
+runtime: python
+api_version: 1
+skip_files: |
+ ^(.*/)?(
+ (app\.yaml)|
+ (app\.yml)|
+ (index\.yaml)|
+ (index\.yml)|
+ (#.*#)|
+ (.*~)|
+ (.*\.py[co])|
+ (.*/RCS/.*)|
+ (\..*)|
+ (.*/\.svn/.*)|
+ (.*/Thumbs\.db)|
+ (.*/.iml)|
+ )$
+
+handlers:
+- url: /favicon.ico
+  static_files: static/images/favicon.ico
+  upload: static/images/favicon.ico
+
+- url: /static
+  static_dir: static
+
+- url: /.*
+  script: main.py
