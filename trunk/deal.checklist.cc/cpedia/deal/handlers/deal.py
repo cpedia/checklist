@@ -47,7 +47,7 @@ import sys
 import urllib
 from google.appengine.api import urlfetch
 
-from BeautifulSoup import BeautifulSoup
+from HTMLParser import HTMLParser
 
 class BaseRequestHandler(webapp.RequestHandler):
     """Supplies a common template generation function.
@@ -90,7 +90,42 @@ class GetDealsJob(BaseRequestHandler):
             headers={'Content-Type': 'text/html; charset=UTF-8'}
         )
         if dealsea_page.status_code == 200:
-            dealsea_soup = BeautifulSoup(dealsea_page.content)
-            deals_div = dealsea_soup("div",class="dealbox")
+            dealParse = DealSeaHTMLParser()
+            dealParse.feed(dealsea_page.content)
+            dealParse.close()
+            deals = dealParse.deals
         return True;
+
+class DealSeaHTMLParser(HTMLParser):
+    def __init__(self):
+         HTMLParser.__init__(self)
+         self.deals = []
+         self.deal_div = 0
+         
+
+    def handle_starttag(self, tag, attrs):
+        #print "Encountered the beginning of a %s tag" % tag
+        if tag == "div":
+          if len(attrs) == 0:
+              pass
+          else:
+              for (variable, value)  in attrs:
+                 if variable == "class" and value.rfind("dealbox")!=-1:
+                     self.deal_div = 1
+                     self.deals.append(value)
+
+    def handle_endtag(self, tag, attrs):
+        #print "Encountered the end of a %s tag" % tag
+        if tag == "div":
+          if len(attrs) == 0:
+              pass
+          else:
+              for (variable, value)  in attrs:
+                 if variable == "class" and value.rfind("dealbox")!=-1:
+                     self.deal_div = 0
+
+    def handle_data(self, text):
+        """This is called everytime we get to text data (ie. not tags) """
+        if self.deal_div:
+           print "Got anchor text: %s" % text
 
