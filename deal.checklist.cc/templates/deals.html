@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+{% block title %}{{title}} - Deals Management{% endblock %}
+{% block deals %}
+<!--CSS file (default YUI Sam Skin) -->
+<link type="text/css" rel="stylesheet"
+      href="http://yui.yahooapis.com/2.7.0/build/datatable/assets/skins/sam/datatable.css">
+<link rel="stylesheet" type="text/css"
+      href="http://yui.yahooapis.com/2.7.0/build/paginator/assets/skins/sam/paginator.css"/>
+<!-- Dependencies -->
+<script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/element/element-min.js"></script>
+<script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/datasource/datasource-min.js"></script>
+<!-- OPTIONAL: JSON Utility (for DataSource) -->
+<script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/json/json-min.js"></script>
+<!-- OPTIONAL: Connection Manager (enables XHR for DataSource) -->
+<script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/connection/connection-min.js"></script>
+<!-- OPTIONAL: Drag Drop (enables resizeable or reorderable columns) -->
+<script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/dragdrop/dragdrop-min.js"></script>
+<!-- Source files -->
+<script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/datatable/datatable-min.js"></script>
+<script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/paginator/paginator-min.js"></script>
+<script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/button/button-min.js"></script>
+<style type="text/css">
+    .align_center {
+        text-align: center !important;
+    }
+    .nowrap{
+        white-space:nowrap;
+    }
+</style>
+<script type="text/javascript">
+    YAHOO.namespace("deals");
+    YAHOO.util.Event.addListener(window, "load", function() {
+        YAHOO.deals.DynamicData = function() {
+            var detailLinkFormatter = function(elCell, oRecord, oColumn,oData) {
+                elCell.innerHTML = '<a href="/list/' + oRecord.getData()['key'] + '"' + '>'+oRecord.getData()[oColumn.key]+'</a>';
+            };
+            // Column definitions
+            var myColumnDefs = [ // sortable:true enables sorting
+                {key:"check",resizeable:true,label:"",formatter:YAHOO.widget.DataTable.formatCheckbox,className:"align_center"},
+                {key:"title", label:"Title", formatter:detailLinkFormatter,sortable:true},
+                {key:"pub_date", label:"Pub Date", sortable:true,formatter:"date"},
+                {key:"last_updated_date", label:"Update Date", sortable:true,formatter:"date"},
+                {key:"key",resizeable:true,label:"Edit",formatter:function(elCell, oRecord, oColumn, oData){
+                    elCell.innerHTML = "<a href='/edit/deal/"+oData+"'>Edit</a>";
+                }}
+            ];
+
+            // Custom parser
+            var stringToDate = function(sData) {
+                if (sData != null) {
+                    var array = sData.split("-");
+                    return new Date(array[1] + " " + array[2].slice(0, 2) + ", " + array[0]);
+                }
+            };
+
+            var buildQueryString = function (state, dt) {
+                return "?arg0=" + state.pagination.recordOffset +
+                       "&arg1=" + state.pagination.rowsPerPage + '&time=' + new Date().getTime();
+            };
+
+            // DataSource instance
+            var myDataSource = new YAHOO.util.DataSource("/json/getDeals");
+            myDataSource.responseType = YAHOO.util.DataSource.TYPE_JSON;
+            myDataSource.responseSchema = {
+                resultsList: "records",
+                fields: [
+                    {key:"title"},
+                    {key:"pub_date",parser:stringToDate},
+                    {key:"last_updated_date",parser:stringToDate},
+                    {key:"key"}
+                ],
+                metaFields: {
+                    totalRecords: "totalRecords" // Access to value in the server response
+                }
+            };
+
+            var myPaginator = new YAHOO.widget.Paginator({
+                containers : ['paging_nav'],
+                rowsPerPage : 10,
+                rowsPerPageOptions : [10,20,30],
+                template : "{PreviousPageLink} <strong>{CurrentPageReport}</strong> {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+            });
+
+            // DataTable configuration
+            var myConfigs = {
+                initialRequest: "?arg0=0&arg1=10&time=" + new Date().getTime(),  //'startIndex=0&results=25'
+                generateRequest: buildQueryString,
+                dynamicData: true, // Enables dynamic server-driven data
+                sortedBy : {key:"created_date", dir:YAHOO.widget.DataTable.CLASS_DESC}, // Sets UI initial sort arrow
+                paginator: myPaginator // Enables pagination
+            };
+
+            // DataTable instance
+            var myDataTable = new YAHOO.widget.DataTable("Deals_container", myColumnDefs, myDataSource, myConfigs);
+            // Update totalRecords on the fly with value from server
+            myDataTable.handleDataReturnPayload = function(oRequest, oResponse, oPayload) {
+                oPayload.totalRecords = oResponse.meta.totalRecords;
+                return oPayload;
+            };
+
+            // Selects any cell that receives a checkbox click
+            myDataTable.subscribe("checkboxClickEvent", function(oArgs) {
+                var elCheckbox = oArgs.target;
+                var elRow = this.getTrEl(elCheckbox);
+                if (elCheckbox.checked) {
+                    this.selectRow(elRow);
+                } else {
+                    this.unselectRow(elRow);
+                }
+            });
+
+            myDataTable.subscribe("cellClickEvent", myDataTable.onEventShowCellEditor);
+
+            var selectedDealIds = function(recordSet,selectedRows) {
+                var deal_keys  = "deal_keys=";
+                for (var x = 0, length=selectedRows.length; x < length; x++) {
+                    var record =  recordSet.getRecord(selectedRows[x]);
+                    deal_keys += record.getData().key;
+                    if(x < length-1){
+                        deal_keys+=",";
+                    }
+                }
+                return deal_keys;
+            };
+            var deleteDeals = function() {
+                var selected = myDataTable.getSelectedRows();
+                var rset = myDataTable.getRecordSet();
+                if (selected.length > 0) {
+                    YAHOO.util.Connect.asyncRequest('POST', '/json/deleteDeals',
+                    {
+                        success: function (o) {
+                            if (o.responseText == 'true') {
+                                for (var x = 0; x < selected.length; x++) {
+                                    myDataTable.deleteRow(rset.getRecordIndex(rset.getRecord(selected[x])));
+                                }
+                            } else {
+                                alert(o.responseText);
+                            }
+                        },
+                        failure: function (o) {
+                            alert(o.statusText);
+                        },
+                        scope:this
+                    }, selectedDealIds(rset, selected)
+                            );
+                } else {
+                    alert("Please select at least one Deal to delete.");
+                }
+            };
+
+            YAHOO.util.Event.addListener("deleteDeal", "click", deleteDeals);
+
+            return {
+                ds: myDataSource,
+                dt: myDataTable
+            };
+
+        }();
+    });
+</script>
+<div>
+    Deals<br><br>
+
+    <div style="padding-bottom:3px">
+        <button id="deleteDeal">Delete</button>
+    </div>
+    <div id="Deals_container" width="100%">
+    </div>
+    <div id="paging_nav"> </div>
+</div>
+<br>
+{% endblock %}
+
