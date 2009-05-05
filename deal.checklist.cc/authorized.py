@@ -24,7 +24,7 @@ import gdata.service
 
 import urllib
 
-from cpedia.checklist.models import checklist
+from cpedia.deal.models import deal
 
 def role(role):
     """This method refer to the Bloog (http://bloog.appspot.com).
@@ -135,20 +135,20 @@ def UpgradeAndStoreToken(client,email,service,token):
     client.SetAuthSubToken(token)
     client.UpgradeToSessionToken()
   
-    stored_token = checklist.AuthSubStoredToken.gql('WHERE user_email = :1 and target_service = :2',
+    stored_token = deal.AuthSubStoredToken.gql('WHERE user_email = :1 and target_service = :2',
         email, service).get()
     if stored_token:
         stored_token.session_token = token
         stored_token.put()
     else:
-        new_token = checklist.AuthSubStoredToken(user_email=email,
+        new_token = deal.AuthSubStoredToken(user_email=email,
             session_token=client.GetAuthSubToken(),
             target_service=service)
         new_token.put()
     return client.GetAuthSubToken()
 
 def LookupToken(email, service):
-    stored_token = checklist.AuthSubStoredToken.gql('WHERE user_email = :1 and target_service = :2',
+    stored_token = deal.AuthSubStoredToken.gql('WHERE user_email = :1 and target_service = :2',
         email, service).get()
     if stored_token:
         return stored_token.session_token
@@ -156,7 +156,7 @@ def LookupToken(email, service):
         return None
 
 def DeleteUnvalidToken(email, service):
-    stored_token = checklist.AuthSubStoredToken.gql('WHERE user_email = :1 and target_service = :2',
+    stored_token = deal.AuthSubStoredToken.gql('WHERE user_email = :1 and target_service = :2',
         email, service).get()
     if stored_token:
         return stored_token.delete()

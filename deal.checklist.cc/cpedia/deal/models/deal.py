@@ -69,10 +69,10 @@ class Tagable(models.MemcachedModel):
     tags_commas = property(get_tags,set_tags)
 
 class Deals(models.MemcachedModel):
-    verdor = db.StringProperty(multiline=False)
+    vendor = db.StringProperty(multiline=False)
     title = db.StringProperty()
     content = db.TextProperty()
-    image = db.BlobProperty()
+    image = db.StringProperty()
     pub_date = db.DateTimeProperty(auto_now_add=True) #pub date from vendor.
     expired = db.BooleanProperty(default = False)
     created_date = db.DateTimeProperty(auto_now_add=True)
