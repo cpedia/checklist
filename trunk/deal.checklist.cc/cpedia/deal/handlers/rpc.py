@@ -71,6 +71,20 @@ class RPCHandler(webapp.RequestHandler):
         returnValue = {"records":deals,"totalRecords":totalRecords,"startIndex":startIndex}
         return returnValue
 
+    #get checklist template list.
+    @authorized.role('admin')
+    def getLatestDeals(self,results,startIndex):
+        current_date = datetime.datetime.now().strftime('%b %d %Y')
+        query = db.Query(models.Deals)
+        query.filter("pub_date",current_date)
+        query.order('-created_date')
+        deals = []
+        for deal in query.fetch(results,startIndex):
+            deals+=[deal.to_json()]
+        totalRecords = query.count()
+        returnValue = {"records":deals,"totalRecords":totalRecords,"startIndex":startIndex}
+        return returnValue
+
     @authorized.role('admin')
     def deleteDeals(self,request):
         deal_keys = request.get("deal_keys")
