@@ -2,10 +2,9 @@
     <div id="gaia">
         {% if user %}
         <b>{{ user.email }}</b> |
-        <a href="/settings">Settings</a> |
-        <a href="/help">Help</a> |
         {% if user_is_admin %}
-        <a href='/admin/templates'>Templates</a> |
+        <a href='/tasks/getdeals' target="_blank">Generate latest deals</a> |
+        <a href="/tasks/deletedeals" target="_blank">Purge today's deals</a> |
         {% endif %}
         <a href="{{sign_url}}">Sign out</a>
         {% else %}
@@ -17,7 +16,7 @@
         <div class="yui-gd">
             <div class="yui-u first">
                 <div id="title">
-                    <a href="/"><img src="/static/images/checklist.png" alt="Chec.kli.st"></a>
+                    <a href="/"><img src="/static/images/logo.gif" alt="Deal"></a>
                 </div>
             </div>
             <div class="yui-u">

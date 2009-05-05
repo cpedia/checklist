@@ -26,32 +26,32 @@
     .nowrap{
         white-space:nowrap;
     }
+    .content_div{
+        font-size:0.9em;
+        margin:2px;
+    }
+    .title{
+        font-size:1.1em;
+        font-weight:bold;
+    }
 </style>
 <script type="text/javascript">
-    YAHOO.namespace("deals");
     YAHOO.util.Event.addListener(window, "load", function() {
         YAHOO.deals.DynamicData = function() {
             var detailLinkFormatter = function(elCell, oRecord, oColumn,oData) {
-                elCell.innerHTML = '<a href="/list/' + oRecord.getData()['key'] + '"' + '>'+oRecord.getData()[oColumn.key]+'</a>';
+                elCell.innerHTML = '<a class="title" href="/list/' + oRecord.getData()['key'] + '"' + '>'
+                        +oRecord.getData()[oColumn.key]+'</a>'+ '<br/><img src="'+oRecord.getData()['image']+'" border="0" align="right"/>'+
+                        '<div class="content_div">'+oRecord.getData()['content']+'</div>';
             };
             // Column definitions
             var myColumnDefs = [ // sortable:true enables sorting
                 {key:"check",resizeable:true,label:"",formatter:YAHOO.widget.DataTable.formatCheckbox,className:"align_center"},
                 {key:"title", label:"Title", formatter:detailLinkFormatter,sortable:true},
-                {key:"pub_date", label:"Pub Date", sortable:true,formatter:"date"},
-                {key:"last_updated_date", label:"Update Date", sortable:true,formatter:"date"},
+                {key:"pub_date", label:"Pub Date", sortable:true,formatter:"date",className:"nowrap"},
                 {key:"key",resizeable:true,label:"Edit",formatter:function(elCell, oRecord, oColumn, oData){
                     elCell.innerHTML = "<a href='/edit/deal/"+oData+"'>Edit</a>";
                 }}
             ];
-
-            // Custom parser
-            var stringToDate = function(sData) {
-                if (sData != null) {
-                    var array = sData.split("-");
-                    return new Date(array[1] + " " + array[2].slice(0, 2) + ", " + array[0]);
-                }
-            };
 
             var buildQueryString = function (state, dt) {
                 return "?arg0=" + state.pagination.recordOffset +
@@ -65,9 +65,10 @@
                 resultsList: "records",
                 fields: [
                     {key:"title"},
-                    {key:"pub_date",parser:stringToDate},
-                    {key:"last_updated_date",parser:stringToDate},
-                    {key:"key"}
+                    {key:"pub_date"},
+                    {key:"key"},
+                    {key:"content"},
+                    {key:"image"}
                 ],
                 metaFields: {
                     totalRecords: "totalRecords" // Access to value in the server response
@@ -75,23 +76,23 @@
             };
 
             var myPaginator = new YAHOO.widget.Paginator({
-                containers : ['paging_nav'],
-                rowsPerPage : 10,
-                rowsPerPageOptions : [10,20,30],
+                containers : ['paging_nav_0','paging_nav_1'],
+                rowsPerPage : 15,
+                rowsPerPageOptions : [15,30,60],
                 template : "{PreviousPageLink} <strong>{CurrentPageReport}</strong> {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
             });
 
             // DataTable configuration
             var myConfigs = {
-                initialRequest: "?arg0=0&arg1=10&time=" + new Date().getTime(),  //'startIndex=0&results=25'
+                initialRequest: "?arg0=0&arg1=15&time=" + new Date().getTime(),  //'startIndex=0&results=25'
                 generateRequest: buildQueryString,
                 dynamicData: true, // Enables dynamic server-driven data
-                sortedBy : {key:"created_date", dir:YAHOO.widget.DataTable.CLASS_DESC}, // Sets UI initial sort arrow
+                sortedBy : {key:"pub_date", dir:YAHOO.widget.DataTable.CLASS_DESC}, // Sets UI initial sort arrow
                 paginator: myPaginator // Enables pagination
             };
 
             // DataTable instance
-            var myDataTable = new YAHOO.widget.DataTable("Deals_container", myColumnDefs, myDataSource, myConfigs);
+            var myDataTable = new YAHOO.widget.DataTable("deals_container", myColumnDefs, myDataSource, myConfigs);
             // Update totalRecords on the fly with value from server
             myDataTable.handleDataReturnPayload = function(oRequest, oResponse, oPayload) {
                 oPayload.totalRecords = oResponse.meta.totalRecords;
@@ -159,15 +160,13 @@
     });
 </script>
 <div>
-    Deals<br><br>
-
     <div style="padding-bottom:3px">
         <button id="deleteDeal">Delete</button>
     </div>
-    <div id="Deals_container" width="100%">
+    <div id="paging_nav_0"> </div>
+    <div id="deals_container" width="100%">
     </div>
-    <div id="paging_nav"> </div>
+    <div id="paging_nav_1"> </div>
 </div>
-<br>
 {% endblock %}
 

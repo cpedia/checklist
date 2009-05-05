@@ -46,6 +46,7 @@ def main():
                     ('/403.html', deal.UnauthorizedHandler),
                     ('/404.html', deal.NotFoundHandler),
                     ('/tasks/getdeals/*$', deal.GetDealsJob),
+                    ('/tasks/deletedeals/*$', deal.DeleteDealsJob),
                     ('/*$', deal.MainPage),
                     ],
                     debug=config.DEBUG)

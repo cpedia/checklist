@@ -10,12 +10,13 @@
     <title>{% block title %}{{title}}{% endblock %}</title>
     {% block header %}
     {% endblock %}    
-    <link rel="alternate" type="application/atom+xml" title="{{ CHECKLIST.title }}" href="{{ CHECKLIST.root_url }}/atom" />
+    <link rel="alternate" type="application/atom+xml" title="{{ DEAL.title }}" href="{{ DEAL.root_url }}/atom" />
     <link rel="stylesheet" href="/static/stylesheets/deal.css" type="text/css" />    
     <!-- yui -->
     <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.7.0/build/reset-fonts-grids/reset-fonts-grids.css" />
     <script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/yahoo/yahoo-min.js" ></script>
     <script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/yahoo-dom-event/yahoo-dom-event.js"></script>
+    <script type="text/javascript" src="/static/jscripts/deals.js"></script>
 </head>
 <body class="yui-skin-sam">
 <div id="doc2" class="yui-t1">
@@ -27,7 +28,7 @@
         <div id="yui-main">
             <div class="yui-b">
                 <div class="yui-g">
-                        {% block deal %}
+                        {% block deals %}
                         {% endblock %}
                 </div>
             </div>
