@@ -100,7 +100,7 @@ class GetDealsJob(BaseRequestHandler):
                 deal.title = title_.contents[0].rstrip(", ")
                 pub_date_ = title_.nextSibling
                 if pub_date_:
-                    deal.pub_date = datetime.datetime.strptime(str(pub_date_), '%b %d')
+                    deal.pub_date = str(pub_date_)+" "+ str(datetime.datetime.now().year)
                     pub_date_.extract()
                 image_ = deal_div.find("img")
                 image_url = image_.get("src")
@@ -119,6 +119,13 @@ class GetDealsJob(BaseRequestHandler):
                 [internal_link_.extract() for internal_link_ in internal_links]
                 deal.content = deal_div.prettify()
                 deals+=[deal]
-        return deals;
+        current_date = datetime.datetime.now().strftime('%b %d %Y')
+        for deal in deals:
+            deal_ = models.Deals.gql('where pub_date =:1 and title =:2',current_date,deal.title).get()
+            if deal_:
+                break
+            else:
+                deal.put()
+        return True;
 
 

@@ -73,7 +73,7 @@ class Deals(models.MemcachedModel):
     title = db.StringProperty()
     content = db.TextProperty()
     image = db.StringProperty()
-    pub_date = db.DateTimeProperty(auto_now_add=True) #pub date from vendor.
+    pub_date = db.StringProperty() #pub date from vendor. '%b %d %Y'
     expired = db.BooleanProperty(default = False)
     created_date = db.DateTimeProperty(auto_now_add=True)
     last_updated_date = db.DateTimeProperty(auto_now=True)
