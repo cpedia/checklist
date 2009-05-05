@@ -34,6 +34,7 @@ from google.appengine.ext import webapp
 from google.appengine.ext import db
 from google.appengine.api import memcache
 from google.appengine.ext import search
+from google.appengine.api import images
 
 from cpedia.deal.handlers import restful
 import cpedia.deal.models.deal as models
@@ -47,7 +48,7 @@ import sys
 import urllib
 from google.appengine.api import urlfetch
 
-from HTMLParser import HTMLParser
+from BeautifulSoup import BeautifulSoup
 
 class BaseRequestHandler(webapp.RequestHandler):
     """Supplies a common template generation function.
@@ -83,49 +84,41 @@ class MainPage(BaseRequestHandler):
 
 class GetDealsJob(BaseRequestHandler):
     def get(self):
-        #if self.get("X-AppEngine-Cron")=="true":
+    #if self.get("X-AppEngine-Cron")=="true":
         dealsea_page = urlfetch.fetch(
-            url="http://www.dealsea.com",
-            method=urlfetch.GET,
-            headers={'Content-Type': 'text/html; charset=UTF-8'}
-        )
+                url="http://www.dealsea.com",
+                method=urlfetch.GET,
+                headers={'Content-Type': 'text/html; charset=UTF-8'}
+                )
+        deals = []
         if dealsea_page.status_code == 200:
-            dealParse = DealSeaHTMLParser()
-            dealParse.feed(dealsea_page.content)
-            dealParse.close()
-            deals = dealParse.deals
-        return True;
+            dealsea_soap = BeautifulSoup(dealsea_page.content)
+            deal_divs = dealsea_soap.findAll(attrs={"class":re.compile("dealbox\d\d\d\d\d\d[\s\w]*$")})
+            for deal_div in deal_divs:
+                deal = models.Deals(vendor="dealsea.com")
+                title_ = deal_div.find("b")
+                deal.title = title_.contents[0].rstrip(", ")
+                pub_date_ = title_.nextSibling
+                if pub_date_:
+                    deal.pub_date = datetime.datetime.strptime(str(pub_date_), '%b %d')
+                    pub_date_.extract()
+                image_ = deal_div.find("img")
+                image_url = image_.get("src")
+                if image_url.rfind("http:")==-1:
+                            image_url = "http://www.dealsea.com"+image_url
+                deal.image = image_url   
+                expired = deal_div.find("span",attrs={"class":"colr_red xxsmall"})
+                if expired:
+                    deal.expired = True
+                    expired.extract()
+                brs_ = deal_div.findAll("br")
+                internal_links = deal_div.findAll("a",attrs={"href":re.compile("\/forums\/viewtopic\.php\?t=\d*$")})
+                image_.extract()   
+                title_.extract()
+                [br_.extract() for br_ in brs_]
+                [internal_link_.extract() for internal_link_ in internal_links]
+                deal.content = deal_div.prettify()
+                deals+=[deal]
+        return deals;
 
-class DealSeaHTMLParser(HTMLParser):
-    def __init__(self):
-         HTMLParser.__init__(self)
-         self.deals = []
-         self.deal_div = 0
-         
-
-    def handle_starttag(self, tag, attrs):
-        #print "Encountered the beginning of a %s tag" % tag
-        if tag == "div":
-          if len(attrs) == 0:
-              pass
-          else:
-              for (variable, value)  in attrs:
-                 if variable == "class" and value.rfind("dealbox")!=-1:
-                     self.deal_div = 1
-                     self.deals.append(value)
-
-    def handle_endtag(self, tag, attrs):
-        #print "Encountered the end of a %s tag" % tag
-        if tag == "div":
-          if len(attrs) == 0:
-              pass
-          else:
-              for (variable, value)  in attrs:
-                 if variable == "class" and value.rfind("dealbox")!=-1:
-                     self.deal_div = 0
-
-    def handle_data(self, text):
-        """This is called everytime we get to text data (ie. not tags) """
-        if self.deal_div:
-           print "Got anchor text: %s" % text
 
