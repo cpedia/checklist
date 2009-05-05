@@ -82,6 +82,20 @@ class MainPage(BaseRequestHandler):
         }
         self.generate('deals.html',template_values)
 
+class DeleteDealsJob(BaseRequestHandler):
+    def get(self):
+        current_date = datetime.datetime.now().strftime('%b %d %Y')
+        query = db.Query(models.Deals)
+        query.filter("pub_date",current_date)
+        query.order('-created_date')
+        deals = []
+        for deal in query.fetch(1000):
+            deal.delete()
+        self.response.out.write("Purge today's deal successfully.")                   
+
+    def post(self):
+         self.get()
+
 class GetDealsJob(BaseRequestHandler):
     def get(self):
     #if self.get("X-AppEngine-Cron")=="true":
@@ -105,19 +119,19 @@ class GetDealsJob(BaseRequestHandler):
                 image_ = deal_div.find("img")
                 image_url = image_.get("src")
                 if image_url.rfind("http:")==-1:
-                            image_url = "http://www.dealsea.com"+image_url
-                deal.image = image_url   
+                    image_url = "http://www.dealsea.com"+image_url
+                deal.image = image_url
                 expired = deal_div.find("span",attrs={"class":"colr_red xxsmall"})
                 if expired:
                     deal.expired = True
                     expired.extract()
                 brs_ = deal_div.findAll("br")
                 internal_links = deal_div.findAll("a",attrs={"href":re.compile("\/forums\/viewtopic\.php\?t=\d*$")})
-                image_.extract()   
+                image_.extract()
                 title_.extract()
                 [br_.extract() for br_ in brs_]
                 [internal_link_.extract() for internal_link_ in internal_links]
-                deal.content = deal_div.prettify()
+                deal.content = deal_div.prettify().replace("[\n]","")
                 deals+=[deal]
         current_date = datetime.datetime.now().strftime('%b %d %Y')
         for deal in deals:
@@ -126,6 +140,8 @@ class GetDealsJob(BaseRequestHandler):
                 break
             else:
                 deal.put()
-        return True;
+        self.response.out.write("Run getdeals job successfully.")
 
+    def post(self):
+         self.get()
 
