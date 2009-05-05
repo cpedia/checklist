@@ -79,6 +79,18 @@ class Deals(models.MemcachedModel):
     last_updated_date = db.DateTimeProperty(auto_now=True)
     last_updated_user = db.UserProperty(auto_current_user=True)
 
+class Coupon(models.MemcachedModel):
+    vendor = db.StringProperty(multiline=False)
+    code = db.StringProperty()
+    discount = db.StringProperty()
+    site = db.StringProperty()
+    image = db.StringProperty()
+    pub_date = db.StringProperty() #pub date from vendor. '%b %d %Y'
+    expired = db.BooleanProperty(default = False)
+    created_date = db.DateTimeProperty(auto_now_add=True)
+    last_updated_date = db.DateTimeProperty(auto_now=True)
+    last_updated_user = db.UserProperty(auto_current_user=True)
+
 
 class Comment(polymodel.PolyModel):
     user = db.UserProperty(required=True,auto_current_user_add=True)
