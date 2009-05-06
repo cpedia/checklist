@@ -3,8 +3,8 @@
         {% if user %}
         <b>{{ user.email }}</b> |
         {% if user_is_admin %}
-        <a href='/tasks/getdeals' target="_blank">Generate latest deals</a> |
-        <a href="/tasks/deletedeals" target="_blank">Purge today's deals</a> |
+        <a href="/tasks/deletedeals">Purge latest deals</a> |
+        <a href='/tasks/deletecoupons'>Purge latest coupons</a> |
         {% endif %}
         <a href="{{sign_url}}">Sign out</a>
         {% else %}

@@ -51,7 +51,7 @@ class Tag(models.SerializableModel):
     valid = db.BooleanProperty(default = True)
 
     def put(self):
-        memcache.delete("tag_"+str(self.user.email())) 
+        memcache.delete("tag_"+str(self.user.email()))
         self.user_id = self.user.user_id()
         super(Tag, self).put()
 
@@ -64,7 +64,8 @@ class Tagable(models.MemcachedModel):
 
     def set_tags(self, tags):
         if tags:
-            self.tags = [db.Category(urllib.quote(tag.strip().encode('utf8'))) for tag in tags.split(',') if tag.strip()!='']
+            self.tags = [db.Category(urllib.quote(tag.strip().encode('utf8'))) for tag in tags.split(',') if
+                         tag.strip()!='']
 
     tags_commas = property(get_tags,set_tags)
 
@@ -75,31 +76,50 @@ class Deals(models.MemcachedModel):
     image = db.StringProperty()
     pub_date = db.StringProperty() #pub date from vendor. '%b %d %Y'
     expired = db.BooleanProperty(default = False)
+    created_date_str = db.StringProperty()
     created_date = db.DateTimeProperty(auto_now_add=True)
     last_updated_date = db.DateTimeProperty(auto_now=True)
     last_updated_user = db.UserProperty(auto_current_user=True)
 
-class Coupon(models.MemcachedModel):
+    def put(self):
+        date_ = self.created_date.strftime('%b %d %Y') # July 2008
+        self.created_date_str = date_
+        super(Deals, self).put()
+
+class Coupons(models.MemcachedModel):
     vendor = db.StringProperty(multiline=False)
+    coupon_id = db.StringProperty(multiline=False) #Coupon Id from retailmenot.com
+    site_id = db.StringProperty(multiline=False) #Site Id from retailmenot.com
     code = db.StringProperty()
-    discount = db.StringProperty()
-    site = db.StringProperty()
+    discount = db.TextProperty()
+    site_name = db.StringProperty()
+    site_url = db.StringProperty()
     image = db.StringProperty()
-    pub_date = db.StringProperty() #pub date from vendor. '%b %d %Y'
+    pub_date = db.StringProperty() #pub date from created_date. '%b %d %Y'
     expired = db.BooleanProperty(default = False)
     created_date = db.DateTimeProperty(auto_now_add=True)
     last_updated_date = db.DateTimeProperty(auto_now=True)
     last_updated_user = db.UserProperty(auto_current_user=True)
 
+    def put(self):
+        date_ = self.created_date.strftime('%b %d %Y') # July 2008
+        self.pub_date = date_
+        super(Coupons, self).put()
 
-class Comment(polymodel.PolyModel):
+class Comment(models.MemcachedModel):
     user = db.UserProperty(required=True,auto_current_user_add=True)
     user_id = db.StringProperty(multiline=False)
     content = db.StringProperty()
     created_date = db.DateTimeProperty(auto_now_add=True)
     last_updated_date = db.DateTimeProperty(auto_now=True)
     last_updated_user = db.UserProperty()
+
+class DealComment(Comment):
     deal = db.ReferenceProperty(Deals)
+
+class CouponComment(Comment):
+    rate = db.BooleanProperty()  #Rate for the coupon. True/False.
+    coupon = db.ReferenceProperty(Coupons)
 
 class AuthSubStoredToken(db.Model):
     user_email = db.StringProperty(required=True)

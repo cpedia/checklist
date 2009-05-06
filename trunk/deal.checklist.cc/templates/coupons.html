@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}{{title}} - Deals Management{% endblock %}
+{% block title %}{{title}} - Coupons Management{% endblock %}
 {% block deals %}
 <!--CSS file (default YUI Sam Skin) -->
 <link type="text/css" rel="stylesheet"
@@ -37,21 +37,31 @@
 </style>
 <script type="text/javascript">
     YAHOO.util.Event.addListener(window, "load", function() {
-        YAHOO.deals.DynamicData = function() {
+        YAHOO.coupons.DynamicData = function() {
             var detailLinkFormatter = function(elCell, oRecord, oColumn,oData) {
-                elCell.innerHTML = '<a class="title" href="/list/' + oRecord.getData()['key'] + '"' + '>'
-                        +oRecord.getData()[oColumn.key]+'</a>'+ '<br/><img src="'+oRecord.getData()['image']+'" border="0" align="right"/>'+
-                        '<div class="content_div">'+oRecord.getData()['content']+'</div>';
+                elCell.innerHTML = '<img src="'+oRecord.getData()['image']+'" border="0" align="right"/>'+
+                                   '<div><ul><li><label>Code:</label><span class=title>' + oRecord.getData()['code'] + '</span></li>' +
+                                   "<li><label>Discount:</label><span class=content_div>"+oRecord.getData()['discount']+ '</span></li>'+
+                                   '<li><label>Site:</label><a href="'+oRecord.getData()['site_url']+'" target=_blank>'+
+                                    oRecord.getData()['site_name']+'</a></li></ul></div>';
             };
             // Column definitions
             var myColumnDefs = [ // sortable:true enables sorting
                 {key:"check",resizeable:true,label:"",formatter:YAHOO.widget.DataTable.formatCheckbox,className:"align_center"},
-                {key:"title", label:"Title", formatter:detailLinkFormatter,sortable:true},
-                {key:"pub_date", label:"Pub Date", sortable:true,formatter:"date",className:"nowrap"},
+                {key:"code", label:"Code Info", formatter:detailLinkFormatter,sortable:true},
+                {key:"created_date", label:"Created Date", sortable:true,formatter:"date",className:"nowrap"},
                 {key:"key",resizeable:true,label:"Edit",formatter:function(elCell, oRecord, oColumn, oData){
-                    elCell.innerHTML = "<a href='/deal/"+oData+"'>Edit</a>";
+                    elCell.innerHTML = "<a href='/coupon/"+oData+"'>Edit</a>";
                 }}
             ];
+
+            // Custom parser
+            var stringToDate = function(sData) {
+                if (sData != null) {
+                    var array = sData.split("-");
+                    return new Date(array[1] + " " + array[2].slice(0, 2) + ", " + array[0]);
+                }
+            };
 
             var buildQueryString = function (state, dt) {
                 return "?arg0=" + state.pagination.recordOffset +
@@ -59,15 +69,17 @@
             };
 
             // DataSource instance
-            var myDataSource = new YAHOO.util.DataSource("/json/getDeals");
+            var myDataSource = new YAHOO.util.DataSource("/json/getCoupons");
             myDataSource.responseType = YAHOO.util.DataSource.TYPE_JSON;
             myDataSource.responseSchema = {
                 resultsList: "records",
                 fields: [
-                    {key:"title"},
-                    {key:"pub_date"},
+                    {key:"code"},
+                    {key:"created_date",parser:stringToDate},
                     {key:"key"},
-                    {key:"content"},
+                    {key:"discount"},
+                    {key:"site_url"},
+                    {key:"site_name"},
                     {key:"image"}
                 ],
                 metaFields: {
@@ -77,8 +89,8 @@
 
             var myPaginator = new YAHOO.widget.Paginator({
                 containers : ['paging_nav_0','paging_nav_1'],
-                rowsPerPage : 30,
-                rowsPerPageOptions : [30,60,100],
+                rowsPerPage : 15,
+                rowsPerPageOptions : [15,30,60],
                 template : "{PreviousPageLink} <strong>{CurrentPageReport}</strong> {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
             });
 
@@ -87,12 +99,12 @@
                 initialRequest: "?arg0=0&arg1=15&time=" + new Date().getTime(),  //'startIndex=0&results=25'
                 generateRequest: buildQueryString,
                 dynamicData: true, // Enables dynamic server-driven data
-                sortedBy : {key:"pub_date", dir:YAHOO.widget.DataTable.CLASS_DESC}, // Sets UI initial sort arrow
+                sortedBy : {key:"created_date", dir:YAHOO.widget.DataTable.CLASS_DESC}, // Sets UI initial sort arrow
                 paginator: myPaginator // Enables pagination
             };
 
             // DataTable instance
-            var myDataTable = new YAHOO.widget.DataTable("deals_container", myColumnDefs, myDataSource, myConfigs);
+            var myDataTable = new YAHOO.widget.DataTable("coupons_container", myColumnDefs, myDataSource, myConfigs);
             // Update totalRecords on the fly with value from server
             myDataTable.handleDataReturnPayload = function(oRequest, oResponse, oPayload) {
                 oPayload.totalRecords = oResponse.meta.totalRecords;
@@ -112,22 +124,22 @@
 
             myDataTable.subscribe("cellClickEvent", myDataTable.onEventShowCellEditor);
 
-            var selectedDealIds = function(recordSet,selectedRows) {
-                var deal_keys  = "deal_keys=";
+            var selectedCouponIds = function(recordSet,selectedRows) {
+                var coupon_keys  = "coupon_keys=";
                 for (var x = 0, length=selectedRows.length; x < length; x++) {
                     var record =  recordSet.getRecord(selectedRows[x]);
-                    deal_keys += record.getData().key;
+                    coupon_keys += record.getData().key;
                     if(x < length-1){
-                        deal_keys+=",";
+                        coupon_keys+=",";
                     }
                 }
-                return deal_keys;
+                return coupon_keys;
             };
-            var deleteDeals = function() {
+            var deleteCoupons = function() {
                 var selected = myDataTable.getSelectedRows();
                 var rset = myDataTable.getRecordSet();
                 if (selected.length > 0) {
-                    YAHOO.util.Connect.asyncRequest('POST', '/json/deleteDeals',
+                    YAHOO.util.Connect.asyncRequest('POST', '/json/deleteCoupons',
                     {
                         success: function (o) {
                             if (o.responseText == 'true') {
@@ -142,14 +154,14 @@
                             alert(o.statusText);
                         },
                         scope:this
-                    }, selectedDealIds(rset, selected)
+                    }, selectedCouponIds(rset, selected)
                             );
                 } else {
-                    alert("Please select at least one Deal to delete.");
+                    alert("Please select at least one Coupon to delete.");
                 }
             };
 
-            YAHOO.util.Event.addListener("deleteDeal", "click", deleteDeals);
+            YAHOO.util.Event.addListener("deleteCoupon", "click", deleteCoupons);
 
             return {
                 ds: myDataSource,
@@ -161,10 +173,10 @@
 </script>
 <div>
     <div style="padding-bottom:3px">
-        <button id="deleteDeal">Delete</button>
+        <button id="deleteCoupon">Delete</button>
     </div>
     <div id="paging_nav_0"> </div>
-    <div id="deals_container" width="100%">
+    <div id="coupons_container" width="100%">
     </div>
     <div id="paging_nav_1"> </div>
 </div>

@@ -37,8 +37,8 @@
 }
 
 #google_ad {
-    padding-right: 10px;
-    padding-top: 10px;
+    margin-right: 20px;
+    padding-top: 20px;
 }
 
 #logo {
@@ -48,4 +48,14 @@
     padding-right: 5px;
     padding-top: 2px;
     text-align: right;
+}
+.msg{
+    white-space: nowrap;
+    padding: 2px; 
+    font-size: 0.9em;
+    background-color:rgb(221, 248, 204);
+}
+
+#menu_list li{
+    padding:3px
 }
