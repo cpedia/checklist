@@ -81,6 +81,20 @@ class RPCHandler(webapp.RequestHandler):
         returnValue = {"records":coupons,"totalRecords":totalRecords,"startIndex":startIndex}
         return returnValue
 
+
+    @authorized.role('admin')
+    def getComments(self,type,key):
+        if type == "coupon":
+            query = db.GqlQuery("select * from CouponComment where coupon =:1  order by created_date", models.Coupons.get(key))
+        elif type == "deal":
+            query = db.GqlQuery("select * from DealComment where deal =:1  order by created_date", models.Deals.get(key))
+
+        comments = []
+        for comment in query.fetch(1000):
+            comments+=[comment.to_json()]
+        returnValue = {"records":comments,"totalRecords":query.count()}
+        return returnValue
+
     @authorized.role('admin')
     def getLatestDeals(self,results,startIndex):
         current_date = datetime.datetime.now().strftime('%b %d %Y')
@@ -106,6 +120,18 @@ class RPCHandler(webapp.RequestHandler):
     def deleteCoupons(self,request):
         coupon_keys = request.get("coupon_keys")
         coupons =  models.Coupons.get(coupon_keys.split(","))
+        for coupon in coupons:
+            coupon.delete()
+        return True
+
+    @authorized.role('admin')
+    def deleteComments(self,request):
+        comment_keys = request.get("comment_keys")
+        comment_type = request.get("comment_type")
+        if comment_type == "deal":
+            coupons =  models.DealComment.get(comment_keys.split(","))
+        elif comment_type == "coupon":
+            coupons =  models.CouponComment.get(comment_keys.split(","))
         for coupon in coupons:
             coupon.delete()
         return True
