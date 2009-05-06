@@ -137,7 +137,7 @@ class GetDealsJob(BaseRequestHandler):
             for deal_div in deal_divs:
                 deal = models.Deals(vendor="dealsea.com")
                 title_ = deal_div.find("b")
-                deal.title = title_.contents[0].rstrip(", ")
+                deal.title = str(title_.contents[0].rstrip(", "))
                 pub_date_ = title_.nextSibling
                 if pub_date_:
                     deal.pub_date = str(pub_date_)+" "+ str(datetime.datetime.now().year)
@@ -163,7 +163,7 @@ class GetDealsJob(BaseRequestHandler):
                 deals+=[deal]
         current_date = datetime.datetime.now().strftime('%b %d %Y')
         for deal in deals:
-            deal_ = models.Deals.gql('where pub_date =:1 and title =:2',current_date,deal.title).fetch(10)
+            deal_ = models.Deals.gql('where created_date_str =:1 and title =:2',current_date,deal.title).fetch(10)
             if deal_ and len(deal_) > 0:
                 break
             else:
