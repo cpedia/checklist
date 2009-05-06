@@ -1,7 +1,7 @@
 cron:
 - description: Fetch deals information from dealsea.com
   url: /tasks/getdeals
-  schedule: every 10 minutes
+  schedule: every 5 minutes
 
 - description: Fetch coupons information from retailmenot.com
   url: /tasks/getcoupons
