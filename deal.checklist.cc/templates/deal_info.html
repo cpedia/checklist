@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}{{title}} - Deals Management{% endblock %}
+{% block title %}{{title}} - Deal Detailed Information{% endblock %}
 {% block deals %}
 <!--CSS file (default YUI Sam Skin) -->
 <link type="text/css" rel="stylesheet"
@@ -37,59 +37,47 @@
 </style>
 <script type="text/javascript">
     YAHOO.util.Event.addListener(window, "load", function() {
-        YAHOO.deals.DynamicData = function() {
-            var detailLinkFormatter = function(elCell, oRecord, oColumn,oData) {
-                elCell.innerHTML = '<a class="title" href="/deal/' + oRecord.getData()['key'] + '"' + '>'
-                        +oRecord.getData()[oColumn.key]+'</a>'+ '<br/><img src="'+oRecord.getData()['image']+'" border="0" align="right"/>'+
-                        '<div class="content_div">'+oRecord.getData()['content']+'</div>';
-            };
+        YAHOO.comments.DynamicData = function() {
             // Column definitions
             var myColumnDefs = [ // sortable:true enables sorting
                 {key:"check",resizeable:true,label:"",formatter:YAHOO.widget.DataTable.formatCheckbox,className:"align_center"},
-                {key:"title", label:"Title", formatter:detailLinkFormatter,sortable:true},
-                {key:"pub_date", label:"Pub Date", sortable:true,formatter:"date",className:"nowrap"}
+                {key:"content", label:"Comments"},
+                {key:"email", label:"Commented by", sortable:true},
+                {key:"created_date", label:"Created Date", sortable:true,formatter:"date",className:"nowrap"}
             ];
 
-            var buildQueryString = function (state, dt) {
-                return "?arg0=" + state.pagination.recordOffset +
-                       "&arg1=" + state.pagination.rowsPerPage + '&time=' + new Date().getTime();
+            // Custom parser
+            var stringToDate = function(sData) {
+                if (sData != null) {
+                    var array = sData.split("-");
+                    return new Date(array[1] + " " + array[2].slice(0, 2) + ", " + array[0]);
+                }
             };
 
+
             // DataSource instance
-            var myDataSource = new YAHOO.util.DataSource("/json/getDeals");
+            var myDataSource = new YAHOO.util.DataSource("/json/getComments");
             myDataSource.responseType = YAHOO.util.DataSource.TYPE_JSON;
             myDataSource.responseSchema = {
                 resultsList: "records",
                 fields: [
-                    {key:"title"},
-                    {key:"pub_date"},
-                    {key:"key"},
                     {key:"content"},
-                    {key:"image"}
-                ],
-                metaFields: {
-                    totalRecords: "totalRecords" // Access to value in the server response
-                }
-            };
+                    {key:"created_date",parser:stringToDate},
+                    {key:"key"},
+                    {key:"email"}
+                 ]
+             };
 
-            var myPaginator = new YAHOO.widget.Paginator({
-                containers : ['paging_nav_0','paging_nav_1'],
-                rowsPerPage : 30,
-                rowsPerPageOptions : [30,60,100],
-                template : "{PreviousPageLink} <strong>{CurrentPageReport}</strong> {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
-            });
 
             // DataTable configuration
             var myConfigs = {
-                initialRequest: "?arg0=0&arg1=15&time=" + new Date().getTime(),  //'startIndex=0&results=25'
-                generateRequest: buildQueryString,
+                initialRequest: "?arg0=\"deal\"&arg1=\"{{deal.key}}\"&time=" + new Date().getTime(),  //'startIndex=0&results=25'
                 dynamicData: true, // Enables dynamic server-driven data
-                sortedBy : {key:"pub_date", dir:YAHOO.widget.DataTable.CLASS_DESC}, // Sets UI initial sort arrow
-                paginator: myPaginator // Enables pagination
+                sortedBy : {key:"created_date", dir:YAHOO.widget.DataTable.CLASS_DESC} // Sets UI initial sort arrow
             };
 
             // DataTable instance
-            var myDataTable = new YAHOO.widget.DataTable("deals_container", myColumnDefs, myDataSource, myConfigs);
+            var myDataTable = new YAHOO.widget.DataTable("comments_container", myColumnDefs, myDataSource, myConfigs);
             // Update totalRecords on the fly with value from server
             myDataTable.handleDataReturnPayload = function(oRequest, oResponse, oPayload) {
                 oPayload.totalRecords = oResponse.meta.totalRecords;
@@ -109,22 +97,22 @@
 
             myDataTable.subscribe("cellClickEvent", myDataTable.onEventShowCellEditor);
 
-            var selectedDealIds = function(recordSet,selectedRows) {
-                var deal_keys  = "deal_keys=";
+            var selectedCommentIds = function(recordSet,selectedRows) {
+                var comment_keys  = "comment_keys=";
                 for (var x = 0, length=selectedRows.length; x < length; x++) {
                     var record =  recordSet.getRecord(selectedRows[x]);
-                    deal_keys += record.getData().key;
+                    comment_keys += record.getData().key;
                     if(x < length-1){
-                        deal_keys+=",";
+                        comment_keys+=",";
                     }
                 }
-                return deal_keys;
+                return comment_keys+"&comment_type=\"deal\"";
             };
-            var deleteDeals = function() {
+            var deleteComments = function() {
                 var selected = myDataTable.getSelectedRows();
                 var rset = myDataTable.getRecordSet();
                 if (selected.length > 0) {
-                    YAHOO.util.Connect.asyncRequest('POST', '/json/deleteDeals',
+                    YAHOO.util.Connect.asyncRequest('POST', '/json/deleteComments',
                     {
                         success: function (o) {
                             if (o.responseText == 'true') {
@@ -139,14 +127,19 @@
                             alert(o.statusText);
                         },
                         scope:this
-                    }, selectedDealIds(rset, selected)
+                    }, selectedCommentIds(rset, selected)
                             );
                 } else {
-                    alert("Please select at least one Deal to delete.");
+                    alert("Please select at least one Comment to delete.");
                 }
             };
 
-            YAHOO.util.Event.addListener("deleteDeal", "click", deleteDeals);
+            var addComment = function(){
+               //todo: add a dialog box to add the comment.
+            };
+
+            YAHOO.util.Event.addListener("deleteComment", "click", deleteComments);
+            YAHOO.util.Event.addListener("addComment", "click", addComment);
 
             return {
                 ds: myDataSource,
@@ -157,13 +150,18 @@
     });
 </script>
 <div>
-    <div style="padding-bottom:3px">
-        <button id="deleteDeal">Delete</button>
+    <div class="dealbox">
+        <img border="0" align="right" src="{{deal.image}}"/>        
+        <b>{{deal.title}}, </b>{{deal.pub_date}}<br/><br/>
+        {{deal.content}}
+        <br/><br/>
     </div>
-    <div id="paging_nav_0"> </div>
-    <div id="deals_container" width="100%">
+    <div style="padding:5px;">
+        <button id="deleteComment">Delete</button>
+        <button id="addComment">Add new Comment</button>
     </div>
-    <div id="paging_nav_1"> </div>
-</div>
+     <div id="comments_container" width="100%">
+    </div>
+ </div>
 {% endblock %}
 

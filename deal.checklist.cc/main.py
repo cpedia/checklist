@@ -51,6 +51,8 @@ def main():
                     ('/tasks/deletecoupons/*$', deal.DeleteCoupons),
                     ('/list/deals/*$', deal.MainPage),
                     ('/list/coupons/*$', deal.ListCouponsPage),
+                    ('/deal/([-\w\.]+)/*$', deal.DealInfoPage),
+                    ('/coupon/([-\w\.]+)/*$', deal.CouponInfoPage),
                     ('/*$', deal.MainPage),
                     ],
                     debug=config.DEBUG)

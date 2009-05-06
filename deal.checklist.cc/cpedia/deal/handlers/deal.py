@@ -121,6 +121,23 @@ class DeleteCoupons(BaseRequestHandler):
     def post(self):
         self.get()
 
+class DealInfoPage(BaseRequestHandler):
+    def get(self,deal_key):
+        deal =  models.Deals.get(deal_key)
+        template_values = {
+            "deal":deal,
+         }
+        self.generate('deal_info.html',template_values)
+
+class CouponInfoPage(BaseRequestHandler):
+    def get(self,coupon_key):
+        coupon =  models.Coupons.get(coupon_key)
+        template_values = {
+            "coupon":coupon,
+         }
+        self.generate('coupon_info.html',template_values)
+
+
     #get latest deal from dealsea.com
 class GetDealsJob(BaseRequestHandler):
     def get(self):
