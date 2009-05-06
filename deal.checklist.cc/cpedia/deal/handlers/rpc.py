@@ -59,7 +59,6 @@ class RPCHandler(webapp.RequestHandler):
 
     # The RPCs exported to JavaScript follow here:
 
-    #get checklist template list.
     @authorized.role('admin')
     def getDeals(self,startIndex,results):
         query = db.Query(models.Deals)
@@ -71,7 +70,17 @@ class RPCHandler(webapp.RequestHandler):
         returnValue = {"records":deals,"totalRecords":totalRecords,"startIndex":startIndex}
         return returnValue
 
-    #get checklist template list.
+    @authorized.role('admin')
+    def getCoupons(self,startIndex,results):
+        query = db.Query(models.Coupons)
+        query.order('-created_date')
+        coupons = []
+        for coupon in query.fetch(results,startIndex):
+            coupons+=[coupon.to_json()]
+        totalRecords = query.count()
+        returnValue = {"records":coupons,"totalRecords":totalRecords,"startIndex":startIndex}
+        return returnValue
+
     @authorized.role('admin')
     def getLatestDeals(self,results,startIndex):
         current_date = datetime.datetime.now().strftime('%b %d %Y')
@@ -90,10 +99,15 @@ class RPCHandler(webapp.RequestHandler):
         deal_keys = request.get("deal_keys")
         deals =  models.Deals.get(deal_keys.split(","))
         for deal in deals:
-            deal_comments = deal.comment_set
-            for comment in deal_comments:
-                comment.delete()
             deal.delete()
+        return True
+
+    @authorized.role('admin')
+    def deleteCoupons(self,request):
+        coupon_keys = request.get("coupon_keys")
+        coupons =  models.Coupons.get(coupon_keys.split(","))
+        for coupon in coupons:
+            coupon.delete()
         return True
 
 

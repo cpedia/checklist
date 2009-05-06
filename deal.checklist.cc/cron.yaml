@@ -1,3 +1,10 @@
 cron:
-- url: /tasks/getdeals
+- description: Fetch deals information from dealsea.com
+  url: /tasks/getdeals
   schedule: every 30 minutes
+
+- description: Fetch coupons information from retailmenot.com
+  url: /tasks/getcoupons
+  schedule: every day
+
+  
