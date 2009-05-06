@@ -114,6 +114,10 @@ class Comment(models.MemcachedModel):
     last_updated_date = db.DateTimeProperty(auto_now=True)
     last_updated_user = db.UserProperty()
 
+    def put(self):
+        self.user_id = self.user.user_id()
+        super(Comment, self).put()
+
 class DealComment(Comment):
     deal = db.ReferenceProperty(Deals)
 

@@ -2,6 +2,8 @@
 {% block title %}{{title}} - Deal Detailed Information{% endblock %}
 {% block deals %}
 <!--CSS file (default YUI Sam Skin) -->
+<link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.7.0/build/button/assets/skins/sam/button.css" />
+<link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.7.0/build/container/assets/skins/sam/container.css" />        
 <link type="text/css" rel="stylesheet"
       href="http://yui.yahooapis.com/2.7.0/build/datatable/assets/skins/sam/datatable.css">
 <link rel="stylesheet" type="text/css"
@@ -19,6 +21,7 @@
 <script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/datatable/datatable-min.js"></script>
 <script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/paginator/paginator-min.js"></script>
 <script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/button/button-min.js"></script>
+<script type="text/javascript" src="http://yui.yahooapis.com/2.7.0/build/container/container-min.js"></script>
 <style type="text/css">
     .align_center {
         text-align: center !important;
@@ -34,6 +37,10 @@
         font-size:1.1em;
         font-weight:bold;
     }
+    label { display:block;float:left;clear:left;padding-bottom:5px }
+    #comment{
+        width:90%
+    }
 </style>
 <script type="text/javascript">
     YAHOO.util.Event.addListener(window, "load", function() {
@@ -42,7 +49,7 @@
             var myColumnDefs = [ // sortable:true enables sorting
                 {key:"check",resizeable:true,label:"",formatter:YAHOO.widget.DataTable.formatCheckbox,className:"align_center"},
                 {key:"content", label:"Comments"},
-                {key:"email", label:"Commented by", sortable:true},
+                {key:"user.email", label:"Commented by", sortable:true},
                 {key:"created_date", label:"Created Date", sortable:true,formatter:"date",className:"nowrap"}
             ];
 
@@ -64,7 +71,7 @@
                     {key:"content"},
                     {key:"created_date",parser:stringToDate},
                     {key:"key"},
-                    {key:"email"}
+                    {key:"user.email"}
                  ]
              };
 
@@ -106,7 +113,7 @@
                         comment_keys+=",";
                     }
                 }
-                return comment_keys+"&comment_type=\"deal\"";
+                return comment_keys+"&comment_type=deal";
             };
             var deleteComments = function() {
                 var selected = myDataTable.getSelectedRows();
@@ -134,12 +141,62 @@
                 }
             };
 
-            var addComment = function(){
-               //todo: add a dialog box to add the comment.
+            YAHOO.util.Event.addListener("deleteComment", "click", deleteComments);
+
+            // Define various event handlers for Dialog
+            var handleSubmit = function() {
+                var formObject = document.getElementById('comment_form');
+                YAHOO.util.Connect.setForm(formObject); 
+                YAHOO.util.Connect.asyncRequest('POST', '/json/addComment',
+                {
+                    success: function (o) {
+                          var index = myDataTable.getRecordSet().getLength();
+                          myDataTable.addRow(YAHOO.lang.JSON.parse(o.responseText), index);
+                          YAHOO.comments.dialog1.hide();
+                          YAHOO.util.Dom.get("comment_form").reset();
+                    },
+                    failure: function (o) {
+                        alert(o.statusText);
+                    },
+                    scope:this
+                });
+            };
+            var handleCancel = function() {
+                this.cancel();
+            };
+            var handleFailure = function(o) {
+                alert("Submission failed: " + o.status);
             };
 
-            YAHOO.util.Event.addListener("deleteComment", "click", deleteComments);
-            YAHOO.util.Event.addListener("addComment", "click", addComment);
+            // Instantiate the Dialog
+            YAHOO.comments.dialog1 = new YAHOO.widget.Dialog("dialog1",
+                                    { width : "30em",
+                                      fixedcenter : true,
+                                      visible : false, 
+                                      constraintoviewport : true,
+                                      buttons : [ { text:"Submit", handler:handleSubmit, isDefault:true },
+                                              { text:"Cancel", handler:handleCancel } ]
+                                    });
+
+            // Validate the entries in the form to require that both first and last name are entered
+            YAHOO.comments.dialog1.validate = function() {
+                var data = this.getData();
+                if (data.comment == "") {
+                    alert("Please enter your comment.");
+                    return false;
+                } else {
+                    return true;
+                }
+            };
+
+            // Render the Dialog
+            YAHOO.comments.dialog1.render();
+
+            var showDialog = function(){
+                YAHOO.util.Dom.setStyle("dialog1","display","");
+                YAHOO.comments.dialog1.show();
+            };
+            YAHOO.util.Event.addListener("addComment", "click", showDialog, YAHOO.comments.dialog1, true);
 
             return {
                 ds: myDataSource,
@@ -156,12 +213,23 @@
         {{deal.content}}
         <br/><br/>
     </div>
-    <div style="padding:5px;">
+    <div style="padding-bottom:5px;">
         <button id="deleteComment">Delete</button>
         <button id="addComment">Add new Comment</button>
     </div>
      <div id="comments_container" width="100%">
     </div>
  </div>
+<div id="dialog1" style="display:none;">
+<div class="hd">Please enter your comment</div>
+<div class="bd">
+    <form method="POST" id="comment_form">
+    <input type="hidden" id="deal_key" name="deal_key" value="{{deal.key}}">
+    <input type="hidden" id="comment_type" name="comment_type" value="deal">
+	<label for="comment">Comment:</label><textarea name="comment" id="comment"></textarea>
+    </form>
+</div>
+</div>
+
 {% endblock %}
 
