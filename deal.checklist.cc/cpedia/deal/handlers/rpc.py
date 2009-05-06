@@ -85,9 +85,11 @@ class RPCHandler(webapp.RequestHandler):
     @authorized.role('admin')
     def getComments(self,type,key):
         if type == "coupon":
-            query = db.GqlQuery("select * from CouponComment where coupon =:1  order by created_date", models.Coupons.get(key))
+            query = db.GqlQuery("select * from CouponComment where coupon =:1  order by created_date",
+                                models.Coupons.get(key))
         elif type == "deal":
-            query = db.GqlQuery("select * from DealComment where deal =:1  order by created_date", models.Deals.get(key))
+            query = db.GqlQuery("select * from DealComment where deal =:1  order by created_date", models.Deals.get(key)
+                    )
 
         comments = []
         for comment in query.fetch(1000):
@@ -129,11 +131,23 @@ class RPCHandler(webapp.RequestHandler):
         comment_keys = request.get("comment_keys")
         comment_type = request.get("comment_type")
         if comment_type == "deal":
-            coupons =  models.DealComment.get(comment_keys.split(","))
+            comments =  models.DealComment.get(comment_keys.split(","))
         elif comment_type == "coupon":
-            coupons =  models.CouponComment.get(comment_keys.split(","))
-        for coupon in coupons:
-            coupon.delete()
+            comments =  models.CouponComment.get(comment_keys.split(","))
+        for comment in comments:
+            comment.delete()
         return True
 
+    @authorized.role('admin')
+    def addComment(self,request):
+        comment_type = request.get('comment_type')
+        if comment_type == "deal":
+            comment = models.DealComment(user= users.GetCurrentUser())
+            comment.deal = models.Deals.get(request.get('deal_key'))
+        elif comment_type == "coupon":
+            comment = models.CouponComment(user= users.GetCurrentUser())
+            comment.coupon = models.Coupons.get(request.get('deal_key'))
+        comment.content = request.get('comment')
+        comment.put()
+        return comment.to_json()
 
