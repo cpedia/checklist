@@ -153,9 +153,10 @@ class GetDealsJob(BaseRequestHandler):
             deal_divs = dealsea_soap.findAll(attrs={"class":re.compile("dealbox\d\d\d\d\d\d[\s\w]*$")})
             for deal_div in deal_divs:
                 deal = models.Deals(vendor="dealsea.com")
-                title_ = deal_div.find("b")
-                deal.title = str(title_.contents[0].rstrip(", "))
-                pub_date_ = title_.nextSibling
+                title_ = deal_div.find("b",text=re.compile(".*"))
+                deal.title = str(title_.rstrip(", "))
+                b = deal_div.find("b")
+                pub_date_ = b.nextSibling
                 if pub_date_:
                     deal.pub_date = str(pub_date_)+" "+ str(datetime.datetime.now().year)
                     pub_date_.extract()
