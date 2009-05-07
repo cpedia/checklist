@@ -62,7 +62,7 @@ class RPCHandler(webapp.RequestHandler):
     @authorized.role('admin')
     def getDeals(self,startIndex,results):
         query = db.Query(models.Deals)
-        query.order('-pub_date')
+        query.order('-created_date')
         deals = []
         for deal in query.fetch(results,startIndex):
             deals+=[deal.to_json()]

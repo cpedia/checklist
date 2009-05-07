@@ -181,12 +181,16 @@ class GetDealsJob(BaseRequestHandler):
                 deal.content = utils.utf82uni(deal_div.prettify().replace("[\n]",""))
                 deals+=[deal]
         current_date = datetime.datetime.now().strftime('%b %d %Y')
+        latest_deals = []
         for deal in deals:
             deal_ = models.Deals.gql('where created_date_str =:1 and title =:2',current_date,deal.title).fetch(10)
             if deal_ and len(deal_) > 0:
                 break
             else:
-                deal.put()
+                latest_deals += [deal]
+        for latest_deal in reversed(latest_deals):
+            latest_deal.created_date = datetime.datetime.now()   #unaccuracy for the auto_now_add
+            latest_deal.put()
         template_values = {
             "msg":"Generate latest deals from dealsea.com successfully.",
         }
@@ -232,12 +236,16 @@ class GetCouponsJob(BaseRequestHandler):
                 coupon.coupon_id = dict_["couponId"]
                 coupon.site_id = dict_["siteId"]
                 coupons+=[coupon]
+        latest_coupons = []
         for coupon in coupons:
             coupon_ = models.Coupons.gql('where coupon_id =:1 and site_id =:2',coupon.coupon_id,coupon.site_id).fetch(10)
             if coupon_ and len(coupon_) > 0:
                 break
             else:
-                coupon.put()
+                latest_coupons += [coupon]
+        for latest_coupon in reversed(latest_coupons):
+            latest_coupon.created_date = datetime.datetime.now() #unaccuracy for the auto_now_add
+            latest_coupon.put()
         template_values = {
             "msg":"Generate latest coupons from retailmenot successfully.",
         }
