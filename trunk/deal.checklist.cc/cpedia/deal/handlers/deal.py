@@ -36,6 +36,7 @@ from google.appengine.ext import db
 from google.appengine.api import memcache
 from google.appengine.ext import search
 from google.appengine.api import images
+from google.appengine.api import mail
 
 from cpedia.deal.handlers import restful
 import cpedia.deal.models.deal as models
@@ -100,7 +101,7 @@ class DeleteDeals(BaseRequestHandler):
         for deal in query.fetch(1000):
             deal.delete()
         template_values = {
-            "msg":"Purge latest deals successfully.",
+        "msg":"Purge latest deals successfully.",
         }
         self.generate('deals.html',template_values)
 
@@ -115,7 +116,7 @@ class DeleteCoupons(BaseRequestHandler):
         for coupon in query.fetch(1000):
             coupon.delete()
         template_values = {
-            "msg":"Purge latest coupons successfully.",
+        "msg":"Purge latest coupons successfully.",
         }
         self.generate('coupons.html',template_values)
 
@@ -126,16 +127,16 @@ class DealInfoPage(BaseRequestHandler):
     def get(self,deal_key):
         deal =  models.Deals.get(deal_key)
         template_values = {
-            "deal":deal,
-         }
+        "deal":deal,
+        }
         self.generate('deal_info.html',template_values)
 
 class CouponInfoPage(BaseRequestHandler):
     def get(self,coupon_key):
         coupon =  models.Coupons.get(coupon_key)
         template_values = {
-            "coupon":coupon,
-         }
+        "coupon":coupon,
+        }
         self.generate('coupon_info.html',template_values)
 
 
@@ -143,57 +144,77 @@ class CouponInfoPage(BaseRequestHandler):
 class GetDealsJob(BaseRequestHandler):
     def get(self):
     #if self.get("X-AppEngine-Cron")=="true":
-        dealsea_page = urlfetch.fetch(
-                url="http://www.dealsea.com",
-                method=urlfetch.GET,
-                headers={'Content-Type': 'text/html; charset=UTF-8'}
-                )
-        deals = []
-        if dealsea_page.status_code == 200:
-            dealsea_soap = BeautifulSoup(dealsea_page.content)
-            deal_divs = dealsea_soap.findAll(attrs={"class":re.compile("dealbox\d\d\d\d\d\d[\s\w]*$")})
-            for deal_div in deal_divs:
-                deal = models.Deals(vendor="dealsea.com")
-                title_ = deal_div.find("b",text=re.compile(".*"))
-                deal.title = utils.utf82uni(str(title_.rstrip(", ")))
-                b = deal_div.find("b")
-                pub_date_ = b.nextSibling
-                if pub_date_:
-                    deal.pub_date = str(pub_date_)+" "+ str(datetime.datetime.now().year)
-                    pub_date_.extract()
-                image_ = deal_div.find("img")
-                image_url = image_.get("src")
-                if image_url.rfind("http:")==-1:
-                    image_url = "http://www.dealsea.com"+image_url
-                deal.image = image_url
-                expired = deal_div.find("span",attrs={"class":"colr_red xxsmall"})
-                if expired:
-                    deal.expired = True
-                    expired.extract()
-                brs_ = deal_div.findAll("br")
-                priceSearch_links = deal_div.findAll("a",text='PriceSearch')
-                comments_links = deal_div.findAll("a",text='Comments')
-                image_.extract()
-                title_.extract()
-                [br_.extract() for br_ in brs_]
-                [internal_link_.parent.extract() for internal_link_ in priceSearch_links]
-                [internal_link_.parent.extract() for internal_link_ in comments_links]
-                deal.content = utils.utf82uni(deal_div.prettify().replace("[\n]",""))
-                deals+=[deal]
-        current_date = datetime.datetime.now().strftime('%b %d %Y')
-        latest_deals = []
-        for deal in deals:
-            deal_ = models.Deals.gql('where created_date_str =:1 and title =:2',current_date,deal.title).fetch(10)
-            if deal_ and len(deal_) > 0:
-                break
-            else:
-                latest_deals += [deal]
-        for latest_deal in reversed(latest_deals):
-            latest_deal.created_date = datetime.datetime.now()   #unaccuracy for the auto_now_add
-            latest_deal.put()
-        template_values = {
+        try:
+            dealsea_page = urlfetch.fetch(
+                    url="http://www.dealsea.com",
+                    method=urlfetch.GET,
+                    headers={'Content-Type': 'text/html; charset=UTF-8'}
+                    )
+            deals = []
+            if dealsea_page.status_code == 200:
+                dealsea_soap = BeautifulSoup(dealsea_page.content)
+                deal_divs = dealsea_soap.findAll(attrs={"class":re.compile("dealbox\d\d\d\d\d\d[\s\w]*$")})
+                for deal_div in deal_divs:
+                    deal = models.Deals(vendor="dealsea.com")
+                    title_ = deal_div.find("b",text=re.compile(".*"))
+                    deal.title = utils.utf82uni(str(title_.rstrip(", ")))
+                    b = deal_div.find("b")
+                    pub_date_ = b.nextSibling
+                    if pub_date_:
+                        deal.pub_date = str(pub_date_)+" "+ str(datetime.datetime.now().year)
+                        pub_date_.extract()
+                    image_ = deal_div.find("img")
+                    image_url = image_.get("src")
+                    if image_url.rfind("http:")==-1:
+                        image_url = "http://www.dealsea.com"+image_url
+                    deal.image = image_url
+                    expired = deal_div.find("span",attrs={"class":"colr_red xxsmall"})
+                    if expired:
+                        deal.expired = True
+                        expired.extract()
+                    brs_ = deal_div.findAll("br")
+                    priceSearch_links = deal_div.findAll("a",text='PriceSearch')
+                    comments_links = deal_div.findAll("a",text='Comments')
+                    image_.extract()
+                    title_.extract()
+                    [br_.extract() for br_ in brs_]
+                    [internal_link_.parent.extract() for internal_link_ in priceSearch_links]
+                    [internal_link_.parent.extract() for internal_link_ in comments_links]
+                    deal.content = utils.utf82uni(deal_div.prettify().replace("[\n]",""))
+                    deals+=[deal]
+            current_date = datetime.datetime.now().strftime('%b %d %Y')
+            latest_deals = []
+            for deal in deals:
+                deal_ = models.Deals.gql('where created_date_str =:1 and title =:2',current_date,deal.title).fetch(10)
+                if deal_ and len(deal_) > 0:
+                    break
+                else:
+                    latest_deals += [deal]
+            for latest_deal in reversed(latest_deals):
+                latest_deal.created_date = datetime.datetime.now()   #unaccuracy for the auto_now_add
+                latest_deal.put()
+            template_values = {
             "msg":"Generate latest deals from dealsea.com successfully.",
-        }
+            }
+        except Exception, exception:
+            mail.send_mail(sender="support@checklist.cc",
+                           to="Ping Chen <cpedia@gmail.com>",
+                           subject="Something wrong with the Deal Generation Job.",
+                           body="""
+            Hi Ping,
+
+            Something wroing with the Deal Generation Job.
+
+            Please access app engine console to resolve the problem.
+            http://appengine.google.com/a/checklist.cc
+
+            Sent from deal.checklist.cc
+            """)
+
+            template_values = {
+            "msg":"Generate latest deals from dealsea.com unsuccessfully. An alert email sent out.<br>" + str(exception),
+            }
+
         self.generate('deals.html',template_values)
 
     def post(self):
@@ -203,54 +224,76 @@ class GetDealsJob(BaseRequestHandler):
 class GetCouponsJob(BaseRequestHandler):
     def get(self):
     #if self.get("X-AppEngine-Cron")=="true":
-        retailmenot_page = urlfetch.fetch(
-                url="http://www.retailmenot.com",
-                method=urlfetch.GET,
-                headers={'Content-Type': 'text/html; charset=UTF-8'}
-                )
-        coupons = []
-        if retailmenot_page.status_code == 200:
-            retailmenot_soap = BeautifulSoup(retailmenot_page.content)
-            recentCoupons = retailmenot_soap.find("div",id="recentCoupons")
-            coupon_divs = recentCoupons.findAll("div",attrs={"class":"coupon"})
-            for coupon_div in coupon_divs:
-                coupon = models.Coupons(vendor="retailmenot.com")
-                code_ = coupon_div.find("td",attrs={"class":"code"})
-                coupon.code = str(code_.next.contents[0])
-                discount_  = coupon_div.find("td",attrs={"class":"discount"})
-                coupon.discount = utils.utf82uni(str(discount_.contents[0]))
-                site_info = coupon_div.find("span",attrs={"class":"site"}).next.contents[0]
-                coupon.site_name = utils.utf82uni(site_info.rstrip(" coupon codes"))
-                siteTools = coupon_div.find("div",attrs={"class":"siteTools"})
-                site_img = siteTools.find("img")
-                image_url = site_img.get("src")
-                coupon.image = image_url
-                site_url = site_img.get("alt")
-                if site_url.rfind("http:")==-1:
-                    site_url = "http://"+site_url
-                coupon.site_url = site_url
-                script_ = coupon_div.find("script",attrs={"type":"data"}).contents[0]
-                couponId = "couponId"
-                siteId = "siteId"
-                dict_ = eval(script_)
-                coupon.coupon_id = dict_["couponId"]
-                coupon.site_id = dict_["siteId"]
-                coupons+=[coupon]
-        latest_coupons = []
-        for coupon in coupons:
-            coupon_ = models.Coupons.gql('where coupon_id =:1 and site_id =:2',coupon.coupon_id,coupon.site_id).fetch(10)
-            if coupon_ and len(coupon_) > 0:
-                break
-            else:
-                latest_coupons += [coupon]
-        for latest_coupon in reversed(latest_coupons):
-            latest_coupon.created_date = datetime.datetime.now() #unaccuracy for the auto_now_add
-            latest_coupon.put()
-        template_values = {
+        try:
+            retailmenot_page = urlfetch.fetch(
+                    url="http://www.retailmenot.com",
+                    method=urlfetch.GET,
+                    headers={'Content-Type': 'text/html; charset=UTF-8'}
+                    )
+            coupons = []
+            if retailmenot_page.status_code == 200:
+                retailmenot_soap = BeautifulSoup(retailmenot_page.content)
+                recentCoupons = retailmenot_soap.find("div",id="recentCoupons")
+                coupon_divs = recentCoupons.findAll("div",attrs={"class":"coupon"})
+                for coupon_div in coupon_divs:
+                    coupon = models.Coupons(vendor="retailmenot.com")
+                    code_ = coupon_div.find("td",attrs={"class":"code"})
+                    coupon.code = str(code_.next.contents[0])
+                    discount_  = coupon_div.find("td",attrs={"class":"discount"})
+                    coupon.discount = utils.utf82uni(str(discount_.contents[0]))
+                    site_info = coupon_div.find("span",attrs={"class":"site"}).next.contents[0]
+                    coupon.site_name = utils.utf82uni(site_info.rstrip(" coupon codes"))
+                    siteTools = coupon_div.find("div",attrs={"class":"siteTools"})
+                    site_img = siteTools.find("img")
+                    image_url = site_img.get("src")
+                    coupon.image = image_url
+                    site_url = site_img.get("alt")
+                    if site_url.rfind("http:")==-1:
+                        site_url = "http://"+site_url
+                    coupon.site_url = site_url
+                    script_ = coupon_div.find("script",attrs={"type":"data"}).contents[0]
+                    couponId = "couponId"
+                    siteId = "siteId"
+                    dict_ = eval(script_)
+                    coupon.coupon_id = dict_["couponId"]
+                    coupon.site_id = dict_["siteId"]
+                    coupons+=[coupon]
+            latest_coupons = []
+            for coupon in coupons:
+                coupon_ = models.Coupons.gql('where coupon_id =:1 and site_id =:2',coupon.coupon_id,coupon.site_id
+                        ).fetch(10
+                        )
+                if coupon_ and len(coupon_) > 0:
+                    break
+                else:
+                    latest_coupons += [coupon]
+            for latest_coupon in reversed(latest_coupons):
+                latest_coupon.created_date = datetime.datetime.now() #unaccuracy for the auto_now_add
+                latest_coupon.put()
+            template_values = {
             "msg":"Generate latest coupons from retailmenot successfully.",
-        }
+            }
+        except Exception, exception:
+            mail.send_mail(sender="support@checklist.cc",
+                           to="Ping Chen <cpedia@gmail.com>",
+                           subject="Something wrong with the coupon generation job.",
+                           body="""
+            Hi Ping,
+
+            Something wroing with the coupon generation job.
+
+            Please access app engine console to resolve the problem.
+            http://appengine.google.com/a/checklist.cc
+
+            Sent from deal.checklist.cc
+            """)
+
+            template_values = {
+            "msg":"Generate latest deals from dealsea.com unsuccessfully. An alert email sent out.<br>" + str(exception),
+            }
+
         self.generate('coupons.html',template_values)
 
-    def post(self):
-        self.get()
+def post(self):
+    self.get()
 
