@@ -55,14 +55,6 @@
                 }}
             ];
 
-            // Custom parser
-            var stringToDate = function(sData) {
-                if (sData != null) {
-                    var array = sData.split("-");
-                    return new Date(array[1] + " " + array[2].slice(0, 2) + ", " + array[0]);
-                }
-            };
-
             var buildQueryString = function (state, dt) {
                 return "?arg0=" + state.pagination.recordOffset +
                        "&arg1=" + state.pagination.rowsPerPage + '&time=' + new Date().getTime();
@@ -75,7 +67,7 @@
                 resultsList: "records",
                 fields: [
                     {key:"code"},
-                    {key:"created_date",parser:stringToDate},
+                    {key:"created_date"},
                     {key:"key"},
                     {key:"discount"},
                     {key:"site_url"},

@@ -47,7 +47,8 @@
             var myColumnDefs = [ // sortable:true enables sorting
                 {key:"check",resizeable:true,label:"",formatter:YAHOO.widget.DataTable.formatCheckbox,className:"align_center"},
                 {key:"title", label:"Title", formatter:detailLinkFormatter,sortable:true},
-                {key:"pub_date", label:"Pub Date", sortable:true,formatter:"date",className:"nowrap"}
+                {key:"pub_date", label:"Pub Date", sortable:true,formatter:"date",className:"nowrap"},
+                {key:"created_date", label:"Created Date", sortable:true,formatter:"date",className:"nowrap"}
             ];
 
             var buildQueryString = function (state, dt) {
@@ -62,6 +63,7 @@
                 resultsList: "records",
                 fields: [
                     {key:"title"},
+                    {key:"created_date"},
                     {key:"pub_date"},
                     {key:"key"},
                     {key:"content"},
@@ -84,7 +86,7 @@
                 initialRequest: "?arg0=0&arg1=30&time=" + new Date().getTime(),  //'startIndex=0&results=25'
                 generateRequest: buildQueryString,
                 dynamicData: true, // Enables dynamic server-driven data
-                sortedBy : {key:"pub_date", dir:YAHOO.widget.DataTable.CLASS_DESC}, // Sets UI initial sort arrow
+                sortedBy : {key:"created_date", dir:YAHOO.widget.DataTable.CLASS_DESC}, // Sets UI initial sort arrow
                 paginator: myPaginator // Enables pagination
             };
 

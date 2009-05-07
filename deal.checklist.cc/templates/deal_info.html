@@ -53,15 +53,6 @@
                 {key:"created_date", label:"Created Date", sortable:true,formatter:"date",className:"nowrap"}
             ];
 
-            // Custom parser
-            var stringToDate = function(sData) {
-                if (sData != null) {
-                    var array = sData.split("-");
-                    return new Date(array[1] + " " + array[2].slice(0, 2) + ", " + array[0]);
-                }
-            };
-
-
             // DataSource instance
             var myDataSource = new YAHOO.util.DataSource("/json/getComments");
             myDataSource.responseType = YAHOO.util.DataSource.TYPE_JSON;
@@ -69,7 +60,7 @@
                 resultsList: "records",
                 fields: [
                     {key:"content"},
-                    {key:"created_date",parser:stringToDate},
+                    {key:"created_date"},
                     {key:"key"},
                     {key:"user.email"}
                  ]
