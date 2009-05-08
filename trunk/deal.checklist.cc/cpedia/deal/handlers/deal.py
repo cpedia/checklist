@@ -164,10 +164,11 @@ class GetDealsJob(BaseRequestHandler):
                         deal.pub_date = str(pub_date_)+" "+ str(datetime.datetime.now().year)
                         pub_date_.extract()
                     image_ = deal_div.find("img")
-                    image_url = image_.get("src")
-                    if image_url.rfind("http:")==-1:
-                        image_url = "http://www.dealsea.com"+image_url
-                    deal.image = image_url
+                    if image_:
+                        image_url = image_.get("src")
+                        if image_url.rfind("http:")==-1:
+                            image_url = "http://www.dealsea.com"+image_url
+                        deal.image = image_url
                     expired = deal_div.find("span",attrs={"class":"colr_red xxsmall"})
                     if expired:
                         deal.expired = True
@@ -175,7 +176,8 @@ class GetDealsJob(BaseRequestHandler):
                     brs_ = deal_div.findAll("br")
                     priceSearch_links = deal_div.findAll("a",text='PriceSearch')
                     comments_links = deal_div.findAll("a",text='Comments')
-                    image_.extract()
+                    if image_:
+                        image_.extract()
                     title_.extract()
                     [br_.extract() for br_ in brs_]
                     [internal_link_.parent.extract() for internal_link_ in priceSearch_links]
@@ -197,7 +199,7 @@ class GetDealsJob(BaseRequestHandler):
             "msg":"Generate latest deals from dealsea.com successfully.",
             }
         except Exception, exception:
-            mail.send_mail(sender="support@checklist.cc",
+            mail.send_mail(sender="cpedia@checklist.cc",
                            to="Ping Chen <cpedia@gmail.com>",
                            subject="Something wrong with the Deal Generation Job.",
                            body="""
@@ -245,12 +247,13 @@ class GetCouponsJob(BaseRequestHandler):
                     coupon.site_name = utils.utf82uni(site_info.rstrip(" coupon codes"))
                     siteTools = coupon_div.find("div",attrs={"class":"siteTools"})
                     site_img = siteTools.find("img")
-                    image_url = site_img.get("src")
-                    coupon.image = image_url
-                    site_url = site_img.get("alt")
-                    if site_url.rfind("http:")==-1:
-                        site_url = "http://"+site_url
-                    coupon.site_url = site_url
+                    if site_img:
+                        image_url = site_img.get("src")
+                        coupon.image = image_url
+                        site_url = site_img.get("alt")
+                        if site_url.rfind("http:")==-1:
+                            site_url = "http://"+site_url
+                        coupon.site_url = site_url
                     script_ = coupon_div.find("script",attrs={"type":"data"}).contents[0]
                     couponId = "couponId"
                     siteId = "siteId"
@@ -274,7 +277,7 @@ class GetCouponsJob(BaseRequestHandler):
             "msg":"Generate latest coupons from retailmenot successfully.",
             }
         except Exception, exception:
-            mail.send_mail(sender="support@checklist.cc",
+            mail.send_mail(sender="cpedia@checklist.cc",
                            to="Ping Chen <cpedia@gmail.com>",
                            subject="Something wrong with the coupon generation job.",
                            body="""
