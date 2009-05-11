@@ -165,7 +165,9 @@
 </script>
 <div>
     <div style="padding-bottom:3px">
+        {% if user_is_admin %}
         <button id="deleteCoupon">Delete</button>
+        {% endif %}
     </div>
     <div id="paging_nav_0"> </div>
     <div id="coupons_container" width="100%">

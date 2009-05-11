@@ -59,7 +59,6 @@ class RPCHandler(webapp.RequestHandler):
 
     # The RPCs exported to JavaScript follow here:
 
-    @authorized.role('admin')
     def getDeals(self,startIndex,results):
         query = db.Query(models.Deals)
         query.order('-created_date')
@@ -70,7 +69,6 @@ class RPCHandler(webapp.RequestHandler):
         returnValue = {"records":deals,"totalRecords":totalRecords,"startIndex":startIndex}
         return returnValue
 
-    @authorized.role('admin')
     def getCoupons(self,startIndex,results):
         query = db.Query(models.Coupons)
         query.order('-created_date')
@@ -82,7 +80,6 @@ class RPCHandler(webapp.RequestHandler):
         return returnValue
 
 
-    @authorized.role('admin')
     def getComments(self,type,key):
         if type == "coupon":
             query = db.GqlQuery("select * from CouponComment where coupon =:1  order by created_date",
@@ -97,7 +94,6 @@ class RPCHandler(webapp.RequestHandler):
         returnValue = {"records":comments,"totalRecords":query.count()}
         return returnValue
 
-    @authorized.role('admin')
     def getLatestDeals(self,results,startIndex):
         current_date = datetime.datetime.now().strftime('%b %d %Y')
         query = db.Query(models.Deals)
@@ -138,7 +134,7 @@ class RPCHandler(webapp.RequestHandler):
             comment.delete()
         return True
 
-    @authorized.role('admin')
+    @authorized.role('user')
     def addComment(self,request):
         comment_type = request.get('comment_type')
         if comment_type == "deal":
@@ -149,5 +145,7 @@ class RPCHandler(webapp.RequestHandler):
             comment.coupon = models.Coupons.get(request.get('deal_key'))
         comment.content = request.get('comment')
         comment.put()
-        return comment.to_json()
+        values = comment.to_json()
+        values["user.email"] = comment.user.email()
+        return values
 

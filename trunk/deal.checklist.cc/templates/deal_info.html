@@ -205,8 +205,12 @@
         <br/><br/>
     </div>
     <div style="padding-bottom:5px;">
+        {% if user_is_admin %}
         <button id="deleteComment">Delete</button>
+        {% endif %}
+        {% if user %}
         <button id="addComment">Add new Comment</button>
+        {% endif %}
     </div>
      <div id="comments_container" width="100%">
     </div>
