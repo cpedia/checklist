@@ -3,8 +3,10 @@
         <ul id="menu_list" >
             <li><a href="/list/deals">Deal List</a></li>
             <li><a href="/list/coupons">Coupon List</a></li>
+{% if user %}
             <li><a href="/tasks/getdeals">Generate latest deals</a></li>
             <li><a href="/tasks/getcoupons">Generate latest coupons</a></li>
+{% endif %}
         </ul>
     </div>
     <div id="google_ad">

@@ -160,7 +160,9 @@
 </script>
 <div>
     <div style="padding-bottom:3px">
+        {% if user_is_admin %}
         <button id="deleteDeal">Delete</button>
+        {% endif %}
     </div>
     <div id="paging_nav_0"> </div>
     <div id="deals_container" width="100%">
