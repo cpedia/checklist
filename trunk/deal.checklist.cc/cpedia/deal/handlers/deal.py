@@ -26,6 +26,7 @@ import calendar
 import logging
 import string
 import urllib
+import traceback 
 
 from xml.etree import ElementTree
 
@@ -199,22 +200,25 @@ class GetDealsJob(BaseRequestHandler):
             "msg":"Generate latest deals from dealsea.com successfully.",
             }
         except Exception, exception:
-            mail.send_mail(sender="cpedia@checklist.cc",
+            mail.send_mail(sender="deal.checklist.cc <cpedia@checklist.cc>",
                            to="Ping Chen <cpedia@gmail.com>",
                            subject="Something wrong with the Deal Generation Job.",
                            body="""
-            Hi Ping,
+Hi Ping,
 
-            Something wroing with the Deal Generation Job.
+Something wroing with the Deal Generation Job.
 
-            Please access app engine console to resolve the problem.
-            http://appengine.google.com/a/checklist.cc
+Below is the detailed exception information:
+%s
 
-            Sent from deal.checklist.cc
-            """)
+Please access app engine console to resolve the problem.
+http://appengine.google.com/a/checklist.cc
+
+Sent from deal.checklist.cc
+            """ % traceback.format_exc())
 
             template_values = {
-            "msg":"Generate latest deals from dealsea.com unsuccessfully. An alert email sent out.<br>" + str(exception),
+            "msg":"Generate latest deals from dealsea.com unsuccessfully. An alert email sent out.<br>" + traceback.format_exc(),
             }
 
         self.generate('deals.html',template_values)
@@ -277,22 +281,25 @@ class GetCouponsJob(BaseRequestHandler):
             "msg":"Generate latest coupons from retailmenot successfully.",
             }
         except Exception, exception:
-            mail.send_mail(sender="cpedia@checklist.cc",
+            mail.send_mail(sender="deal.checklist.cc <cpedia@checklist.cc>",
                            to="Ping Chen <cpedia@gmail.com>",
                            subject="Something wrong with the coupon generation job.",
                            body="""
-            Hi Ping,
+Hi Ping,
 
-            Something wroing with the coupon generation job.
+Something wroing with the Coupon Generation job.
 
-            Please access app engine console to resolve the problem.
-            http://appengine.google.com/a/checklist.cc
+Below is the detailed exception information:
+%s
 
-            Sent from deal.checklist.cc
-            """)
+Please access app engine console to resolve the problem.
+http://appengine.google.com/a/checklist.cc
+
+Sent from deal.checklist.cc
+            """ % traceback.format_exc())
 
             template_values = {
-            "msg":"Generate latest deals from dealsea.com unsuccessfully. An alert email sent out.<br>" + str(exception),
+            "msg":"Generate latest deals from dealsea.com unsuccessfully. An alert email sent out.<br>" + traceback.format_exc(),
             }
 
         self.generate('coupons.html',template_values)
