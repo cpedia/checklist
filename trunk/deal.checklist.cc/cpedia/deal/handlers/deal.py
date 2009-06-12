@@ -185,7 +185,7 @@ class GetDealsJob(BaseRequestHandler):
             current_date = datetime.datetime.now().strftime('%b %d %Y')
             latest_deals = []
             for deal in deals:
-                deal_ = models.Deals.gql('where created_date_str =:1 and title =:2',current_date,deal.title).fetch(10)
+                deal_ = models.Deals.gql('where title =:2',deal.title).fetch(10)
                 if deal_ and len(deal_) > 0:
                     break
                 else:
