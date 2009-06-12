@@ -155,7 +155,7 @@ class GetDealsJob(BaseRequestHandler):
                 for deal_div in deal_divs:
                     deal = models.Deals(vendor="dealsea.com")
                     title_ = deal_div.find("b",text=re.compile(".*"))
-                    deal.title = utils.utf82uni(str(title_.rstrip(", ")))
+                    deal.title = utils.utf82uni(title_.rstrip(", "))
                     b = deal_div.find("b")
                     pub_date_ = b.nextSibling
                     if pub_date_:
@@ -243,7 +243,7 @@ class GetCouponsJob(BaseRequestHandler):
                     code_ = coupon_div.find("td",attrs={"class":"code"})
                     coupon.code = str(code_.next.contents[0])
                     discount_  = coupon_div.find("td",attrs={"class":"discount"})
-                    coupon.discount = utils.utf82uni(str(discount_.contents[0]))
+                    coupon.discount = utils.utf82uni(discount_.contents[0])
                     site_info = coupon_div.find("span",attrs={"class":"site"}).next.contents[0]
                     coupon.site_name = utils.utf82uni(site_info.rstrip(" coupon codes"))
                     siteTools = coupon_div.find("div",attrs={"class":"siteTools"})
