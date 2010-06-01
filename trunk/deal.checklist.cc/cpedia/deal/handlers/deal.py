@@ -236,7 +236,7 @@ class GetCouponsJob(BaseRequestHandler):
             coupons = []
             if retailmenot_page.status_code == 200:
                 retailmenot_soap = BeautifulSoup(retailmenot_page.content)
-                recentCoupons = retailmenot_soap.find("div",id="recentCoupons")
+                recentCoupons = retailmenot_soap.find("div",id="topCoupons")
                 coupon_divs = recentCoupons.findAll("div",attrs={"class":"coupon"})
                 for coupon_div in coupon_divs:
                     coupon = models.Coupons(vendor="retailmenot.com")
