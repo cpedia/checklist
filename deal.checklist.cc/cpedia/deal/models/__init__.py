@@ -34,7 +34,7 @@ def to_dict(model_obj, attr_list, init_dict_func=None):
             value = getattr(value, elem)
         values[elems[-1]] = value
     if model_obj.is_saved():
-        values['key'] =  str(model_obj.key())  
+        values['key'] =  str(model_obj.key())
     return values
 
 # Format for conversion of datetime to JSON
@@ -88,14 +88,27 @@ class SerializableModel(db.Model):
     """
     json_does_not_include = []
 
+    def to_entity(self, entity):
+        """Convert datastore types in entity to
+           JSON-friendly structures."""
+        #self._to_entity(entity)  bug from appengine 1.2.8
+        for prop in self.properties().values():
+          datastore_value = prop.get_value_for_datastore(self)
+          if datastore_value == []:
+            try:
+              del entity[prop.name]
+            except KeyError:
+              pass
+          else:
+            entity[prop.name] = datastore_value
+
+        for skipped_property in self.__class__.json_does_not_include:
+            del entity[skipped_property]
+        replace_datastore_types(entity)
+
     def to_json(self, attr_list=[]):
         def to_entity(entity):
-            """Convert datastore types in entity to
-               JSON-friendly structures."""
-            self._to_entity(entity)
-            for skipped_property in self.__class__.json_does_not_include:
-                del entity[skipped_property]
-            replace_datastore_types(entity)
+           self.to_entity(entity)
         values = to_dict(self, attr_list, to_entity)
         #return simplejson.dumps(values)   #simplejson.dumps will be applied when do the rpc call.
         return values

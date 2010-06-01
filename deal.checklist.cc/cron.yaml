@@ -3,8 +3,8 @@ cron:
   url: /tasks/getdeals
   schedule: every 5 minutes
 
-- description: Fetch coupons information from retailmenot.com
-  url: /tasks/getcoupons
-  schedule: every 30 minutes
+#- description: Fetch coupons information from retailmenot.com
+#  url: /tasks/getcoupons
+#  schedule: every 30 minutes
 
   
